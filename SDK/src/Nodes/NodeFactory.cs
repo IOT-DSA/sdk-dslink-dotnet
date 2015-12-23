@@ -61,6 +61,12 @@ namespace DSLink.Nodes
             return this;
         }
 
+        public NodeFactory SetValue(dynamic value)
+        {
+            _node.Value.Set(value);
+            return this;
+        }
+
         public NodeFactory SetAction(Action action)
         {
             _node.SetInvokable(action.Permission);
