@@ -14,6 +14,24 @@ namespace Examples
         private int counter;
         public ExampleDSLink() : base(new Configuration("sdk-dotnet", responder: true, brokerUrl: "http://dglux.rpi.local/conn", communicationFormat: "json"))
         {
+
+            var myNum = Responder.SuperRoot.CreateChild("MyNum")
+                .SetDisplayName("My Number")
+                .SetType("int")
+                .SetValue(0)
+                .BuildNode();
+
+            var addNum = Responder.SuperRoot.CreateChild("AddNum")
+                .SetDisplayName("Add Number")
+                .AddParameter(new Parameter("Number", "int"))
+                .SetAction(new Action(Permission.Write, parameters =>
+                {
+                    myNum.Value.Set(parameters["Number"].Get());
+                    return new List<dynamic>();
+                }))
+                .BuildNode();
+
+/*
             Responder.SuperRoot.CreateChild("TestAction")
                 .AddParameter(new Parameter("Test", "string"))
                 .AddColumn(new Column("Status", "bool"))
@@ -26,6 +44,7 @@ namespace Examples
                         true
                     };
                 }));
+*/
 
             /*var testValue = Responder.SuperRoot.CreateChild("testnode")
                 .SetConfig("type", new Value("number")).BuildNode();

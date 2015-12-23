@@ -80,11 +80,14 @@ namespace DSLink
                                     var parameters = request.Parameters.ToDictionary(pair => pair.Key, pair => new Value(pair.Value));
                                     var updateValues = node.Action.Function.Invoke(parameters);
                                     var updates = updateValues.Select(value => new[] {value}).Cast<dynamic>().ToList();
+                                    var columns = node.GetConfig("columns") != null
+                                        ? node.GetConfig("columns").Get()
+                                        : new List<Column>();
                                     responses.Add(new ResponseObject
                                     {
                                         RequestId = request.RequestId,
                                         Stream = "closed",
-                                        Columns = node.GetConfig("columns").Get(),
+                                        Columns = columns,
                                         Updates = updates
                                     });
                                 }
