@@ -18,6 +18,7 @@ namespace DSLink.Crypto
         private const string CURVE = "SECP256R1";
         private readonly string _location;
         public AsymmetricCipherKeyPair BcKeyPair;
+        public byte[] EncodedPublicKey => ((ECPublicKeyParameters) BcKeyPair.Public).Q.GetEncoded();
 
         public KeyPair(string location)
         {
@@ -38,7 +39,7 @@ namespace DSLink.Crypto
         {
             if (File.Exists(_location))
             {
-                using (StreamReader reader = new StreamReader(_location))
+                using (var reader = new StreamReader(_location))
                 {
                     string data = reader.ReadLine();
 
@@ -64,14 +65,14 @@ namespace DSLink.Crypto
                 }
             }
             var key = Generate();
-            Save();
+            Save(key);
             return key;
         }
 
-        private void Save()
+        private void Save(AsymmetricCipherKeyPair keyPair)
         {
-            byte[] privateBytes = ((ECPrivateKeyParameters) BcKeyPair.Private).D.ToByteArray();
-            byte[] publicBytes = ((ECPublicKeyParameters) BcKeyPair.Public).Q.GetEncoded();
+            byte[] privateBytes = ((ECPrivateKeyParameters) keyPair.Private).D.ToByteArray();
+            byte[] publicBytes = ((ECPublicKeyParameters) keyPair.Public).Q.GetEncoded();
 
             string data = Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
 
@@ -80,8 +81,6 @@ namespace DSLink.Crypto
                 writer.WriteLine(data);
             }
         }
-
-        public byte[] EncodedPublicKey => ((ECPublicKeyParameters) BcKeyPair.Public).Q.GetEncoded();
 
         public byte[] GenerateSharedSecret(string tempKey)
         {
