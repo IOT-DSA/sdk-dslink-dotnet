@@ -4,7 +4,6 @@ using System.Text;
 using DSLink.Connection;
 using DSLink.Crypto;
 using DSLink.Util;
-using WebSocketSharp;
 
 namespace DSLink
 {
@@ -21,7 +20,7 @@ namespace DSLink
         public KeyPair KeyPair { get; }
         public string Authentication => UrlBase64.Encode(_sha256.ComputeHash(Encoding.UTF8.GetBytes(RemoteEndpoint.salt).Concat(SharedSecret).ToArray()));
         public string CommunicationFormat => (string.IsNullOrEmpty(_communicationFormat) ? RemoteEndpoint.format : _communicationFormat);
-        public byte[] SharedSecret => RemoteEndpoint.tempKey.IsNullOrEmpty() ? new byte[0] : KeyPair.GenerateSharedSecret(RemoteEndpoint.tempKey);
+        public byte[] SharedSecret => string.IsNullOrEmpty(RemoteEndpoint.tempKey) ? new byte[0] : KeyPair.GenerateSharedSecret(RemoteEndpoint.tempKey);
         public string DsId => Name + "-" + UrlBase64.Encode(_sha256.ComputeHash(KeyPair.EncodedPublicKey));
 
         public RemoteEndpoint RemoteEndpoint
