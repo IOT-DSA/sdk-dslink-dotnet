@@ -78,11 +78,11 @@ namespace DSLink.Nodes
             return this;
         }
 
-        public NodeFactory AddColumn(Parameter column)
+        public NodeFactory AddColumn(Column column)
         {
             if (_node.GetConfig("columns") == null)
             {
-                _node.SetColumns(new List<Parameter>());
+                _node.SetColumns(new List<Column>());
             }
             _node.GetConfig("columns").Get().Add(column);
             return this;

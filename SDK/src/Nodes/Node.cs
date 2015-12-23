@@ -129,7 +129,7 @@ namespace DSLink.Nodes
             SetConfig("params", new Value(parameters));
         }
 
-        public void SetColumns(List<Parameter> columns)
+        public void SetColumns(List<Column> columns)
         {
             SetConfig("columns", new Value(columns));
         }

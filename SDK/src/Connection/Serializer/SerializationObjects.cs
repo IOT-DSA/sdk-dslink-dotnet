@@ -36,7 +36,7 @@ namespace DSLink.Connection.Serializer
         public dynamic Value;
         // TODO: Swap out dynamic for Parameter
         [JsonProperty("params")]
-        public Dictionary<string, Parameter> Parameters;
+        public Dictionary<string, dynamic> Parameters;
     }
 
     public class ResponseObject
@@ -48,7 +48,7 @@ namespace DSLink.Connection.Serializer
         [JsonProperty("updates")]
         public List<dynamic> Updates;
         [JsonProperty("columns")]
-        public List<dynamic> Columns;
+        public List<Column> Columns;
     }
 
     public class AddSubscriptionObject

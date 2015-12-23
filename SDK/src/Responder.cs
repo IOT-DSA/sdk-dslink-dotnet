@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DSLink.Connection.Serializer;
 using DSLink.Nodes;
+using DSLink.Nodes.Actions;
 
 namespace DSLink
 {
@@ -16,7 +18,7 @@ namespace DSLink
         {
             _link = link;
             SuperRoot = new Node("", null, _link);
-            SubscriptionManager = new SubscriptionManager();
+            SubscriptionManager = new SubscriptionManager(_link);
             StreamManager = new StreamManager(_link);
         }
 
@@ -75,7 +77,16 @@ namespace DSLink
                             {
                                 if (request.Permit == null || request.Permit.Equals(node.Action.Permission.ToString()))
                                 {
-                                    node.Action.Function.Invoke(request.Parameters);
+                                    var parameters = request.Parameters.ToDictionary(pair => pair.Key, pair => new Value(pair.Value));
+                                    var updateValues = node.Action.Function.Invoke(parameters);
+                                    var updates = updateValues.Select(value => new[] {value}).Cast<dynamic>().ToList();
+                                    responses.Add(new ResponseObject
+                                    {
+                                        RequestId = request.RequestId,
+                                        Stream = "closed",
+                                        Columns = node.GetConfig("columns").Get(),
+                                        Updates = updates
+                                    });
                                 }
                             }
                         }
@@ -148,7 +159,13 @@ namespace DSLink
 
     internal class SubscriptionManager
     {
-        private readonly Dictionary<int, Node> _subscriptions = new Dictionary<int, Node>(); 
+        private readonly Dictionary<int, Node> _subscriptions = new Dictionary<int, Node>();
+        private readonly DSLinkContainer _link;
+
+        public SubscriptionManager(DSLinkContainer link)
+        {
+            _link = link;
+        }
 
         public void Subscribe(int sid, Node node)
         {
@@ -158,8 +175,15 @@ namespace DSLink
 
         public void Unsubscribe(int sid)
         {
-            _subscriptions[sid].Subscribers.Remove(sid);
-            _subscriptions.Remove(sid);
+            try
+            {
+                _subscriptions[sid].Subscribers.Remove(sid);
+                _subscriptions.Remove(sid);
+            }
+            catch (KeyNotFoundException)
+            {
+                _link.Logger.Info("Unknown rid");
+            }
         }
     }
 

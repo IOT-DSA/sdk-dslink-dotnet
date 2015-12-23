@@ -5,11 +5,10 @@ namespace DSLink.Nodes.Actions
 {
     public class Action
     {
-        // TODO: Swap out dynamic for Values.
         public readonly Permission Permission;
-        public readonly Func<Dictionary<string, Parameter>, Dictionary<string, dynamic>> Function;
+        public readonly Func<Dictionary<string, Value>, List<dynamic>> Function;
 
-        public Action(Permission permission, Func<Dictionary<string, Parameter>, Dictionary<string, dynamic>> function)
+        public Action(Permission permission, Func<Dictionary<string, Value>, List<dynamic>> function)
         {
             Permission = permission;
             Function = function;
