@@ -12,7 +12,7 @@ namespace Examples
     {
         private Timer timer;
         private int counter;
-        public ExampleDSLink() : base(new Configuration("sdk-dotnet", responder: true, brokerUrl: "http://dglux.rpi.local/conn", communicationFormat: "json"))
+        public ExampleDSLink() : base(new Configuration("sdk-dotnet", responder: true, communicationFormat: "json"))
         {
 
             var myNum = Responder.SuperRoot.CreateChild("MyNum")

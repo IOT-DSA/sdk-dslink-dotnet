@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using DSLink.Connection;
 using DSLink.Crypto;
 using DSLink.Util;
+using Mono.Options;
 
 namespace DSLink
 {
@@ -38,16 +40,26 @@ namespace DSLink
             }
         }
 
-        public Configuration(string name, bool requester = false, bool responder = false, string brokerUrl = "http://127.0.0.1:8080/conn", string keysLocation = ".keys", string communicationFormat = "")
+        public Configuration(string name, bool requester = false, bool responder = false, string keysLocation = ".keys", string communicationFormat = "")
         {
             _sha256 = SHA256.Create();
             Name = name;
             Requester = requester;
             Responder = responder;
-            BrokerUrl = brokerUrl;
             KeysLocation = keysLocation;
             _communicationFormat = communicationFormat;
-            
+
+            var brokerUrl = "http://localhost:8080/conn";
+            var options = new OptionSet
+            {
+                {
+                    "broker", opt => { brokerUrl = opt; }
+                }
+            };
+            options.Parse(Environment.GetCommandLineArgs());
+
+            BrokerUrl = brokerUrl;
+
             KeyPair = new KeyPair(KeysLocation);
         }
     }
