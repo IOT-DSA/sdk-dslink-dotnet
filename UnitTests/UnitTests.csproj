@@ -44,7 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NodeTests.cs" />
+    <Compile Include="src\Framework\FakeConnector.cs" />
+    <Compile Include="src\Framework\TestingContainer.cs" />
+    <Compile Include="src\Tests\NodeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

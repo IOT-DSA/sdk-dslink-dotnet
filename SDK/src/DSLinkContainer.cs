@@ -2,48 +2,24 @@
 using System.Timers;
 using DSLink.Connection;
 using DSLink.Connection.Serializer;
-using log4net;
-using log4net.Appender;
-using log4net.Config;
-using log4net.Core;
-using log4net.Layout;
+using DSLink.Container;
 
 namespace DSLink
 {
     // ReSharper disable once InconsistentNaming
-    public class DSLinkContainer
+    public class DSLinkContainer : AbstractContainer
     {
-        public readonly ILog Logger = LogManager.GetLogger("DSLink");
-
-        public readonly Configuration Config;
         private readonly Timer _pingTimer;
         internal readonly SerializationManager SerializationManager;
 
         protected Handshake Handshake;
-        internal Connector Connector;
-        private readonly Responder _responder;
-        private readonly Requester _requester;
-        private int _msg;
-        private int _rid;
-        public int MessageId => _msg++;
-        public int RequestId => ++_rid;
 
-        public DSLinkContainer(Configuration config)
+        public DSLinkContainer(Configuration config) : base(config)
         {
-            ConfigureLogger();
+            CreateLogger("DSLink");
 
-            Config = config;
             _pingTimer = new Timer(30 * 1000);
             _pingTimer.Elapsed += OnPingElapsed;
-
-            if (Config.Responder)
-            {
-                _responder = new Responder(this);
-            }
-            if (Config.Requester)
-            {
-                _requester = new Requester(this);
-            }
 
             Handshake = new Handshake(this);
             Handshake.Shake();
@@ -60,29 +36,6 @@ namespace DSLink
             _pingTimer.Start();
         }
 
-        public Responder Responder
-        {
-            get
-            {
-                if (!Config.Responder)
-                {
-                    throw new ArgumentException("Responder is not enabled.");
-                }
-                return _responder;
-            }
-        }
-
-        public Requester Requester
-        {
-            get
-            {
-                if (!Config.Requester)
-                {
-                    throw new ArgumentException("Requester is not enabled.");
-                }
-                return _requester;
-            }
-        }
 
         private void OnClose()
         {
@@ -132,20 +85,6 @@ namespace DSLink
         private void OnPingElapsed(object sender, ElapsedEventArgs e)
         {
             Connector.Write(new RootObject());
-        }
-
-        private static void ConfigureLogger()
-        {
-            LayoutSkeleton layout = new PatternLayout("%date|%logger|%level|%message%newline");
-            layout.ActivateOptions();
-
-            IAppender appender = new ConsoleAppender
-            {
-                Threshold = Level.Debug,
-                Layout = layout
-            };
-
-            BasicConfigurator.Configure(appender);
         }
     }
 }

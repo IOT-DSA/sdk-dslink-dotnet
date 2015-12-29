@@ -1,10 +1,12 @@
-﻿namespace DSLink
+﻿using DSLink.Container;
+
+namespace DSLink
 {
     public class Requester
     {
-        private readonly DSLinkContainer _link;
+        private readonly AbstractContainer _link;
 
-        internal Requester(DSLinkContainer link)
+        internal Requester(AbstractContainer link)
         {
             _link = link;
         }

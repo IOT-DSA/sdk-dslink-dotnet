@@ -61,7 +61,6 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="websocket-sharp, Version=1.0.2.59610, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
       <HintPath>..\packages\WebSocketSharp.1.0.3-rc10\lib\websocket-sharp.dll</HintPath>
@@ -69,6 +68,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mono.Options\Options.cs" />
     <Compile Include="src\Configuration.cs" />
     <Compile Include="src\Connection\Connector.cs" />
     <Compile Include="src\Connection\ConnectionEvents.cs" />
@@ -79,6 +79,7 @@
     <Compile Include="src\Connection\Serializer\SerializationManager.cs" />
     <Compile Include="src\Connection\Serializer\SerializationObjects.cs" />
     <Compile Include="src\Connection\WebSocketConnector.cs" />
+    <Compile Include="src\Container\AbstractContainer.cs" />
     <Compile Include="src\Crypto\KeyPair.cs" />
     <Compile Include="src\DSLinkContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

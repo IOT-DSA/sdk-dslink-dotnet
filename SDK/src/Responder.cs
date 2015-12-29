@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DSLink.Connection.Serializer;
+using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 
@@ -9,12 +10,12 @@ namespace DSLink
 {
     public sealed class Responder
     {
-        private readonly DSLinkContainer _link;
+        private readonly AbstractContainer _link;
         public Node SuperRoot { get; }
         internal SubscriptionManager SubscriptionManager;
         internal StreamManager StreamManager;
 
-        internal Responder(DSLinkContainer link)
+        internal Responder(AbstractContainer link)
         {
             _link = link;
             SuperRoot = new Node("", null, _link);
@@ -163,9 +164,9 @@ namespace DSLink
     internal class SubscriptionManager
     {
         private readonly Dictionary<int, Node> _subscriptions = new Dictionary<int, Node>();
-        private readonly DSLinkContainer _link;
+        private readonly AbstractContainer _link;
 
-        public SubscriptionManager(DSLinkContainer link)
+        public SubscriptionManager(AbstractContainer link)
         {
             _link = link;
         }
@@ -193,9 +194,9 @@ namespace DSLink
     internal class StreamManager
     {
         private readonly Dictionary<int, Node> _streams = new Dictionary<int, Node>();
-        private readonly DSLinkContainer _link;
+        private readonly AbstractContainer _link;
 
-        public StreamManager(DSLinkContainer link)
+        public StreamManager(AbstractContainer link)
         {
             _link = link;
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DSLink.Connection.Serializer;
+using DSLink.Container;
 using DSLink.Nodes.Actions;
 using DSLink.Util;
 using Action = DSLink.Nodes.Actions.Action;
@@ -20,7 +21,7 @@ namespace DSLink.Nodes
         private readonly IDictionary<string, Value> _attributes;
         internal readonly List<int> Subscribers;
         internal readonly List<int> Streams; 
-        private readonly DSLinkContainer _link;
+        private readonly AbstractContainer _link;
 
         public string Name { get; }
         public string Path { get; }
@@ -33,7 +34,7 @@ namespace DSLink.Nodes
         public ReadOnlyDictionary<string, Node> Children => new ReadOnlyDictionary<string, Node>(_children);
         public Node this[string name] => _children[name];
 
-        public Node(string name, Node parent, DSLinkContainer link)
+        public Node(string name, Node parent, AbstractContainer link)
         {
             if (name.IndexOfAny(BannedChars) != -1)
             {
