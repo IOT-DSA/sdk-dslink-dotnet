@@ -1,0 +1,2 @@
+language: csharp
+solution: sdk-dslink-dotnet.sln
