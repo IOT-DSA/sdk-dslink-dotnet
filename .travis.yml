@@ -1,4 +1,5 @@
 language: csharp
 solution: sdk-dslink-dotnet.sln
 after_script:
+  - chmod +x .ci/nunit.sh
   - .ci/nunit.sh
