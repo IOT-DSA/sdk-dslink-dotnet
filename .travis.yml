@@ -1,2 +1,4 @@
 language: csharp
 solution: sdk-dslink-dotnet.sln
+after_script:
+  - .ci/nunit.sh
