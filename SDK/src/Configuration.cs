@@ -53,7 +53,7 @@ namespace DSLink
             var options = new OptionSet
             {
                 {
-                    "broker", opt => { brokerUrl = opt; }
+                    "broker=", val => { brokerUrl = val; }
                 }
             };
             options.Parse(Environment.GetCommandLineArgs());
