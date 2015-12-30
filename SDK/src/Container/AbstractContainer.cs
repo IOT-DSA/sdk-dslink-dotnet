@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DSLink.Connection;
 using log4net;
 using log4net.Appender;

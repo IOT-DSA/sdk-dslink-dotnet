@@ -1,4 +1,4 @@
-﻿using DSLink.Container;
+using DSLink.Container;
 
 namespace DSLink
 {

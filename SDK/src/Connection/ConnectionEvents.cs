@@ -1,4 +1,4 @@
-﻿namespace DSLink.Connection
+namespace DSLink.Connection
 {
     public class MessageEvent
     {

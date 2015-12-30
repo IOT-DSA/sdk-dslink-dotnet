@@ -1,4 +1,4 @@
-﻿using DSLink;
+using DSLink;
 using DSLink.Connection;
 using DSLink.Connection.Serializer;
 

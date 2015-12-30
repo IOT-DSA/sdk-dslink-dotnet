@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -19,9 +19,13 @@ namespace DSLink.Nodes
         private readonly IDictionary<string, Node> _children;
         private readonly IDictionary<string, Value> _configs;
         private readonly IDictionary<string, Value> _attributes;
+        private readonly IList<Node> _removedChildren; 
         internal readonly List<int> Subscribers;
         internal readonly List<int> Streams; 
         private readonly AbstractContainer _link;
+
+        private readonly object _childrenLock = new object();
+        private readonly object _removedChildrenLock = new object();
 
         public string Name { get; }
         public string Path { get; }
@@ -29,10 +33,20 @@ namespace DSLink.Nodes
         public Value Value { get; }
         public Action Action;
         public bool Transient;
+        internal bool Building;
         public bool Subscribed => Subscribers.Count != 0;
 
         public ReadOnlyDictionary<string, Node> Children => new ReadOnlyDictionary<string, Node>(_children);
-        public Node this[string name] => _children[name];
+        public Node this[string name]
+        {
+            get
+            {
+                lock (_childrenLock)
+                {
+                    return _children[name];
+                } 
+            }
+        }
 
         public Node(string name, Node parent, AbstractContainer link)
         {
@@ -47,6 +61,7 @@ namespace DSLink.Nodes
                 {"$is", new Value("node")}
             };
             _attributes = new Dictionary<string, Value>();
+            _removedChildren = new List<Node>();
             Subscribers = new List<int>();
             Streams = new List<int>();
             _link = link;
@@ -149,14 +164,26 @@ namespace DSLink.Nodes
 
         public void AddChild(Node child)
         {
-            _children.Add(child.Name, child);
+            lock (_childrenLock)
+            {
+                _children.Add(child.Name, child);
+            }
             UpdateSubscribers();
         }
 
         public void RemoveChild(string name)
         {
-            // TODO: Implement remove child
-            throw new NotImplementedException();
+            lock (_childrenLock)
+            {
+                if (_children.ContainsKey(name))
+                {
+                    lock (_removedChildrenLock)
+                    {
+                        _removedChildren.Add(_children[name]);
+                    }
+                    _children.Remove(name);
+                }
+            }
         }
 
         internal void RemoveConfigAttribute(string path)
@@ -177,7 +204,7 @@ namespace DSLink.Nodes
 
         public void ValueSet(Value value)
         {
-            RootObject rootObject = new RootObject
+            var rootObject = new RootObject
             {
                 Msg = _link.MessageId,
                 Responses = new List<ResponseObject>
@@ -201,23 +228,35 @@ namespace DSLink.Nodes
             var val = _configs.Select(config => new List<dynamic> {config.Key, config.Value.Get()}).Cast<dynamic>().ToList();
             val.AddRange(_attributes.Select(attribute => new List<dynamic> {attribute.Key, attribute.Value.Get()}));
 
-            foreach (var child in _children)
+            lock (_childrenLock)
             {
-                var value = new Dictionary<string, dynamic>();
-                foreach (var config in child.Value._configs)
+                foreach (var child in _children)
                 {
-                    value.Add(config.Key, config.Value.Get());
+                    var value = new Dictionary<string, dynamic>();
+                    foreach (var config in child.Value._configs)
+                    {
+                        value.Add(config.Key, config.Value.Get());
+                    }
+                    foreach (var attr in child.Value._attributes)
+                    {
+                        value.Add(attr.Key, attr.Value.Get());
+                    }
+                    if (child.Value.HasValue())
+                    {
+                        value.Add("value", child.Value.Value.Get());
+                        value.Add("ts", child.Value.Value.LastUpdated);
+                    }
+                    val.Add(new List<dynamic>{child.Key, value});
                 }
-                foreach (var attr in child.Value._attributes)
+            }
+
+            lock (_removedChildrenLock)
+            {
+                val.AddRange(_removedChildren.Select(child => new Dictionary<string, dynamic>
                 {
-                    value.Add(attr.Key, attr.Value.Get());
-                }
-                if (child.Value.HasValue())
-                {
-                    value.Add("value", child.Value.Value.Get());
-                    value.Add("ts", child.Value.Value.LastUpdated);
-                }
-                val.Add(new List<dynamic>{child.Key, value});
+                    {"name", child.Name}, {"change", "remove"}
+                }));
+                _removedChildren.Clear();
             }
 
             return val;
@@ -246,6 +285,10 @@ namespace DSLink.Nodes
 
         internal void UpdateSubscribers()
         {
+            if (Building)
+            {
+                return;
+            }
             var responses = Streams.Select(stream => new ResponseObject
             {
                 RequestId = stream, Stream = "open", Updates = Serialize()

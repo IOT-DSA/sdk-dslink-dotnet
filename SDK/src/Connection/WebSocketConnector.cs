@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using DSLink.Connection.Serializer;
 using WebSocketSharp;

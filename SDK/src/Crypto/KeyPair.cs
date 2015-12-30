@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using DSLink.Util;
 using Org.BouncyCastle.Asn1.Sec;

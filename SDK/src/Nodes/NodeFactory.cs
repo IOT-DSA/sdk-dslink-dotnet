@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using DSLink.Nodes.Actions;
 
 namespace DSLink.Nodes
@@ -10,11 +10,13 @@ namespace DSLink.Nodes
         public NodeFactory(Node node)
         {
             _node = node;
+            _node.Building = true;
         }
 
         public Node BuildNode()
         {
             _node.Parent.UpdateSubscribers();
+            _node.Building = false;
             return _node;
         }
 

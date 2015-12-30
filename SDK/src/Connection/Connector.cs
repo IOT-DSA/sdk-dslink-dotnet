@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DSLink.Connection.Serializer;
 
 namespace DSLink.Connection

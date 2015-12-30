@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using DSLink;
@@ -12,7 +12,7 @@ namespace Examples
     {
         private Timer timer;
         private int counter;
-        public ExampleDSLink() : base(new Configuration("sdk-dotnet", responder: true, communicationFormat: "json"))
+        public ExampleDSLink() : base(new Configuration("sdk-dotnet", responder: true))
         {
 
             var myNum = Responder.SuperRoot.CreateChild("MyNum")
@@ -46,7 +46,8 @@ namespace Examples
                 }));
 */
 
-            /*var testValue = Responder.SuperRoot.CreateChild("testnode")
+/*
+            var testValue = Responder.SuperRoot.CreateChild("testnode")
                 .SetConfig("type", new Value("number")).BuildNode();
             testValue.Value.Set(5);
 
@@ -54,20 +55,14 @@ namespace Examples
             Random random = new Random();
             timer = new Timer(obj =>
             {
-                try
+                if (testValue.Subscribed)
                 {
-                    if (testValue.Subscribed)
-                    {
-                        testValue.Value.Set(random.Next(0, 1000));
-                    }
-                    Responder.SuperRoot.CreateChild("Test" + counter++);
+                    testValue.Value.Set(random.Next(0, 1000));
                 }
-                catch
-                {
-                    Console.WriteLine("caught something.");
-                }
-            }, null, 2000, 1000);*/
-            //var Test = Responder.SuperRoot.CreateChild("testnode").Node;
+                Responder.SuperRoot.RemoveChild("Test" + counter);
+                Responder.SuperRoot.CreateChild("Test" + ++counter);
+            }, null, 1000, 1);
+*/
         }
 
         private static void Main()

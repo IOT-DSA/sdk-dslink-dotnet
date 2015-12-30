@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Timers;
 using DSLink.Connection;
 using DSLink.Connection.Serializer;
@@ -56,7 +56,7 @@ namespace DSLink
 
         private void OnMessage(RootObject message)
         {
-            RootObject response = new RootObject
+            var response = new RootObject
             {
                 Ack = message.Msg,
                 Msg = MessageId

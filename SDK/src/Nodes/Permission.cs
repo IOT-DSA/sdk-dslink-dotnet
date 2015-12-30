@@ -1,4 +1,4 @@
-﻿namespace DSLink.Nodes
+namespace DSLink.Nodes
 {
     public class Permission
     {

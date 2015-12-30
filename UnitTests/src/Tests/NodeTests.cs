@@ -1,4 +1,4 @@
-﻿using DSLink.Nodes;
+using DSLink.Nodes;
 using NUnit.Framework;
 using UnitTests.Framework;
 
