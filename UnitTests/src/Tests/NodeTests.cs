@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using DSLink.Nodes;
 using NUnit.Framework;
 using UnitTests.Framework;
@@ -48,6 +50,39 @@ namespace UnitTests.Tests
                 Assert.AreEqual(node.Children.Count, 999);
             }
             Assert.AreEqual(tc.Responder.SuperRoot.Children.Count, 999);
+        }
+
+        [Test]
+        public void BannedCharacterTest1()
+        {
+            var tc = new TestingContainer("BannedCharacterTest1", true);
+            foreach (var bannedChar in Node.BannedChars)
+            {
+                Assert.Throws<ArgumentException>(delegate
+                {
+                    tc.Responder.SuperRoot.CreateChild($"Test{bannedChar}").BuildNode();
+                });
+            }
+        }
+
+        [Test]
+        public void BannedCharacterTest2()
+        {
+            var tc = new TestingContainer("BannedCharacterTest2", true);
+            var nodeName = Node.BannedChars.Aggregate("Test", (current, bannedChar) => current + bannedChar);
+            Assert.Throws<ArgumentException>(delegate
+            {
+                tc.Responder.SuperRoot.CreateChild(nodeName).BuildNode();
+            });
+        }
+
+        [Test]
+        public void NullLinkTest()
+        {
+            Assert.Throws<ArgumentException>(delegate
+            {
+                new Node("", null, null);
+            });
         }
     }
 }

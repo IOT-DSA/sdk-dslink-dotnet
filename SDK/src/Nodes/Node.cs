@@ -12,7 +12,7 @@ namespace DSLink.Nodes
 {
     public class Node
     {
-        private static readonly char[] BannedChars = {
+        public static readonly char[] BannedChars = {
             '%', '.', '/', '\\', '?', '*', ':', '|', '<', '>', '$', '@', ','
         };
 
@@ -50,9 +50,13 @@ namespace DSLink.Nodes
 
         public Node(string name, Node parent, AbstractContainer link)
         {
+            if (link == null)
+            {
+                throw new ArgumentException("Link must not be null.");
+            }
             if (name.IndexOfAny(BannedChars) != -1)
             {
-                throw new ArgumentException("Invalid character(s) in Node name");
+                throw new ArgumentException("Invalid character(s) in Node name.");
             }
             Parent = parent;
             _children = new Dictionary<string, Node>();
