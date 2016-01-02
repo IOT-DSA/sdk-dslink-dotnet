@@ -50,6 +50,10 @@ namespace DSLink.Nodes
 
         public Node(string name, Node parent, AbstractContainer link)
         {
+            if (name == null)
+            {
+                throw new ArgumentException("Name must not be null.");
+            }
             if (link == null)
             {
                 throw new ArgumentException("Link must not be null.");
@@ -73,11 +77,6 @@ namespace DSLink.Nodes
             Value = new Value();
             Value.OnSet += ValueSet;
             Transient = false;
-
-            if (name == null)
-            {
-                throw new ArgumentException("name");
-            }
 
             if (parent != null)
             {
@@ -121,7 +120,14 @@ namespace DSLink.Nodes
 
         public Value GetAttribute(string key)
         {
-            return _attributes["@" + key];
+            try
+            {
+                return _attributes["@" + key];
+            }
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
         }
 
         public void SetDisplayName(string displayName)
@@ -229,8 +235,21 @@ namespace DSLink.Nodes
 
         public List<dynamic> Serialize()
         {
-            var val = _configs.Select(config => new List<dynamic> {config.Key, config.Value.Get()}).Cast<dynamic>().ToList();
-            val.AddRange(_attributes.Select(attribute => new List<dynamic> {attribute.Key, attribute.Value.Get()}));
+            var val = new List<dynamic>();
+            foreach (var pair in _configs)
+            {
+                val.Add(new List<dynamic>
+                {
+                    pair.Key, pair.Value.Get()
+                });
+            }
+            foreach (var pair in _attributes)
+            {
+                val.Add(new List<dynamic>
+                {
+                    pair.Key, pair.Value.Get()
+                });
+            }
 
             lock (_childrenLock)
             {
