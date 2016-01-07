@@ -40,7 +40,7 @@ namespace DSLink
             }
         }
 
-        public Configuration(string name, bool requester = false, bool responder = false, string keysLocation = ".keys", string communicationFormat = "")
+        public Configuration(string name, bool requester = false, bool responder = false, string keysLocation = ".keys", string communicationFormat = "", string brokerUrl = "http://localhost:8080/conn")
         {
             _sha256 = SHA256.Create();
             Name = name;
@@ -49,7 +49,6 @@ namespace DSLink
             KeysLocation = keysLocation;
             _communicationFormat = communicationFormat;
 
-            var brokerUrl = "http://localhost:8080/conn";
             var options = new OptionSet
             {
                 {
