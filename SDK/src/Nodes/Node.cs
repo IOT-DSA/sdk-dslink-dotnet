@@ -12,31 +12,110 @@ namespace DSLink.Nodes
 {
     public class Node
     {
+        /// <summary>
+        /// Set of banned characters from DSA names.
+        /// </summary>
         public static readonly char[] BannedChars = {
             '%', '.', '/', '\\', '?', '*', ':', '|', '<', '>', '$', '@', ','
         };
 
+        /// <summary>
+        /// Dictionary of children
+        /// </summary>
         private readonly IDictionary<string, Node> _children;
+        
+        /// <summary>
+        /// Dictionary of Node configurations
+        /// </summary>
         private readonly IDictionary<string, Value> _configs;
+
+        /// <summary>
+        /// Dictionary of Node attributes
+        /// </summary>
         private readonly IDictionary<string, Value> _attributes;
+
+        /// <summary>
+        /// List of removed children, used to notify watchers about
+        /// removed children.
+        /// </summary>
         private readonly IList<Node> _removedChildren; 
+
+        /// <summary>
+        /// List of subscription IDs belonging to this Node
+        /// </summary>
         internal readonly List<int> Subscribers;
+
+        /// <summary>
+        /// List of request IDs belonging to this Node
+        /// </summary>
         internal readonly List<int> Streams; 
+
+        /// <summary>
+        /// DSLink container instance
+        /// </summary>
         private readonly AbstractContainer _link;
 
+        /// <summary>
+        /// Used to lock the children dictionary
+        /// </summary>
         private readonly object _childrenLock = new object();
+
+        /// <summary>
+        /// Used to lock the removed children list
+        /// </summary>
         private readonly object _removedChildrenLock = new object();
 
+        /// <summary>
+        /// Node name
+        /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// Node path
+        /// </summary>
         public string Path { get; }
+
+        /// <summary>
+        /// Node parent
+        /// </summary>
         public Node Parent { get; }
+
+        /// <summary>
+        /// Node value
+        /// </summary>
         public Value Value { get; }
+
+        /// <summary>
+        /// Node action
+        /// </summary>
         public Action Action;
+        
+        /// <summary>
+        /// Node is transient
+        /// </summary>
         public bool Transient;
+
+        /// <summary>
+        /// Node is still being created via NodeFactory
+        /// </summary>
         internal bool Building;
+
+        /// <summary>
+        /// Node is subscribed to
+        /// </summary>
         public bool Subscribed => Subscribers.Count != 0;
 
+        /// <summary>
+        /// Public-facing dictionary of children
+        /// </summary>
         public ReadOnlyDictionary<string, Node> Children => new ReadOnlyDictionary<string, Node>(_children);
+
+        /// <summary>
+        /// Index operator overload.
+        /// Example: Parent["Child"]["ChildOfChild"]
+        /// </summary>
+        /// <param name="name">Child name</param>
+        /// <returns>Child Node</returns>
         public Node this[string name]
         {
             get
@@ -48,6 +127,12 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Node constructor
+        /// </summary>
+        /// <param name="name">Name of Node</param>
+        /// <param name="parent">Parent of Node</param>
+        /// <param name="link">DSLink container of Node</param>
         public Node(string name, Node parent, AbstractContainer link)
         {
             if (name == null)
@@ -94,12 +179,22 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Set a Node configuration.
+        /// </summary>
+        /// <param name="key">Configuration key</param>
+        /// <param name="value">Configuration value</param>
         public void SetConfig(string key, Value value)
         {
             UpdateSubscribers();
             _configs["$" + key] = value;
         }
 
+        /// <summary>
+        /// Get a Node configuration.
+        /// </summary>
+        /// <param name="key">Configuration key</param>
+        /// <returns>Attribute value</returns>
         public Value GetConfig(string key)
         {
             try
@@ -112,12 +207,22 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Set a Node attribute.
+        /// </summary>
+        /// <param name="key">Attribute key</param>
+        /// <param name="value">Attribute value</param>
         public void SetAttribute(string key, Value value)
         {
             UpdateSubscribers();
             _attributes["@" + key] = value;
         }
 
+        /// <summary>
+        /// Get a Node attribute.
+        /// </summary>
+        /// <param name="key">Attribute key</param>
+        /// <returns>Attribute value</returns>
         public Value GetAttribute(string key)
         {
             try
@@ -130,41 +235,74 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Set the Node's display name.
+        /// </summary>
+        /// <param name="displayName">Node display name</param>
         public void SetDisplayName(string displayName)
         {
             SetConfig("name", new Value(displayName));
         }
 
+        /// <summary>
+        /// Set the Node's profile.
+        /// </summary>
+        /// <param name="profile">Node profile</param>
         public void SetProfile(string profile)
         {
             SetConfig("is", new Value(profile));
         }
 
+        /// <summary>
+        /// Set the Node's writable permission.
+        /// </summary>
+        /// <param name="permission">Writable permission</param>
         public void SetWritable(Permission permission)
         {
             SetConfig("writable", new Value(permission.ToString()));
         }
 
+        /// <summary>
+        /// Set the Node's invokable permission.
+        /// </summary>
+        /// <param name="permission">Invoke permission</param>
         public void SetInvokable(Permission permission)
         {
             SetConfig("invokable", new Value(permission.ToString()));
         }
 
+        /// <summary>
+        /// Set the Node's invoke parameters.
+        /// </summary>
+        /// <param name="parameters">Invoke parameters</param>
         public void SetParameters(List<Parameter> parameters)
         {
             SetConfig("params", new Value(parameters));
         }
 
+        /// <summary>
+        /// Set the Node's invoke columns.
+        /// </summary>
+        /// <param name="columns">Invoke columns</param>
         public void SetColumns(List<Column> columns)
         {
             SetConfig("columns", new Value(columns));
         }
 
+        /// <summary>
+        /// Check if Node has a value.
+        /// </summary>
+        /// <returns></returns>
         public bool HasValue()
         {
             return Value.Get() != null;
         }
 
+        /// <summary>
+        /// Create a child via the NodeFactory.
+        /// </summary>
+        /// <param name="name">Node's name</param>
+        /// <returns>NodeFactory of new child</returns>
         public NodeFactory CreateChild(string name)
         {
             Node child = new Node(name, this, _link);
@@ -172,6 +310,10 @@ namespace DSLink.Nodes
             return new NodeFactory(child);
         }
 
+        /// <summary>
+        /// Add a pre-existing Node as a child.
+        /// </summary>
+        /// <param name="child">Child Node</param>
         public void AddChild(Node child)
         {
             lock (_childrenLock)
@@ -181,6 +323,10 @@ namespace DSLink.Nodes
             UpdateSubscribers();
         }
 
+        /// <summary>
+        /// Remove a Node from being a child.
+        /// </summary>
+        /// <param name="name">Child Node's name</param>
         public void RemoveChild(string name)
         {
             lock (_childrenLock)
@@ -196,6 +342,10 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Remove a Node configuration or attribute in the Node tree from here.
+        /// </summary>
+        /// <param name="path">Path of configuration/attribute</param>
         internal void RemoveConfigAttribute(string path)
         {
             if (path.StartsWith("/$") || path.StartsWith(Path + "/@"))
@@ -212,6 +362,10 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Event fired when the value is set.
+        /// </summary>
+        /// <param name="value"></param>
         public void ValueSet(Value value)
         {
             var rootObject = new RootObject
@@ -233,6 +387,10 @@ namespace DSLink.Nodes
             _link.Connector.Write(rootObject);
         }
 
+        /// <summary>
+        /// Serialize the Node.
+        /// </summary>
+        /// <returns>Serialized data</returns>
         public List<dynamic> Serialize()
         {
             var val = new List<dynamic>();
@@ -285,6 +443,11 @@ namespace DSLink.Nodes
             return val;
         }
 
+        /// <summary>
+        /// Get a Node in the Node structure from here.
+        /// </summary>
+        /// <param name="path">Node path</param>
+        /// <returns>Node</returns>
         public Node Get(string path)
         {
             if (string.IsNullOrEmpty(path) || path.Equals("/") || path.StartsWith("/$") || path.StartsWith("/@"))
@@ -306,6 +469,9 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Update all subscribers of this Node.
+        /// </summary>
         internal void UpdateSubscribers()
         {
             if (Building)
@@ -326,6 +492,9 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Internal utility
+        /// </summary>
         internal static int NthIndexOf(string target, string value, int n)
         {
             var m = Regex.Match(target, "((" + Regex.Escape(value) + ").*?){" + n + "}");
