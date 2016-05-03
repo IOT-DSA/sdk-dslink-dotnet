@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DSLink.Util;
 
 namespace DSLink.Nodes
 {
@@ -9,7 +10,7 @@ namespace DSLink.Nodes
         private DateTime _lastUpdated;
         public event Action<Value> OnSet;
 
-        public string LastUpdated => _lastUpdated.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
+        public string LastUpdated => TimeUtil.ToIso8601(_lastUpdated);
 
         public Value()
         {
