@@ -3,9 +3,7 @@ using System.Net;
 using System.Threading;
 using DSLink.Connection.Serializer;
 using DSLink.Util;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using EasyHttp.Http;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink.Connection
@@ -30,12 +28,12 @@ namespace DSLink.Connection
             while (keepTrying)
             {
                 _link.Logger.Info("Connecting to " + _link.Config.BrokerUrl);
-                var resp = RunHandshake().Result;
+                var resp = RunHandshake();
 
                 if (resp != null && resp.StatusCode == HttpStatusCode.OK)
                 {
                     _link.Logger.Info("Connected");
-                    _link.Config.RemoteEndpoint = JsonConvert.DeserializeObject<RemoteEndpoint>(resp.Content.ReadAsStringAsync().Result);
+                    _link.Config.RemoteEndpoint = resp.StaticBody<RemoteEndpoint>();
                     break;
                 }
 
@@ -55,10 +53,16 @@ namespace DSLink.Connection
             }
         }
 
-        private Task<HttpResponseMessage> RunHandshake()
+        private HttpResponse RunHandshake()
         {
-            return _httpClient.PostAsync(_link.Config.BrokerUrl + "?dsId=" + _link.Config.DsId, 
-                new StringContent(GetJson().ToString()));
+            try
+            {
+                return _httpClient.Post(_link.Config.BrokerUrl, GetJson().ToString(), HttpContentTypes.ApplicationJson, new { dsId = _link.Config.DsId });
+            }
+            catch (WebException)
+            {
+                return null;
+            }
         }
 
         private JObject GetJson()
