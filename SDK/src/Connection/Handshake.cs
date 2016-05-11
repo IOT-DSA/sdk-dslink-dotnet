@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -61,7 +62,7 @@ namespace DSLink.Connection
             }
             catch (WebException)
             {
-                return null;
+				return null;
             }
         }
 
