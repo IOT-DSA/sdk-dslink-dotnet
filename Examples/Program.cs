@@ -31,6 +31,12 @@ namespace Examples
                 }))
                 .BuildNode();
 
+			var bytes = Responder.SuperRoot.CreateChild("bytes")
+				.SetDisplayName("Bytes")
+				.SetType("bytes")
+				.SetValue(new byte[]{0x01, 0x02, 0x03})
+				.BuildNode();
+
 /*
             Responder.SuperRoot.CreateChild("TestAction")
                 .AddParameter(new Parameter("Test", "string"))

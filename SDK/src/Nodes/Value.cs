@@ -51,6 +51,11 @@ namespace DSLink.Nodes
             Set(val);
         }
 
+		public Value(byte[] val)
+		{
+			Set(val);
+		}
+
         public dynamic Get()
         {
             return _val;
@@ -90,6 +95,11 @@ namespace DSLink.Nodes
         {
             SetValue(val);
         }
+
+		public void Set(byte[] val)
+		{
+			SetValue(val);
+		}
 
         private void SetValue(dynamic val)
         {

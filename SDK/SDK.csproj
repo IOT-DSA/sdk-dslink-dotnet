@@ -90,6 +90,7 @@
     <Compile Include="src\Responder.cs" />
     <Compile Include="src\Util\ReadOnlyDictionary.cs" />
     <Compile Include="src\Util\UrlBase64.cs" />
+    <Compile Include="src\Connection\Serializer\JsonByteArrayConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
