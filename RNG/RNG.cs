@@ -39,7 +39,6 @@ namespace RNG
                 }))
                 .BuildNode();
 
-            
                         Responder.SuperRoot.CreateChild("TestAction")
                             .AddParameter(new Parameter("Test", "string"))
                             .AddColumn(new Column("Status", "bool"))
@@ -54,6 +53,12 @@ namespace RNG
                             }));
             */
 
+			var bytes = Responder.SuperRoot.CreateChild("bytes")
+				.SetDisplayName("Bytes")
+				.SetType("bytes")
+				.SetValue(new byte[]{0x01, 0x02, 0x03})
+				.SetWritable(Permission.Read)
+				.BuildNode();
 
             var testValue = Responder.SuperRoot.CreateChild("testnode")
                 .SetConfig("type", new Value("number")).BuildNode();
