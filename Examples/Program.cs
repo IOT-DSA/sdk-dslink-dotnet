@@ -35,6 +35,7 @@ namespace Examples
 				.SetDisplayName("Bytes")
 				.SetType("bytes")
 				.SetValue(new byte[]{0x01, 0x02, 0x03})
+				.SetWritable(Permission.Read)
 				.BuildNode();
 
 /*
