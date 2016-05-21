@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using DSLink;
-using DSLink.NET;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using Action = DSLink.Nodes.Actions.Action;
@@ -15,7 +14,6 @@ namespace RNG
         private int counter;
         public ExampleDSLink(Configuration config) : base(config)
         {
-
             var myNum = Responder.SuperRoot.CreateChild("MyNum")
                 .SetDisplayName("My Number")
                 .SetType("int")
@@ -68,7 +66,6 @@ namespace RNG
 
         private static void Main(string[] args)
         {
-            NetPlatform.Initialize();
             new ExampleDSLink(new Configuration(args, "sdk-dotnet", responder: true, brokerUrl: "http://octocat.local:8080/conn"));
 
             Console.ReadLine();

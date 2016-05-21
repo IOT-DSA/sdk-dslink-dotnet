@@ -1,7 +1,9 @@
 ﻿{
   "dependencies": {
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
-    "PCLStorage": "1.0.2"
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.1.0",
+    "modernhttpclient": "2.4.2",
+    "PCLStorage": "1.0.2",
+    "Websockets.Pcl": "1.1.9"
   },
   "frameworks": {
     "uap10.0": {}

@@ -56,18 +56,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DSLink.NET\DSLink.NET.csproj">
-      <Project>{061ea8db-6913-498e-a20b-eaa4d7164cf3}</Project>
-      <Name>DSLink.NET</Name>
-    </ProjectReference>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\DSLink\DSLink.csproj">
       <Project>{88591365-982e-41af-9c02-ad8d84fbb54b}</Project>
       <Name>DSLink</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

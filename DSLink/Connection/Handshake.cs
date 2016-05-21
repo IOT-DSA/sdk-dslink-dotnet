@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -30,19 +31,25 @@ namespace DSLink.Connection
             while (keepTrying)
             {
                 _link.Logger.Info("Connecting to " + _link.Config.BrokerUrl);
+                HttpResponseMessage resp = null;
                 try
                 {
-                    var resp = RunHandshake().Result;
-
-                    if (resp != null && resp.StatusCode == HttpStatusCode.OK)
+                    resp = RunHandshake().Result;
+                }
+                catch (AggregateException e)
+                {
+                    foreach (var innerException in e.InnerExceptions)
                     {
-                        _link.Logger.Info("Connected");
-                        _link.Config.RemoteEndpoint = JsonConvert.DeserializeObject<RemoteEndpoint>(resp.Content.ReadAsStringAsync().Result);
-                        break;
+                        Debug.WriteLine(innerException.Message);
                     }
                 }
-                catch (AggregateException)
+                    
+
+                if (resp != null && resp.StatusCode == HttpStatusCode.OK)
                 {
+                    _link.Logger.Info("Connected");
+                    _link.Config.RemoteEndpoint = JsonConvert.DeserializeObject<RemoteEndpoint>(resp.Content.ReadAsStringAsync().Result);
+                    break;
                 }
 
                 Task.Delay(delay * 1000).Wait();

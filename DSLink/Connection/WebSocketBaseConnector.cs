@@ -2,15 +2,15 @@ using System;
 using System.Text;
 using DSLink.Connection;
 using DSLink.Connection.Serializer;
-using WebSocketSharp;
+using Websockets;
 
-namespace DSLink.NET.Connection
+namespace DSLink.Connection
 {
-    public class WebSocketConnector : Connector
+    public class WebSocketBaseConnector : Connector
     {
-        private WebSocket _webSocket;
+        private IWebSocketConnection _webSocket;
 
-        public WebSocketConnector(Configuration config, ISerializer serializer) : base(config, serializer)
+        public WebSocketBaseConnector(Configuration config, ISerializer serializer) : base(config, serializer)
         {
         }
 
@@ -34,31 +34,16 @@ namespace DSLink.NET.Connection
 
         public override void Connect()
         {
-            _webSocket = new WebSocket(WsUrl);
+            _webSocket = WebSocketFactory.Create();
 
-            _webSocket.OnOpen += (sender, e) =>
+            _webSocket.OnOpened += EmitOpen;
+            _webSocket.OnClosed += EmitClose;
+            _webSocket.OnMessage += text =>
             {
-                EmitOpen();
+                EmitMessage(new MessageEvent(text));
             };
 
-            _webSocket.OnClose += (sender, e) =>
-            {
-                EmitClose();
-            };
-
-            _webSocket.OnMessage += (sender, e) =>
-            {
-                if (e.IsText)
-                {
-                    EmitMessage(new MessageEvent(e.Data));
-                }
-                else if (e.IsBinary)
-                {
-                    EmitBinaryMessage(new BinaryMessageEvent(e.RawData));
-                }
-            };
-            
-            _webSocket.Connect();
+            _webSocket.Open(WsUrl);
         }
 
         public override void Disconnect()
@@ -68,7 +53,7 @@ namespace DSLink.NET.Connection
 
         public override bool Connected()
         {
-            return _webSocket.IsAlive;
+            return _webSocket.IsOpen;
         }
 
         protected override void WriteString(string data)
@@ -79,8 +64,7 @@ namespace DSLink.NET.Connection
 
         protected override void WriteBinary(byte[] data)
         {
-            base.WriteBinary(data);
-            _webSocket.Send(data);
+            throw new NotImplementedException();
         }
     }
 }
