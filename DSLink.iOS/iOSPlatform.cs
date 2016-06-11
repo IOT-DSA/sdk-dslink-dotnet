@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DSLink.Connection;
+
 namespace DSLink.iOS
 {
-	public class iOSPlatform
+	public static class iOSPlatform
 	{
-		public iOSPlatform()
+		public static void Initialize()
 		{
+			Websockets.Ios.WebsocketConnection.Link();
+			ConnectorManager.SetConnector(typeof(WebSocketBaseConnector));
 		}
 	}
 }
