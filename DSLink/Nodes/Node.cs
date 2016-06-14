@@ -23,7 +23,7 @@ namespace DSLink.Nodes
         /// Dictionary of children
         /// </summary>
         private readonly IDictionary<string, Node> _children;
-        
+
         /// <summary>
         /// Dictionary of Node configurations
         /// </summary>
@@ -38,7 +38,7 @@ namespace DSLink.Nodes
         /// List of removed children, used to notify watchers about
         /// removed children.
         /// </summary>
-        private readonly IList<Node> _removedChildren; 
+        private readonly IList<Node> _removedChildren;
 
         /// <summary>
         /// List of subscription IDs belonging to this Node
@@ -48,7 +48,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// List of request IDs belonging to this Node
         /// </summary>
-        internal readonly List<int> Streams; 
+        internal readonly List<int> Streams;
 
         /// <summary>
         /// DSLink container instance
@@ -89,7 +89,7 @@ namespace DSLink.Nodes
         /// Node action
         /// </summary>
         public Action Action;
-        
+
         /// <summary>
         /// Node is transient
         /// </summary>
@@ -123,7 +123,7 @@ namespace DSLink.Nodes
                 lock (_childrenLock)
                 {
                     return _children[name];
-                } 
+                }
             }
         }
 
@@ -366,7 +366,7 @@ namespace DSLink.Nodes
         /// Event fired when the value is set.
         /// </summary>
         /// <param name="value"></param>
-        public void ValueSet(Value value)
+        protected void ValueSet(Value value)
         {
             var rootObject = new RootObject
             {
@@ -380,11 +380,16 @@ namespace DSLink.Nodes
                     }
                 }
             };
+            bool hasUpdates = false;
             foreach (var sid in Subscribers)
             {
-                rootObject.Responses[0].Updates.Add(new[] {sid, value.Get(), value.LastUpdated});
+                hasUpdates = true;
+                rootObject.Responses[0].Updates.Add(new[] { sid, value.Get(), value.LastUpdated });
             }
-            _link.Connector.Write(rootObject);
+            if (hasUpdates)
+            {
+                _link.Connector.Write(rootObject);
+            }
         }
 
         /// <summary>
@@ -427,7 +432,7 @@ namespace DSLink.Nodes
                         value.Add("value", child.Value.Value.Get());
                         value.Add("ts", child.Value.Value.LastUpdated);
                     }
-                    val.Add(new List<dynamic>{child.Key, value});
+                    val.Add(new List<dynamic> { child.Key, value });
                 }
             }
 
@@ -480,7 +485,9 @@ namespace DSLink.Nodes
             }
             var responses = Streams.Select(stream => new ResponseObject
             {
-                RequestId = stream, Stream = "open", Updates = Serialize()
+                RequestId = stream,
+                Stream = "open",
+                Updates = Serialize()
             }).ToList();
             if (responses.Count > 0)
             {
