@@ -6,7 +6,7 @@ using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 
-namespace DSLink
+namespace DSLink.Respond
 {
     /// <summary>
     /// Class that handles the responder features.
