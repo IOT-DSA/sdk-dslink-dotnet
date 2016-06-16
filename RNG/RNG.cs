@@ -60,7 +60,7 @@ namespace RNG
 				.SetWritable(Permission.Read)
 				.BuildNode();
 
-            var testValue = Responder.SuperRoot.CreateChild("testnode")
+            /*var testValue = Responder.SuperRoot.CreateChild("testnode")
                 .SetConfig("type", new Value("number")).BuildNode();
             testValue.Value.Set(5);
 
@@ -74,7 +74,7 @@ namespace RNG
                 }
                 Responder.SuperRoot.RemoveChild("Test" + counter);
                 Responder.SuperRoot.CreateChild("Test" + ++counter);
-            }, null, 1000, 100);
+            }, null, 1000, 100);*/
 
         }
 

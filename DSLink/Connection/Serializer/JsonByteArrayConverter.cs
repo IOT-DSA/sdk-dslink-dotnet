@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using DSLink.Util;
 
-namespace DSLink
+namespace DSLink.Connection.Serializer
 {
 	public class JsonByteArrayConverter : JsonConverter
 	{
