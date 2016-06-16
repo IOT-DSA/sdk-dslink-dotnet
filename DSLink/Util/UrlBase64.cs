@@ -11,7 +11,6 @@ namespace DSLink.Util
 
         public static byte[] Decode(string data)
         {
-            Console.WriteLine(data);
             return Convert.FromBase64String(data.Replace('-', '+').Replace('_', '/').PadRight(data.Length + (4 - data.Length % 4) % 4, '='));
         }
     }
