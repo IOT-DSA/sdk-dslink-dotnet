@@ -1,4 +1,5 @@
 using DSLink.Connection;
+using DSLink.Util.Logger;
 
 namespace DSLink.Android
 {
@@ -8,6 +9,7 @@ namespace DSLink.Android
         {
             Websockets.Droid.WebsocketConnection.Link();
             ConnectorManager.SetConnector(typeof(WebSocketBaseConnector));
+            BaseLogger.Logger = typeof(AndroidLogger);
         }
     }
 }

@@ -469,7 +469,7 @@ namespace DSLink.Nodes
             }
             catch (KeyNotFoundException)
             {
-                _link.Logger.Warn("Non-existant Node requested");
+                _link.Logger.Warning("Non-existant Node requested");
                 return null;
             }
         }

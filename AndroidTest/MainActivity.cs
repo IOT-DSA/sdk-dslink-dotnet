@@ -8,6 +8,7 @@ using Android.OS;
 using DSLink;
 using DSLink.Nodes;
 using Environment = Android.OS.Environment;
+using DSLink.Util.Logger;
 
 namespace AndroidTest
 {
@@ -26,7 +27,7 @@ namespace AndroidTest
             EditText url = FindViewById<EditText>(Resource.Id.broker_url);
             connect.Click += delegate
             {
-                _dslink = new AndroidDSLink(new Configuration(new List<string>(), "androidtest", true, true, Environment.ExternalStorageDirectory.Path + "/.keys", brokerUrl: url.Text));
+                _dslink = new AndroidDSLink(new Configuration(new List<string>(), "AndroidTest", true, true, Environment.ExternalStorageDirectory.Path + "/.keys", brokerUrl: url.Text, logLevel: LogLevel.Debug));
                 connect.Enabled = false;
             };
         }
@@ -41,7 +42,7 @@ namespace AndroidTest
         public AndroidDSLink(Configuration config) : base(config)
         {
             random = new Random();
-            timer = new Timer(0.01);
+            timer = new Timer(1);
             timer.Elapsed += Elapsed;
 
             number = Responder.SuperRoot.CreateChild("MyNum")

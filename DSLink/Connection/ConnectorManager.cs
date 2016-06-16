@@ -1,15 +1,16 @@
 using System;
 using DSLink.Connection.Serializer;
+using DSLink.Container;
 
 namespace DSLink.Connection
 {
-    public class ConnectorManager
+    public static class ConnectorManager
     {
         private static Type _connectorType;
 
-        public static Connector Create(Configuration config, ISerializer serializer)
+        public static Connector Create(AbstractContainer link, Configuration config, ISerializer serializer)
         {
-            return (Connector) Activator.CreateInstance(_connectorType, config, serializer);
+            return (Connector) Activator.CreateInstance(_connectorType, link, config, serializer);
         }
 
         public static void SetConnector(Type type)

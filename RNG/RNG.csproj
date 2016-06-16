@@ -64,6 +64,10 @@
       <Project>{88591365-982e-41af-9c02-ad8d84fbb54b}</Project>
       <Name>DSLink</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DSLink.NET\DSLink.NET.csproj">
+      <Project>{FEF78674-3F05-4E6B-A41F-32151A01C38D}</Project>
+      <Name>DSLink.NET</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

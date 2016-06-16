@@ -20,7 +20,7 @@ namespace DSLink
         /// <summary>
         /// SerializationManager handles serialization for communications.
         /// </summary>
-        internal readonly SerializationManager SerializationManager;
+        internal SerializationManager SerializationManager;
 
         /// <summary>
         /// Handshake object, which contains data from the initial connection handshake.
@@ -35,19 +35,34 @@ namespace DSLink
         {
             CreateLogger("DSLink");
 
+            DoHandshake();
+            DoConnect();
+
+            _pingTask = Task.Factory.StartNew(OnPingElapsed);
+        }
+
+        /// <summary>
+        /// Performs handshake with broker.
+        /// </summary>
+        public void DoHandshake()
+        {
             Handshake = new Handshake(this);
             Handshake.Shake();
-            SerializationManager = new SerializationManager(config.CommunicationFormat);
+            SerializationManager = new SerializationManager(Config.CommunicationFormat);
+        }
 
-            Connector = ConnectorManager.Create(Config, SerializationManager.Serializer);
+        /// <summary>
+        /// Connects to the Connector.
+        /// </summary>
+        public void DoConnect()
+        {
+            Connector = ConnectorManager.Create(this, Config, SerializationManager.Serializer);
             Connector.OnMessage += OnTextMessage;
             Connector.OnBinaryMessage += OnBinaryMessage;
             Connector.OnWrite += OnWrite;
             Connector.OnBinaryWrite += OnBinaryWrite;
             Connector.OnClose += OnClose;
             Connector.Connect();
-
-            _pingTask = Task.Factory.StartNew(OnPingElapsed);
         }
 
         /// <summary>
@@ -55,7 +70,8 @@ namespace DSLink
         /// </summary>
         private void OnClose()
         {
-            Logger.Info("Connection Closed");
+            DoHandshake();
+            DoConnect();
         }
 
         /// <summary>
@@ -99,7 +115,10 @@ namespace DSLink
             {
                 // TODO
             }
-            Connector.Write(response);
+            if (message.Requests != null || message.Responses != null)
+            {
+                Connector.Write(response);
+            }
         }
 
         /// <summary>
@@ -121,14 +140,18 @@ namespace DSLink
         }
 
         /// <summary>
-        /// Event that is fired when the ping timed elapses.
+        /// Task used to send pings occasionally to keep the connection alive.
         /// </summary>
         private void OnPingElapsed()
         {
             while (_pingTask.Status != TaskStatus.Canceled)
             {
-                // Write a blank message containing no responses/requests.
-                Connector.Write(new RootObject());
+                if (Connector.Connected())
+                {
+                    // Write a blank message containing no responses/requests.
+                    Connector.Write(new RootObject());
+                }
+                // TODO: Extract the amount of time to the configuration object.
                 Task.Delay(30000).Wait();
             }
         }

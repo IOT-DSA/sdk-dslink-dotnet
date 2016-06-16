@@ -5,6 +5,7 @@ using System.Text;
 using DSLink.Connection;
 using DSLink.Crypto;
 using DSLink.Util;
+using DSLink.Util.Logger;
 using Mono.Options;
 
 namespace DSLink
@@ -47,12 +48,7 @@ namespace DSLink
         /// <summary>
         /// Communication format(internal use only)
         /// </summary>
-        private readonly string _communicationFormat;
-
-        /// <summary>
-        /// Remote Endpoint object, stores data that came from the /conn endpoint
-        /// </summary>
-        private RemoteEndpoint _remoteEndpoint;
+        internal string _communicationFormat;
 
         /// <summary>
         /// Bouncy Castle KeyPair abstraction
@@ -80,21 +76,14 @@ namespace DSLink
         public string DsId => Name + "-" + UrlBase64.Encode(_sha256.ComputeHash(KeyPair.EncodedPublicKey));
 
         /// <summary>
-        /// Remote endpoint getter/setter
+        /// Remote Endpoint object, stores data that came from the /conn endpoint
         /// </summary>
-        public RemoteEndpoint RemoteEndpoint
+        internal RemoteEndpoint RemoteEndpoint;
+
+        public LogLevel LogLevel
         {
-            get
-            {
-                return _remoteEndpoint;
-            }
-            set
-            {
-                if (_remoteEndpoint == null)
-                {
-                    _remoteEndpoint = value;
-                }
-            }
+            private set;
+            get;
         }
 
         /// <summary>
@@ -107,8 +96,15 @@ namespace DSLink
         /// <param name="keysLocation">Location to store keys</param>
         /// <param name="communicationFormat">Communication format(json, msgpack)</param>
         /// <param name="brokerUrl">Full URL of broker to connect to</param>
-        public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false, string keysLocation = ".keys", string communicationFormat = "", string brokerUrl = "http://localhost:8080/conn")
+        public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false,
+                             string keysLocation = ".keys", string communicationFormat = "",
+                             string brokerUrl = "http://localhost:8080/conn", LogLevel logLevel = null)
         {
+            if (logLevel == null)
+            {
+                logLevel = LogLevel.Info;
+            }
+
             _sha256 = new SHA256();
 
             Name = name;
@@ -121,11 +117,15 @@ namespace DSLink
             {
                 {
                     "broker=", val => { brokerUrl = val; }
+                },
+                {
+                    "log=", val => { logLevel = LogLevel.ParseLogLevel(val); }
                 }
             };
             options.Parse(args);
 
             BrokerUrl = brokerUrl;
+            LogLevel = logLevel;
 
             KeyPair = new KeyPair(KeysLocation);
         }

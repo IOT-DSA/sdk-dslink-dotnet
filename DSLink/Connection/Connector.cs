@@ -1,10 +1,12 @@
 using System;
 using DSLink.Connection.Serializer;
+using DSLink.Container;
 
 namespace DSLink.Connection
 {
     public abstract class Connector
     {
+        protected readonly AbstractContainer _link;
         protected readonly Configuration Config;
         private readonly ISerializer _serializer;
 
@@ -15,18 +17,43 @@ namespace DSLink.Connection
         public event Action<MessageEvent> OnMessage;
         public event Action<BinaryMessageEvent> OnBinaryMessage;
 
-        protected Connector(Configuration config, ISerializer serializer)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:DSLink.Connection.Connector"/> class.
+        /// </summary>
+        /// <param name="link">Link.</param>
+        /// <param name="config">Config.</param>
+        /// <param name="serializer">Serializer.</param>
+        protected Connector(AbstractContainer link, Configuration config, ISerializer serializer)
         {
+            _link = link;
             Config = config;
             _serializer = serializer;
         }
+        /// <summary>
+        /// Connect to the broker.
+        /// </summary>
+        public virtual void Connect()
+        {
+            _link.Logger.Info("Connecting");
+        }
 
-        public abstract void Connect();
+        /// <summary>
+        /// Disconnect from the broker.
+        /// </summary>
+        public virtual void Disconnect()
+        {
+            _link.Logger.Info("Disconnecting");
+        }
 
-        public abstract void Disconnect();
-
+        /// <summary>
+        /// Returns true if connected to a broker.
+        /// </summary>
         public abstract bool Connected();
 
+        /// <summary>
+        /// Write the specified data.
+        /// </summary>
+        /// <param name="data">Data.</param>
         public void Write(RootObject data)
         {
             var serialized = _serializer.Serialize(data);
@@ -40,34 +67,57 @@ namespace DSLink.Connection
             }
         }
 
-        protected virtual void WriteString(string data)
+        /// <summary>
+        /// Writes a string to the connector.
+        /// </summary>
+        /// <param name="data">String to write</param>
+        public virtual void WriteString(string data)
         {
             OnWrite?.Invoke(new MessageEvent(data));
         }
 
-        protected virtual void WriteBinary(byte[] data)
+        /// <summary>
+        /// Writes binary to the connector.
+        /// </summary>
+        /// <param name="data">Binary to write</param>
+        public virtual void WriteBinary(byte[] data)
         {
             OnBinaryWrite?.Invoke(new BinaryMessageEvent(data));
         }
 
-        protected void EmitOpen()
+        /// <summary>
+        /// Emit the open connector event.
+        /// </summary>
+        protected virtual void EmitOpen()
         {
             OnOpen?.Invoke();
         }
 
-        protected void EmitClose()
+        /// <summary>
+        /// Emit the close connector event.
+        /// </summary>
+        protected virtual void EmitClose()
         {
             OnClose?.Invoke();
         }
 
-        protected void EmitMessage(MessageEvent e)
+        /// <summary>
+        /// Emit the message connector event.
+        /// </summary>
+        /// <param name="messageEvent">Message event</param>
+        protected void EmitMessage(MessageEvent messageEvent)
         {
-            OnMessage?.Invoke(e);
+            OnMessage?.Invoke(messageEvent);
         }
 
-        protected void EmitBinaryMessage(BinaryMessageEvent e)
+        /// <summary>
+        /// Emits the binary message.
+        /// </summary>
+        /// <returns>The binary message.</returns>
+        /// <param name="messageEvent">Message event.</param>
+        protected void EmitBinaryMessage(BinaryMessageEvent messageEvent)
         {
-            OnBinaryMessage?.Invoke(e);
+            OnBinaryMessage?.Invoke(messageEvent);
         }
     }
 
