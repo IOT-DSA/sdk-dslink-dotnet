@@ -97,7 +97,7 @@ namespace DSLink.Crypto
             ECPoint point = param.Curve.DecodePoint(decoded);
             ECPublicKeyParameters spec = new ECPublicKeyParameters(point, param);
             point = spec.Q.Multiply(privateKey.D);
-            BigInteger bi = point.X.ToBigInteger();
+            BigInteger bi = point.Normalize().XCoord.ToBigInteger();
             return Normalize(bi.ToByteArray());
         }
 
