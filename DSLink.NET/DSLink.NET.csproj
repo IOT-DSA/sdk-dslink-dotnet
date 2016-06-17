@@ -37,17 +37,18 @@
     <Reference Include="PCLStorage.Abstractions">
       <HintPath>..\packages\PCLStorage.1.0.2\lib\net45\PCLStorage.Abstractions.dll</HintPath>
     </Reference>
-    <Reference Include="Websockets.Net">
-      <HintPath>..\packages\Websockets.Pcl.1.1.9\lib\net45\Websockets.Net.dll</HintPath>
-    </Reference>
-    <Reference Include="WebSockets.PCL">
-      <HintPath>..\packages\Websockets.Pcl.1.1.9\lib\net45\WebSockets.PCL.dll</HintPath>
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="websocket-sharp">
+      <HintPath>..\packages\WebSocketSharp.1.0.3-rc10\lib\websocket-sharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NETPlatform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NETLogger.cs" />
+    <Compile Include="NETWebSocket.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

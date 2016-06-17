@@ -78,7 +78,11 @@ namespace DSLink
         /// <summary>
         /// Remote Endpoint object, stores data that came from the /conn endpoint
         /// </summary>
-        internal RemoteEndpoint RemoteEndpoint;
+        public RemoteEndpoint RemoteEndpoint
+        {
+            internal set;
+            get;
+        }
 
         public LogLevel LogLevel
         {

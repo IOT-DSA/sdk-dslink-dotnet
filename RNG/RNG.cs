@@ -27,14 +27,13 @@ namespace RNG
                 .SetDisplayName("My Number")
                 .SetType("int")
                 .SetValue(0)
-                .BuildNode();
+                .BuildNode();*/
 
             var addNum = Responder.SuperRoot.CreateChild("AddNum")
                 .SetDisplayName("Add Number")
                 .AddParameter(new Parameter("Number", "int"))
                 .SetAction(new Action(Permission.Write, parameters =>
                 {
-                    myNum.Value.Set(parameters["Number"].Get());
                     return new List<dynamic>();
                 }))
                 .BuildNode();
@@ -51,16 +50,15 @@ namespace RNG
                                     true
                                 };
                             }));
-            */
 
-			var bytes = Responder.SuperRoot.CreateChild("bytes")
-				.SetDisplayName("Bytes")
-				.SetType("bytes")
-				.SetValue(new byte[]{0x01, 0x02, 0x03})
-				.SetWritable(Permission.Read)
-				.BuildNode();
+            var bytes = Responder.SuperRoot.CreateChild("bytes")
+                .SetDisplayName("Bytes")
+                .SetType("bytes")
+                .SetValue(new byte[] { 0x01, 0x02, 0x03 })
+                .SetWritable(Permission.Read)
+                .BuildNode();
 
-            /*var testValue = Responder.SuperRoot.CreateChild("testnode")
+            var testValue = Responder.SuperRoot.CreateChild("testnode")
                 .SetConfig("type", new Value("number")).BuildNode();
             testValue.Value.Set(5);
 
@@ -74,14 +72,14 @@ namespace RNG
                 }
                 Responder.SuperRoot.RemoveChild("Test" + counter);
                 Responder.SuperRoot.CreateChild("Test" + ++counter);
-            }, null, 1000, 100);*/
+            }, null, 1000, 1);
 
         }
 
         private static void Main(string[] args)
         {
             NETPlatform.Initialize();
-            new ExampleDSLink(new Configuration(new string[] { "--log debug" }, "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Debug));
+            new ExampleDSLink(new Configuration(new string[] { "--log debug" }, "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Info));
 
             while (true)
             {

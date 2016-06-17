@@ -7,8 +7,7 @@ namespace DSLink.NET
     {
         public static void Initialize()
         {
-            Websockets.Net.WebsocketConnection.Link();
-            ConnectorManager.SetConnector(typeof(WebSocketBaseConnector));
+            ConnectorManager.SetConnector(typeof(NETWebSocketConnector));
             BaseLogger.Logger = typeof(NETLogger);
         }
     }
