@@ -106,9 +106,20 @@ namespace DSLink.Nodes
         public bool Subscribed => Subscribers.Count != 0;
 
         /// <summary>
-        /// Public-facing dictionary of children
+        /// Public-facing dictionary of children.
         /// </summary>
         public ReadOnlyDictionary<string, Node> Children => new ReadOnlyDictionary<string, Node>(_children);
+
+        /// <summary>
+        /// Public-facing dictionary of configurations.
+        /// </summary>
+        /// <value>The configurations.</value>
+        public ReadOnlyDictionary<string, Value> Configurations => new ReadOnlyDictionary<string, Value>(_configs);
+
+        /// <summary>
+        /// Public-facing dictionary of attributes.
+        /// </summary>
+        public ReadOnlyDictionary<string, Value> Attributes => new ReadOnlyDictionary<string, Value>(_attributes);
 
         /// <summary>
         /// Index operator overload.
@@ -138,10 +149,6 @@ namespace DSLink.Nodes
             if (name == null)
             {
                 throw new ArgumentException("Name must not be null.");
-            }
-            if (link == null)
-            {
-                throw new ArgumentException("Link must not be null.");
             }
             if (name.IndexOfAny(BannedChars) != -1)
             {
@@ -303,7 +310,7 @@ namespace DSLink.Nodes
         /// </summary>
         /// <param name="name">Node's name</param>
         /// <returns>NodeFactory of new child</returns>
-        public NodeFactory CreateChild(string name)
+        public virtual NodeFactory CreateChild(string name)
         {
             Node child = new Node(name, this, _link);
             AddChild(child);
@@ -366,7 +373,7 @@ namespace DSLink.Nodes
         /// Event fired when the value is set.
         /// </summary>
         /// <param name="value"></param>
-        protected void ValueSet(Value value)
+        protected virtual void ValueSet(Value value)
         {
             var rootObject = new RootObject
             {
@@ -440,7 +447,8 @@ namespace DSLink.Nodes
             {
                 val.AddRange(_removedChildren.Select(child => new Dictionary<string, dynamic>
                 {
-                    {"name", child.Name}, {"change", "remove"}
+                    {"name", child.Name},
+                    {"change", "remove"}
                 }));
                 _removedChildren.Clear();
             }
@@ -469,7 +477,7 @@ namespace DSLink.Nodes
             }
             catch (KeyNotFoundException)
             {
-                _link.Logger.Warning("Non-existant Node requested");
+                _link?.Logger.Warning("Non-existant Node requested");
                 return null;
             }
         }
@@ -477,7 +485,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Update all subscribers of this Node.
         /// </summary>
-        internal void UpdateSubscribers()
+        internal virtual void UpdateSubscribers()
         {
             if (Building)
             {

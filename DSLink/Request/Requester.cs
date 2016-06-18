@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Request;
+using DSLink.Respond;
 
 namespace DSLink.Request
 {
@@ -27,24 +29,30 @@ namespace DSLink.Request
 
             foreach (var response in responses)
             {
-
+                if (response.RequestId != null && _requestManager.RequestPending(response.RequestId.Value))
+                {
+                    var request = _requestManager.GetRequest(response.RequestId.Value);
+                    if (request is ListRequest)
+                    {
+                        var listRequest = request as ListRequest;
+                        string name = listRequest.Path.Split('/').Last();
+                        RemoteNode node = new RemoteNode(name, null);
+                        node.FromSerialized(response.Updates);
+                        listRequest.Callback(new ListResponse(listRequest.RequestID, listRequest.Path, node));
+                    }
+                }
+                else if (response.RequestId == null)
+                {
+                    _link.Logger.Warning("Incoming request has null request ID.");
+                }
             }
 
             return requests;
         }
 
-        public void List(string path, Action<List<Node>> callback)
+        public void List(string path, Action<ListResponse> callback)
         {
-            var metadata = new Dictionary<string, dynamic> {
-                { "path", path }
-            };
-            var request = new ListRequest(NextRequestID, (List<Node> nodes) =>
-            {
-                foreach (Node node in nodes)
-                {
-                    Debug.WriteLine(node.Name);
-                }
-            }, metadata);
+            var request = new ListRequest(NextRequestID, callback, path);
             _requestManager.StartRequest(request);
             _link.Connector.Write(new RootObject
             {
@@ -72,6 +80,16 @@ namespace DSLink.Request
             public void StopRequest(int requestID)
             {
                 requests.Remove(requestID);
+            }
+
+            public bool RequestPending(int requestID)
+            {
+                return requests.ContainsKey(requestID);
+            }
+
+            public BaseRequest GetRequest(int requestID)
+            {
+                return requests[requestID];
             }
         }
     }

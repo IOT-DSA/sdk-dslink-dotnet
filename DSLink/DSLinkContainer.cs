@@ -113,9 +113,18 @@ namespace DSLink
             }
             if (message.Responses != null)
             {
-                // TODO
+                response.Requests = Requester.ProcessRequests(message.Responses);
             }
-            if (message.Requests != null || message.Responses != null)
+            bool write = false;
+            if (response.Requests != null && response.Requests.Count > 0)
+            {
+                write = true;
+            }
+            else if (response.Responses != null && response.Responses.Count > 0)
+            {
+                write = true;
+            }
+            if (write)
             {
                 Connector.Write(response);
             }
@@ -149,6 +158,7 @@ namespace DSLink
                 if (Connector.Connected())
                 {
                     // Write a blank message containing no responses/requests.
+                    Logger.Debug("Sent ping");
                     Connector.Write(new RootObject());
                 }
                 // TODO: Extract the amount of time to the configuration object.

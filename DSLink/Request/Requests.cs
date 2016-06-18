@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DSLink.Connection.Serializer;
 using DSLink.Nodes;
+using DSLink.Respond;
 
 namespace DSLink.Request
 {
@@ -32,20 +33,20 @@ namespace DSLink.Request
 
     public class ListRequest : BaseRequest
     {
-        public Action<List<Node>> Callback
+        public Action<ListResponse> Callback
         {
             get;
         }
 
-        public Dictionary<string, dynamic> Metadata
+        public string Path
         {
             get;
         }
 
-        public ListRequest(int requestID, Action<List<Node>> callback, Dictionary<string, dynamic> metadata) : base(requestID)
+        public ListRequest(int requestID, Action<ListResponse> callback, string path) : base(requestID)
         {
             Callback = callback;
-            Metadata = metadata;
+            Path = path;
         }
 
         public override string Method() => "list";
@@ -53,7 +54,7 @@ namespace DSLink.Request
         public override RequestObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.Path = Metadata["path"];
+            baseSerialized.Path = Path;
             return baseSerialized;
         }
     }

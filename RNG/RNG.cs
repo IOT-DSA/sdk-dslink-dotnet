@@ -5,6 +5,7 @@ using DSLink;
 using DSLink.NET;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
+using DSLink.Respond;
 using DSLink.Util.Logger;
 using Action = DSLink.Nodes.Actions.Action;
 
@@ -18,9 +19,33 @@ namespace RNG
         public ExampleDSLink(Configuration config) : base(config)
         {
             Thread.Sleep(3000);
-            Requester.List("/", (List<Node> obj) =>
+            Requester.List("/", (ListResponse response) =>
             {
-                Console.WriteLine("test");
+                foreach (KeyValuePair<string, Value> kp in response.Node.Configurations)
+                {
+                    Console.WriteLine(kp.Key);
+                    Console.WriteLine(kp.Value.Get());
+                }
+                foreach (KeyValuePair<string, Value> kp in response.Node.Attributes)
+                {
+                    Console.WriteLine(kp.Key);
+                    Console.WriteLine(kp.Value.Get());
+                }
+                foreach (KeyValuePair<string, Node> kp in response.Node.Children)
+                {
+                    Console.WriteLine(kp.Key);
+                    Console.WriteLine(kp.Value.Name);
+                    foreach (KeyValuePair<string, Value> p in kp.Value.Configurations)
+                    {
+                        Console.WriteLine(p.Key);
+                        Console.WriteLine(p.Value.Get());
+                    }
+                    foreach (KeyValuePair<string, Value> p in kp.Value.Attributes)
+                    {
+                        Console.WriteLine(p.Key);
+                        Console.WriteLine(p.Value.Get());
+                    }
+                }
             });
 
             /*var myNum = Responder.SuperRoot.CreateChild("MyNum")
@@ -29,7 +54,7 @@ namespace RNG
                 .SetValue(0)
                 .BuildNode();*/
 
-            var addNum = Responder.SuperRoot.CreateChild("AddNum")
+            /*var addNum = Responder.SuperRoot.CreateChild("AddNum")
                 .SetDisplayName("Add Number")
                 .AddParameter(new Parameter("Number", "int"))
                 .SetAction(new Action(Permission.Write, parameters =>
@@ -72,14 +97,14 @@ namespace RNG
                 }
                 Responder.SuperRoot.RemoveChild("Test" + counter);
                 Responder.SuperRoot.CreateChild("Test" + ++counter);
-            }, null, 1000, 1);
+            }, null, 1000, 10);*/
 
         }
 
         private static void Main(string[] args)
         {
             NETPlatform.Initialize();
-            new ExampleDSLink(new Configuration(new string[] { "--log debug" }, "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Info));
+            new ExampleDSLink(new Configuration(new string[] { "--log debug" }, "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Debug));
 
             while (true)
             {
