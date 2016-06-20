@@ -18,8 +18,21 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
+            int i = 0;
             Thread.Sleep(3000);
-            Requester.List("/", (ListResponse response) =>
+            //Requester.Set("/data/Test", Permission.Write, new Value("Test123"));
+            Requester.Invoke("/upstream/DGLogik Dev/downstream/DQL/query", Permission.Write, new Dictionary<string, dynamic> {
+                {"query", "list /downstream/System | filter :metric | subscribe"}
+            }, (InvokeResponse response) =>
+            {
+                Console.WriteLine("yep");
+                i++;
+                if (i > 100)
+                {
+                    response.Close();
+                }
+            });
+            /*Requester.List("/", (ListResponse response) =>
             {
                 foreach (KeyValuePair<string, Value> kp in response.Node.Configurations)
                 {
@@ -46,7 +59,7 @@ namespace RNG
                         Console.WriteLine(p.Value.Get());
                     }
                 }
-            });
+            });*/
 
             /*var myNum = Responder.SuperRoot.CreateChild("MyNum")
                 .SetDisplayName("My Number")

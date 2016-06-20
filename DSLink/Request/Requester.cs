@@ -13,7 +13,7 @@ namespace DSLink.Request
     public class Requester
     {
         private readonly AbstractContainer _link;
-        private readonly RequestManager _requestManager;
+        internal readonly RequestManager _requestManager;
         private int _rid = 1;
         protected int NextRequestID => _rid++;
 
@@ -36,9 +36,23 @@ namespace DSLink.Request
                     {
                         var listRequest = request as ListRequest;
                         string name = listRequest.Path.Split('/').Last();
-                        RemoteNode node = new RemoteNode(name, null);
+                        var node = new RemoteNode(name, null);
                         node.FromSerialized(response.Updates);
                         listRequest.Callback(new ListResponse(listRequest.RequestID, listRequest.Path, node));
+                        _requestManager.StopRequest(listRequest.RequestID);
+                    }
+                    else if (request is SetRequest)
+                    {
+                        _requestManager.StopRequest(request.RequestID);
+                    }
+                    else if (request is RemoveRequest)
+                    {
+                        _requestManager.StopRequest(request.RequestID);
+                    }
+                    else if (request is InvokeRequest)
+                    {
+                        var invokeRequest = request as InvokeRequest;
+                        invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID, invokeRequest.Path, response.Columns, response.Updates));
                     }
                 }
                 else if (response.RequestId == null)
@@ -50,7 +64,7 @@ namespace DSLink.Request
             return requests;
         }
 
-        public void List(string path, Action<ListResponse> callback)
+        public ListRequest List(string path, Action<ListResponse> callback)
         {
             var request = new ListRequest(NextRequestID, callback, path);
             _requestManager.StartRequest(request);
@@ -61,9 +75,52 @@ namespace DSLink.Request
                     request.Serialize()
                 }
             });
+            return request;
         }
 
-        private class RequestManager
+        public SetRequest Set(string path, Permission permission, Value value)
+        {
+            var request = new SetRequest(NextRequestID, path, permission, value);
+            _requestManager.StartRequest(request);
+            _link.Connector.Write(new RootObject
+            {
+                Requests = new List<RequestObject>
+                {
+                    request.Serialize()
+                }
+            });
+            return request;
+        }
+
+        public RemoveRequest Remove(string path)
+        {
+            var request = new RemoveRequest(NextRequestID, path);
+            _requestManager.StartRequest(request);
+            _link.Connector.Write(new RootObject
+            {
+                Requests = new List<RequestObject>
+                {
+                    request.Serialize()
+                }
+            });
+            return request;
+        }
+
+        public InvokeRequest Invoke(string path, Permission permission, Dictionary<string, dynamic> parameters, Action<InvokeResponse> callback)
+        {
+            var request = new InvokeRequest(NextRequestID, path, permission, parameters, callback);
+            _requestManager.StartRequest(request);
+            _link.Connector.Write(new RootObject
+            {
+                Requests = new List<RequestObject>
+                {
+                    request.Serialize()
+                }
+            });
+            return request;
+        }
+
+        internal class RequestManager
         {
             private Dictionary<int, BaseRequest> requests;
 
