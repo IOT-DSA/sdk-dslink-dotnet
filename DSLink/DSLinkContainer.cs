@@ -28,6 +28,11 @@ namespace DSLink
         protected Handshake Handshake;
 
         /// <summary>
+        /// Whether to reconnect to the broker. 
+        /// </summary>
+        internal bool Reconnect = true;
+
+        /// <summary>
         /// DSLinkContainer constructor.
         /// </summary>
         /// <param name="config">Configuration for the DSLink</param>
@@ -35,8 +40,7 @@ namespace DSLink
         {
             CreateLogger("DSLink");
 
-            DoHandshake();
-            DoConnect();
+            Connect();
 
             _pingTask = Task.Factory.StartNew(OnPingElapsed);
         }
@@ -66,14 +70,34 @@ namespace DSLink
         }
 
         /// <summary>
+        /// Connect to the broker.
+        /// </summary>
+        public void Connect()
+        {
+            DoHandshake();
+            DoConnect();
+        }
+
+        /// <summary>
+        /// Disconnect from the broker.
+        /// </summary>
+        public void Disconnect()
+        {
+            Reconnect = false;
+            Connector.Disconnect();
+        }
+
+        /// <summary>
         /// Event that fires when the connection is closed to the broker.
         /// </summary>
         private void OnClose()
         {
             Responder.SubscriptionManager.ClearAll();
             Responder.StreamManager.ClearAll();
-            DoHandshake();
-            DoConnect();
+            if (Reconnect)
+            {
+                Connect();
+            }
         }
 
         /// <summary>
