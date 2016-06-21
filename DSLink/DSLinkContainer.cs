@@ -74,6 +74,7 @@ namespace DSLink
         /// </summary>
         public void Connect()
         {
+            Reconnect = true;
             DoHandshake();
             DoConnect();
         }
