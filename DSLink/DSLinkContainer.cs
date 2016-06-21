@@ -70,6 +70,7 @@ namespace DSLink
         /// </summary>
         private void OnClose()
         {
+            Responder.StreamManager.ClearAll();
             DoHandshake();
             DoConnect();
         }
