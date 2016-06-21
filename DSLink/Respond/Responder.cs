@@ -239,6 +239,15 @@ namespace DSLink.Respond
                 _link.Logger.Info("Unknown rid");
             }
         }
+
+        /// <summary>
+        /// Ran when the connection is lost.
+        /// Clears all subscriptions.
+        /// </summary>
+        internal void ClearAll()
+        {
+            _subscriptions.Clear();
+        }
     }
 
     /// <summary>
