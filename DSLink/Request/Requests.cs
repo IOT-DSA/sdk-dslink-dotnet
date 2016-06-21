@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using DSLink.Connection.Serializer;
+using DSLink.Container;
 using DSLink.Nodes;
+using DSLink.Nodes.Actions;
 using DSLink.Respond;
 
 namespace DSLink.Request
@@ -155,12 +157,21 @@ namespace DSLink.Request
 
         public readonly Action<InvokeResponse> Callback;
 
-        public InvokeRequest(int requestID, string path, Permission permission, Dictionary<string, dynamic> parameters, Action<InvokeResponse> callback) : base(requestID)
+        private readonly AbstractContainer _link;
+
+        private readonly List<Column> _columns;
+
+        private bool _firstUpdate = true;
+
+        public InvokeRequest(int requestID, string path, Permission permission, Dictionary<string, dynamic> parameters,
+                             Action<InvokeResponse> callback = null, AbstractContainer link = null, List<Column> columns = null) : base(requestID)
         {
             Path = path;
             Permission = permission;
             Parameters = parameters;
             Callback = callback;
+            _link = link;
+            _columns = columns;
         }
 
         public override string Method() => "invoke";
@@ -169,9 +180,70 @@ namespace DSLink.Request
         {
             var baseSerialized = base.Serialize();
             baseSerialized.Path = Path;
-            baseSerialized.Permit = Permission.ToString();
+            if (baseSerialized.Permit != null)
+            {
+                baseSerialized.Permit = Permission.ToString();
+            }
             baseSerialized.Parameters = Parameters;
             return baseSerialized;
+        }
+
+        public void SendUpdates(List<dynamic> updates)
+        {
+            if (_link == null || _columns == null)
+            {
+                throw new NotSupportedException("Link and columns are null, cannot send updates");
+            }
+            var fixedUpdates = new List<dynamic>();
+            foreach (dynamic update in updates)
+            {
+                fixedUpdates.Add(new List<dynamic>
+                {
+                    update
+                });
+            }
+            var updateRootObject = new RootObject
+            {
+                Responses = new List<ResponseObject>
+                {
+                    new ResponseObject
+                    {
+                        RequestId = RequestID,
+                        Stream = "open",
+                        Updates = fixedUpdates
+                    }
+                }
+            };
+            if (_firstUpdate)
+            {
+                _firstUpdate = false;
+                updateRootObject.Responses[0].Meta = new Dictionary<string, dynamic>
+                {
+                    {"mode", "append"},
+                    {"meta", new Dictionary<string, dynamic>()}
+                };
+                updateRootObject.Responses[0].Columns = _columns;
+            }
+            _link.Connector.Write(updateRootObject);
+        }
+
+        public void Close()
+        {
+            if (_link == null)
+            {
+                throw new NotSupportedException("Link is null, cannot send updates");
+            }
+            _link.Connector.Write(new RootObject
+            {
+                Responses = new List<ResponseObject>
+                {
+                    new ResponseObject
+                    {
+                        RequestId = RequestID,
+                        Stream = "closed"
+                    }
+                }
+            });
         }
     }
 }

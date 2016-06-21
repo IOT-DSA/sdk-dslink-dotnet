@@ -5,6 +5,7 @@ using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
+using DSLink.Request;
 
 namespace DSLink.Respond
 {
@@ -106,18 +107,14 @@ namespace DSLink.Respond
                                 if (request.Permit == null || request.Permit.Equals(node.Action.Permission.ToString()))
                                 {
                                     var parameters = request.Parameters.ToDictionary(pair => pair.Key, pair => new Value(pair.Value));
-                                    var updateValues = node.Action.Function.Invoke(parameters);
-                                    var updates = updateValues.Select(value => new[] {value}).Cast<dynamic>().ToList();
                                     var columns = node.GetConfig("columns") != null
                                         ? node.GetConfig("columns").Get()
                                         : new List<Column>();
-                                    responses.Add(new ResponseObject
-                                    {
-                                        RequestId = request.RequestId,
-                                        Stream = "closed",
-                                        Columns = columns,
-                                        Updates = updates
-                                    });
+                                    var permit = (request.Permit != null) ? Permission._permMap[request.Permit.ToLower()] : null;
+                                    var invokeRequest = new InvokeRequest(request.RequestId.Value, request.Path,
+                                                                          permit, request.Parameters, link: _link,
+                                                                          columns: columns);
+                                    node.Action.Function.Invoke(parameters, invokeRequest);
                                 }
                             }
                         }

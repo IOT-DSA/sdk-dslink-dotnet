@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using DSLink;
 using DSLink.NET;
 using DSLink.Nodes;
@@ -18,79 +19,53 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            //int i = 0;
-            Thread.Sleep(3000);
-            Disconnect();
-            Thread.Sleep(3000);
-            Connect();
-            //Requester.Set("/data/Test", Permission.Write, new Value("Test123"));
-            /*Requester.Invoke("/upstream/DGLogik Dev/downstream/DQL/query", Permission.Write, new Dictionary<string, dynamic> {
-                {"query", "list /downstream/System | filter :metric | subscribe"}
-            }, (InvokeResponse response) =>
-            {
-                Console.WriteLine("yep");
-                i++;
-                if (i > 100)
-                {
-                    response.Close();
-                }
-            });*/
-            /*Requester.List("/", (ListResponse response) =>
-            {
-                foreach (KeyValuePair<string, Value> kp in response.Node.Configurations)
-                {
-                    Console.WriteLine(kp.Key);
-                    Console.WriteLine(kp.Value.Get());
-                }
-                foreach (KeyValuePair<string, Value> kp in response.Node.Attributes)
-                {
-                    Console.WriteLine(kp.Key);
-                    Console.WriteLine(kp.Value.Get());
-                }
-                foreach (KeyValuePair<string, Node> kp in response.Node.Children)
-                {
-                    Console.WriteLine(kp.Key);
-                    Console.WriteLine(kp.Value.Name);
-                    foreach (KeyValuePair<string, Value> p in kp.Value.Configurations)
-                    {
-                        Console.WriteLine(p.Key);
-                        Console.WriteLine(p.Value.Get());
-                    }
-                    foreach (KeyValuePair<string, Value> p in kp.Value.Attributes)
-                    {
-                        Console.WriteLine(p.Key);
-                        Console.WriteLine(p.Value.Get());
-                    }
-                }
-            });*/
+            var testAction = Responder.SuperRoot.CreateChild("test_action")
+                                      .SetDisplayName("Test Action")
+                                      .AddColumn(new Column("Test", "bool"))
+                                      .SetConfig("invokable", new Value("write"))
+                                      .SetAction(new Action(Permission.Write, async (Dictionary<string, Value> parameters, DSLink.Request.InvokeRequest request) =>
+                                      {
+                                          request.SendUpdates(new List<dynamic>
+                                          {
+                                              true
+                                          });
+                                          await Task.Delay(1000);
+                                          request.SendUpdates(new List<dynamic>
+                                          {
+                                              false
+                                          });
+                                          await Task.Delay(1000);
+                                          request.Close();
+                                      }));
 
             /*var myNum = Responder.SuperRoot.CreateChild("MyNum")
                 .SetDisplayName("My Number")
                 .SetType("int")
                 .SetValue(0)
-                .BuildNode();*/
+                .BuildNode();
 
-            /*var addNum = Responder.SuperRoot.CreateChild("AddNum")
+            var addNum = Responder.SuperRoot.CreateChild("AddNum")
                 .SetDisplayName("Add Number")
                 .AddParameter(new Parameter("Number", "int"))
                 .SetAction(new Action(Permission.Write, parameters =>
                 {
+                    myNum.Value.Set(myNum.Value.Get() + parameters["Number"].Get());
                     return new List<dynamic>();
                 }))
                 .BuildNode();
 
-                        Responder.SuperRoot.CreateChild("TestAction")
-                            .AddParameter(new Parameter("Test", "string"))
-                            .AddColumn(new Column("Status", "bool"))
-                            .SetAction(new Action(Permission.Write, parameters =>
-                            {
-                                Console.WriteLine("ran!");
-                                Console.WriteLine(parameters.Count);
-                                return new List<dynamic>
-                                {
-                                    true
-                                };
-                            }));
+            Responder.SuperRoot.CreateChild("TestAction")
+                .AddParameter(new Parameter("Test", "string"))
+                .AddColumn(new Column("Status", "bool"))
+                     .SetAction(new Action(Permission.Write, (parameters, request) =>
+                {
+                    Console.WriteLine("ran!");
+                    Console.WriteLine(parameters.Count);
+                    new List<dynamic>
+                    {
+                        true
+                    };
+                }));
 
             var bytes = Responder.SuperRoot.CreateChild("bytes")
                 .SetDisplayName("Bytes")

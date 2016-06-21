@@ -45,10 +45,12 @@ namespace DSLink.Connection.Serializer
         public int? RequestId;
         [JsonProperty("stream")]
         public string Stream;
-        [JsonProperty("updates")]
-        public List<dynamic> Updates;
+        [JsonProperty("meta")]
+        public Dictionary<string, dynamic> Meta;
         [JsonProperty("columns")]
         public List<Column> Columns;
+        [JsonProperty("updates")]
+        public List<dynamic> Updates;
     }
 
     public class AddSubscriptionObject

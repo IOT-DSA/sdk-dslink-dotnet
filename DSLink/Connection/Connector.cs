@@ -56,6 +56,10 @@ namespace DSLink.Connection
         /// <param name="data">Data.</param>
         public void Write(RootObject data)
         {
+            if (!data.Msg.HasValue)
+            {
+                data.Msg = _link.MessageId;
+            }
             var serialized = _serializer.Serialize(data);
             if (serialized is string)
             {

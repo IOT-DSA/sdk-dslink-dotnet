@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
+using DSLink.Request;
 
 namespace DSLink.Nodes.Actions
 {
     public class Action
     {
         public readonly Permission Permission;
-        public readonly Func<Dictionary<string, Value>, List<dynamic>> Function;
+        public readonly Action<Dictionary<string, Value>, InvokeRequest> Function;
 
-        public Action(Permission permission, Func<Dictionary<string, Value>, List<dynamic>> function)
+        public Action(Permission permission, Action<Dictionary<string, Value>, InvokeRequest> function)
         {
             Permission = permission;
             Function = function;
