@@ -50,6 +50,12 @@ namespace DSLink.Nodes
             return this;
         }
 
+        public NodeFactory SetInvokable(Permission invokable)
+        {
+            _node.SetInvokable(invokable);
+            return this;
+        }
+
         public NodeFactory SetTransient(bool transient)
         {
             _node.Transient = true;
