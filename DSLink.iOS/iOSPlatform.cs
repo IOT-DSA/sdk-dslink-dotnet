@@ -6,7 +6,8 @@ namespace DSLink.iOS
     {
         public static void Initialize()
         {
-            ConnectorManager.SetConnector(typeof(iOSWebSocketConnector));
+            Websockets.Ios.WebsocketConnection.Link();
+            ConnectorManager.SetConnector(typeof(WebSocketBaseConnector));
         }
     }
 }
