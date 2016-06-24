@@ -188,19 +188,11 @@ namespace DSLink.Request
             return baseSerialized;
         }
 
-        public void SendUpdates(List<dynamic> updates)
+        public void SendUpdates(List<dynamic> updates, bool close = false)
         {
             if (_link == null || _columns == null)
             {
                 throw new NotSupportedException("Link and columns are null, cannot send updates");
-            }
-            var fixedUpdates = new List<dynamic>();
-            foreach (dynamic update in updates)
-            {
-                fixedUpdates.Add(new List<dynamic>
-                {
-                    update
-                });
             }
             var updateRootObject = new RootObject
             {
@@ -209,8 +201,8 @@ namespace DSLink.Request
                     new ResponseObject
                     {
                         RequestId = RequestID,
-                        Stream = "open",
-                        Updates = fixedUpdates
+                        Stream = (close ? "close" : "open"),
+                        Updates = updates
                     }
                 }
             };
