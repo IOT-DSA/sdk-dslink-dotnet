@@ -350,6 +350,17 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
+        /// Remove this Node from its parent.
+        /// </summary>
+        public void RemoveFromParent()
+        {
+            if (Parent != null)
+            {
+                Parent.RemoveChild(Name);
+            }
+        }
+
+        /// <summary>
         /// Remove a Node configuration or attribute in the Node tree from here.
         /// </summary>
         /// <param name="path">Path of configuration/attribute</param>
