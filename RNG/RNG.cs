@@ -19,7 +19,7 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            var testAction = Responder.SuperRoot.CreateChild("test_action")
+            /*var testAction = Responder.SuperRoot.CreateChild("test_action")
                                       .SetDisplayName("Test Action")
                                       .AddColumn(new Column("Test", "bool"))
                                       .SetConfig("invokable", new Value("write"))
@@ -36,9 +36,9 @@ namespace RNG
                                           });
                                           await Task.Delay(1000);
                                           request.Close();
-                                      }));
+                                      }));*/
 
-            /*var myNum = Responder.SuperRoot.CreateChild("MyNum")
+            var myNum = Responder.SuperRoot.CreateChild("MyNum")
                 .SetDisplayName("My Number")
                 .SetType("int")
                 .SetValue(0)
@@ -46,14 +46,14 @@ namespace RNG
 
             var addNum = Responder.SuperRoot.CreateChild("AddNum")
                 .SetDisplayName("Add Number")
-                .AddParameter(new Parameter("Number", "int"))
-                .SetAction(new Action(Permission.Write, parameters =>
+                .AddParameter(new Parameter("Number", "number"))
+                .SetAction(new Action(Permission.Write, (parameters, request) =>
                 {
                     myNum.Value.Set(myNum.Value.Get() + parameters["Number"].Get());
-                    return new List<dynamic>();
+                    request.Close();
                 }))
                 .BuildNode();
-
+            /*
             Responder.SuperRoot.CreateChild("TestAction")
                 .AddParameter(new Parameter("Test", "string"))
                 .AddColumn(new Column("Status", "bool"))

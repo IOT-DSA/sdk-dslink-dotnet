@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 
@@ -9,6 +11,7 @@ namespace DSLink.Connection
         protected readonly AbstractContainer _link;
         protected readonly Configuration Config;
         private readonly ISerializer _serializer;
+        private Queue<dynamic> _queue;
 
         public event Action<MessageEvent> OnWrite;
         public event Action<BinaryMessageEvent> OnBinaryWrite;
@@ -28,6 +31,28 @@ namespace DSLink.Connection
             _link = link;
             Config = config;
             _serializer = serializer;
+            _queue = new Queue<dynamic>();
+        }
+
+        /// <summary>
+        /// Builds the WebSocket URL.
+        /// </summary>
+        protected string WsUrl
+        {
+            get
+            {
+                var uri = new Uri(Config.BrokerUrl);
+                var sb = new StringBuilder();
+
+                sb.Append(uri.Scheme.Equals("https") ? "wss://" : "ws://");
+                sb.Append(uri.Host).Append(":").Append(uri.Port).Append(Config.RemoteEndpoint.wsUri);
+                sb.Append("?");
+                sb.Append("dsId=").Append(Config.DsId);
+                sb.Append("&auth=").Append(Config.Authentication);
+                sb.Append("&format=").Append(Config.CommunicationFormat);
+
+                return sb.ToString();
+            }
         }
         /// <summary>
         /// Connect to the broker.
@@ -46,7 +71,7 @@ namespace DSLink.Connection
         }
 
         /// <summary>
-        /// Returns true if connected to a broker.
+        /// True if connected to a broker.
         /// </summary>
         public abstract bool Connected();
 
@@ -61,13 +86,10 @@ namespace DSLink.Connection
                 data.Msg = _link.MessageId;
             }
             var serialized = _serializer.Serialize(data);
-            if (serialized is string)
+            _queue.Enqueue(serialized);
+            if (Connected())
             {
-                WriteString(serialized);
-            }
-            else if (serialized is byte[])
-            {
-                WriteBinary(serialized);
+                Flush();
             }
         }
 
@@ -122,6 +144,28 @@ namespace DSLink.Connection
         protected void EmitBinaryMessage(BinaryMessageEvent messageEvent)
         {
             OnBinaryMessage?.Invoke(messageEvent);
+        }
+
+        /// <summary>
+        /// Flush the queue.
+        /// </summary>
+        internal void Flush()
+        {
+            lock (_queue)
+            {
+                while (_queue.Count > 0)
+                {
+                    var data = _queue.Dequeue();
+                    if (data is string)
+                    {
+                        WriteString(data);
+                    }
+                    else if (data is byte[])
+                    {
+                        WriteBinary(data);
+                    }
+                }
+            }
         }
     }
 

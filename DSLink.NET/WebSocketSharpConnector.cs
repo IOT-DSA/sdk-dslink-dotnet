@@ -7,36 +7,15 @@ using WebSocketSharp;
 
 namespace DSLink.NET
 {
-    public class NETWebSocketConnector : Connector
+    public class WebSocketSharpConnector : Connector
     {
         /// <summary>
         /// WebSocket client instance.
         /// </summary>
         private WebSocket _webSocket;
 
-        public NETWebSocketConnector(AbstractContainer link, Configuration config, ISerializer serializer) : base(link, config, serializer)
+        public WebSocketSharpConnector(AbstractContainer link, Configuration config, ISerializer serializer) : base(link, config, serializer)
         {
-        }
-
-        /// <summary>
-        /// Builds the WebSocket URL.
-        /// </summary>
-        private string WsUrl
-        {
-            get
-            {
-                var uri = new Uri(Config.BrokerUrl);
-                var sb = new StringBuilder();
-
-                sb.Append(uri.Scheme.Equals("https") ? "wss://" : "ws://");
-                sb.Append(uri.Host).Append(":").Append(uri.Port).Append(Config.RemoteEndpoint.wsUri);
-                sb.Append("?");
-                sb.Append("dsId=").Append(Config.DsId);
-                sb.Append("&auth=").Append(Config.Authentication);
-                sb.Append("&format=").Append(Config.CommunicationFormat);
-
-                return sb.ToString();
-            }
         }
 
         /// <summary>
@@ -105,7 +84,7 @@ namespace DSLink.NET
         }
 
         /// <summary>
-        /// Writes a string over the WebSocket connection.
+        /// Writes a string to the WebSocket connection.
         /// </summary>
         /// <param name="data">String data</param>
         public override void WriteString(string data)
@@ -115,9 +94,8 @@ namespace DSLink.NET
         }
 
         /// <summary>
-        /// Writes binary over the WebSocket connection.
+        /// Writes binary to the WebSocket connection.
         /// </summary>
-        /// <remarks>Not implemented</remarks>
         /// <param name="data">Binary data</param>
         public override void WriteBinary(byte[] data)
         {

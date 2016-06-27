@@ -40,7 +40,15 @@ namespace DSLink
         {
             CreateLogger("DSLink");
 
-            Connect();
+            Reconnect = true;
+            DoHandshake();
+            Connector = ConnectorManager.Create(this, Config, SerializationManager.Serializer);
+            Connector.OnMessage += OnTextMessage;
+            Connector.OnBinaryMessage += OnBinaryMessage;
+            Connector.OnWrite += OnWrite;
+            Connector.OnBinaryWrite += OnBinaryWrite;
+            Connector.OnClose += OnClose;
+            DoConnect();
 
             _pingTask = Task.Factory.StartNew(OnPingElapsed);
         }
@@ -60,12 +68,6 @@ namespace DSLink
         /// </summary>
         public void DoConnect()
         {
-            Connector = ConnectorManager.Create(this, Config, SerializationManager.Serializer);
-            Connector.OnMessage += OnTextMessage;
-            Connector.OnBinaryMessage += OnBinaryMessage;
-            Connector.OnWrite += OnWrite;
-            Connector.OnBinaryWrite += OnBinaryWrite;
-            Connector.OnClose += OnClose;
             Connector.Connect();
         }
 
@@ -86,6 +88,14 @@ namespace DSLink
         {
             Reconnect = false;
             Connector.Disconnect();
+        }
+
+        /// <summary>
+        /// Event that fires when the connection to the broker is complete.
+        /// </summary>
+        private void OnOpen()
+        {
+            Connector.Flush();
         }
 
         /// <summary>

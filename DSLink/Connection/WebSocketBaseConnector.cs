@@ -1,6 +1,4 @@
 using System;
-using System.Text;
-using DSLink.Connection;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using Websockets;
@@ -16,27 +14,6 @@ namespace DSLink.Connection
 
         public WebSocketBaseConnector(AbstractContainer link, Configuration config, ISerializer serializer) : base(link, config, serializer)
         {
-        }
-
-        /// <summary>
-        /// Builds the WebSocket URL.
-        /// </summary>
-        private string WsUrl
-        {
-            get
-            {
-                var uri = new Uri(Config.BrokerUrl);
-                var sb = new StringBuilder();
-
-                sb.Append(uri.Scheme.Equals("https") ? "wss://" : "ws://");
-                sb.Append(uri.Host).Append(":").Append(uri.Port).Append(Config.RemoteEndpoint.wsUri);
-                sb.Append("?");
-                sb.Append("dsId=").Append(Config.DsId);
-                sb.Append("&auth=").Append(Config.Authentication);
-                sb.Append("&format=").Append(Config.CommunicationFormat);
-
-                return sb.ToString();
-            }
         }
 
         /// <summary>
@@ -59,6 +36,7 @@ namespace DSLink.Connection
                 EmitMessage(new MessageEvent(text));
             };
 
+            _link.Logger.Info("WebSocket connecting to " + WsUrl);
             _webSocket.Open(WsUrl);
         }
 
@@ -70,6 +48,7 @@ namespace DSLink.Connection
             base.Disconnect();
 
             _webSocket.Close();
+            _webSocket.Dispose();
         }
 
         /// <summary>

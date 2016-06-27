@@ -30,7 +30,7 @@ namespace DSLink.Connection
             var delay = 1;
             while (keepTrying)
             {
-                _link.Logger.Info("Handshaking with " + _link.Config.BrokerUrl);
+                _link.Logger.Info("Handshaking with " + _link.Config.BrokerUrl + "?dsId=" + _link.Config.DsId);
                 HttpResponseMessage resp = null;
                 try
                 {

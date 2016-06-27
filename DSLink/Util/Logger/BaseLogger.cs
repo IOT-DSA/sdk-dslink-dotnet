@@ -37,7 +37,7 @@ namespace DSLink.Util.Logger
 
         public virtual string Format(LogLevel logLevel, string message)
         {
-            return string.Format("[{0}][{1}] {2}", Name, logLevel, message);
+            return string.Format("[{0}][{1}][{2}] {3}", DateTime.Now.ToString("MM-dd HH:mm:ss.fff"), Name, logLevel, message);
         }
 
         public abstract void Print(LogLevel logLevel, string message);
