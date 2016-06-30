@@ -53,7 +53,14 @@ namespace DSLink.iOS
 
             _webSocket.ReceivedMessage += (object sender, WebSocketReceivedMessageEventArgs e) =>
             {
-                EmitMessage(new MessageEvent(e.Message.ToString()));
+                if (e.Message is NSData)
+                {
+                    EmitBinaryMessage(new BinaryMessageEvent(((NSData)e.Message).ToArray()));
+                }
+                else
+                {
+                    EmitMessage(new MessageEvent(e.Message.ToString()));
+                }
             };
         }
 
@@ -93,7 +100,7 @@ namespace DSLink.iOS
         /// <param name="data">Binary data</param>
         public override void WriteBinary(byte[] data)
         {
-            throw new NotImplementedException();
+            _webSocket.Send(NSData.FromArray(data));
         }
     }
 }
