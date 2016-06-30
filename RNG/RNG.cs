@@ -53,6 +53,25 @@ namespace RNG
                     request.Close();
                 }))
                 .BuildNode();
+
+            var randomBytes = Responder.SuperRoot.CreateChild("Bytes")
+                                       .SetDisplayName("bytes")
+                                       .SetType("bytes")
+                                       .SetValue(new byte[] { 0x00 })
+                                       .BuildNode();
+
+            var random = new Random();
+            byte[] buffer;
+            int i = 0;
+            while (true)
+            {
+                i += 100;
+                buffer = new byte[i];
+                random.NextBytes(buffer);
+                randomBytes.Value.Set(buffer);
+                Thread.Sleep(100);
+            }
+
             /*
             Responder.SuperRoot.CreateChild("TestAction")
                 .AddParameter(new Parameter("Test", "string"))
@@ -95,7 +114,7 @@ namespace RNG
         private static void Main(string[] args)
         {
             NETPlatform.Initialize();
-            new ExampleDSLink(new Configuration(new string[] { "--log debug" }, "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Debug));
+            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true));
 
             while (true)
             {

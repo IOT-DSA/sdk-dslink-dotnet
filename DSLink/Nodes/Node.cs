@@ -388,13 +388,13 @@ namespace DSLink.Nodes
         {
             var rootObject = new RootObject
             {
-                Msg = _link.MessageId,
-                Responses = new List<ResponseObject>
+                msg = _link.MessageId,
+                responses = new List<ResponseObject>
                 {
                     new ResponseObject
                     {
-                        RequestId = 0,
-                        Updates = new List<dynamic>()
+                        rid = 0,
+                        updates = new List<dynamic>()
                     }
                 }
             };
@@ -402,7 +402,7 @@ namespace DSLink.Nodes
             foreach (var sid in Subscribers)
             {
                 hasUpdates = true;
-                rootObject.Responses[0].Updates.Add(new[] { sid, value.Get(), value.LastUpdated });
+                rootObject.responses[0].updates.Add(new[] { sid, value.Get(), value.LastUpdated });
             }
             if (hasUpdates)
             {
@@ -504,16 +504,16 @@ namespace DSLink.Nodes
             }
             var responses = Streams.Select(stream => new ResponseObject
             {
-                RequestId = stream,
-                Stream = "open",
-                Updates = Serialize()
+                rid = stream,
+                stream = "open",
+                updates = Serialize()
             }).ToList();
             if (responses.Count > 0)
             {
                 _link.Connector.Write(new RootObject()
                 {
-                    Msg = _link.MessageId,
-                    Responses = responses
+                    msg = _link.MessageId,
+                    responses = responses
                 });
             }
         }

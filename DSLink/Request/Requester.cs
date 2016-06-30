@@ -5,6 +5,7 @@ using System.Linq;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
+using DSLink.Nodes.Actions;
 using DSLink.Request;
 using DSLink.Respond;
 
@@ -29,15 +30,15 @@ namespace DSLink.Request
 
             foreach (var response in responses)
             {
-                if (response.RequestId != null && _requestManager.RequestPending(response.RequestId.Value))
+                if (response.rid != null && _requestManager.RequestPending(response.rid.Value))
                 {
-                    var request = _requestManager.GetRequest(response.RequestId.Value);
+                    var request = _requestManager.GetRequest(response.rid.Value);
                     if (request is ListRequest)
                     {
                         var listRequest = request as ListRequest;
                         string name = listRequest.Path.Split('/').Last();
                         var node = new RemoteNode(name, null);
-                        node.FromSerialized(response.Updates);
+                        node.FromSerialized(response.updates);
                         listRequest.Callback(new ListResponse(listRequest.RequestID, listRequest.Path, node));
                         _requestManager.StopRequest(listRequest.RequestID);
                     }
@@ -52,10 +53,10 @@ namespace DSLink.Request
                     else if (request is InvokeRequest)
                     {
                         var invokeRequest = request as InvokeRequest;
-                        invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID, invokeRequest.Path, response.Columns, response.Updates));
+                        invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID, invokeRequest.Path, response.columns, response.updates));
                     }
                 }
-                else if (response.RequestId == null)
+                else if (response.rid == null)
                 {
                     _link.Logger.Warning("Incoming request has null request ID.");
                 }
@@ -70,7 +71,7 @@ namespace DSLink.Request
             _requestManager.StartRequest(request);
             _link.Connector.Write(new RootObject
             {
-                Requests = new List<RequestObject>
+                requests = new List<RequestObject>
                 {
                     request.Serialize()
                 }
@@ -84,7 +85,7 @@ namespace DSLink.Request
             _requestManager.StartRequest(request);
             _link.Connector.Write(new RootObject
             {
-                Requests = new List<RequestObject>
+                requests = new List<RequestObject>
                 {
                     request.Serialize()
                 }
@@ -98,7 +99,7 @@ namespace DSLink.Request
             _requestManager.StartRequest(request);
             _link.Connector.Write(new RootObject
             {
-                Requests = new List<RequestObject>
+                requests = new List<RequestObject>
                 {
                     request.Serialize()
                 }
@@ -112,7 +113,7 @@ namespace DSLink.Request
             _requestManager.StartRequest(request);
             _link.Connector.Write(new RootObject
             {
-                Requests = new List<RequestObject>
+                requests = new List<RequestObject>
                 {
                     request.Serialize()
                 }

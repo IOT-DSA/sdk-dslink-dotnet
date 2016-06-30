@@ -1,21 +1,37 @@
-using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Diagnostics;
+using DSLink.Connection.Serializer;
 
 namespace DSLink.Nodes.Actions
 {
-    public class Parameter
+    public class Parameter : Serializable
     {
-        [JsonProperty("name")]
-        public readonly string Name;
-        [JsonProperty("type")]
-        public readonly string Type;
-        [JsonProperty("default")]
-        public readonly dynamic Default;
+        public string name;
+        public string type;
+        public dynamic @default;
 
         public Parameter(string name, string type, dynamic def = null)
         {
-            Name = name;
-            Type = type;
-            Default = def;
+            this.name = name;
+            this.type = type;
+            @default = def;
+        }
+
+        public override Dictionary<dynamic, dynamic> Serialize()
+        {
+            Debug.WriteLine("Serializing here");
+            var dict = new Dictionary<dynamic, dynamic>();
+            dict["name"] = name;
+            dict["type"] = type;
+            dict["default"] = @default;
+            return dict;
+        }
+
+        public override void Deserialize(Dictionary<dynamic, dynamic> data)
+        {
+            if (data.ContainsKey("name")) name = data["name"];
+            if (data.ContainsKey("type")) type = data["type"];
+            if (data.ContainsKey("default")) @default = data["default"];
         }
     }
 }

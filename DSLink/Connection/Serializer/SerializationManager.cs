@@ -7,7 +7,7 @@ namespace DSLink.Connection.Serializer
     {
         public static readonly Dictionary<string, Type> Serializers = new Dictionary<string, Type>()
         {
-            //{"msgpack", typeof(MsgPackSerializer)},
+            {"msgpack", typeof(MsgPackSerializer)},
             {"json", typeof(JsonSerializer)}
         };
 

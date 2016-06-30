@@ -141,23 +141,23 @@ namespace DSLink
         {
             var response = new RootObject
             {
-                Ack = message.Msg,
-                Msg = MessageId
+                ack = message.msg,
+                msg = MessageId
             };
-            if (message.Requests != null)
+            if (message.requests != null)
             {
-                response.Responses = Responder.ProcessRequests(message.Requests);
+                response.responses = Responder.ProcessRequests(message.requests);
             }
-            if (message.Responses != null)
+            if (message.responses != null)
             {
-                response.Requests = Requester.ProcessRequests(message.Responses);
+                response.requests = Requester.ProcessRequests(message.responses);
             }
             bool write = false;
-            if (response.Requests != null && response.Requests.Count > 0)
+            if (response.requests != null && response.requests.Count > 0)
             {
                 write = true;
             }
-            else if (response.Responses != null && response.Responses.Count > 0)
+            else if (response.responses != null && response.responses.Count > 0)
             {
                 write = true;
             }
