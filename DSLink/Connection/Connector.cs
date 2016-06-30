@@ -10,7 +10,11 @@ namespace DSLink.Connection
     {
         protected readonly AbstractContainer _link;
         protected readonly Configuration Config;
-        private readonly ISerializer _serializer;
+        public ISerializer Serializer
+        {
+            get;
+            internal set;
+        }
         private Queue<dynamic> _queue;
 
         public event Action<MessageEvent> OnWrite;
@@ -25,12 +29,10 @@ namespace DSLink.Connection
         /// </summary>
         /// <param name="link">Link.</param>
         /// <param name="config">Config.</param>
-        /// <param name="serializer">Serializer.</param>
-        protected Connector(AbstractContainer link, Configuration config, ISerializer serializer)
+        protected Connector(AbstractContainer link, Configuration config)
         {
             _link = link;
             Config = config;
-            _serializer = serializer;
             _queue = new Queue<dynamic>();
         }
 
@@ -76,6 +78,11 @@ namespace DSLink.Connection
         public abstract bool Connected();
 
         /// <summary>
+        /// True if the WebSocket implementation supports compression.
+        /// </summary>
+        public virtual bool SupportsCompression() => false;
+
+        /// <summary>
         /// Write the specified data.
         /// </summary>
         /// <param name="data">Data.</param>
@@ -85,11 +92,15 @@ namespace DSLink.Connection
             {
                 data.msg = _link.MessageId;
             }
-            var serialized = _serializer.Serialize(data);
-            _queue.Enqueue(serialized);
+            var serialized = Serializer.Serialize(data);
+
             if (Connected())
             {
-                Flush();
+                WriteData(serialized);
+            }
+            else
+            {
+                _queue.Enqueue(serialized);
             }
         }
 
@@ -117,6 +128,7 @@ namespace DSLink.Connection
         protected virtual void EmitOpen()
         {
             OnOpen?.Invoke();
+            Flush();
         }
 
         /// <summary>
@@ -155,16 +167,20 @@ namespace DSLink.Connection
             {
                 while (_queue.Count > 0)
                 {
-                    var data = _queue.Dequeue();
-                    if (data is string)
-                    {
-                        WriteString(data);
-                    }
-                    else if (data is byte[])
-                    {
-                        WriteBinary(data);
-                    }
+                    WriteData(_queue.Dequeue());
                 }
+            }
+        }
+
+        private void WriteData(dynamic data)
+        {
+            if (data is string)
+            {
+                WriteString(data);
+            }
+            else if (data is byte[])
+            {
+                WriteBinary(data);
             }
         }
     }

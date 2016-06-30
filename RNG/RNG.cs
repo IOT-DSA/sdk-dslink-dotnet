@@ -62,15 +62,10 @@ namespace RNG
 
             var random = new Random();
             byte[] buffer;
-            int i = 0;
-            while (true)
-            {
-                i += 100;
-                buffer = new byte[i];
-                random.NextBytes(buffer);
-                randomBytes.Value.Set(buffer);
-                Thread.Sleep(100);
-            }
+            buffer = new byte[4000000];
+            Console.WriteLine("writing");
+            randomBytes.Value.Set(buffer);
+
 
             /*
             Responder.SuperRoot.CreateChild("TestAction")
@@ -114,7 +109,7 @@ namespace RNG
         private static void Main(string[] args)
         {
             NETPlatform.Initialize();
-            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true));
+            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Info, brokerUrl: "http://10.0.1.177:8080/conn"));
 
             while (true)
             {

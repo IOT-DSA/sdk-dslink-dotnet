@@ -12,7 +12,7 @@ namespace DSLink.Connection
         /// </summary>
         private IWebSocketConnection _webSocket;
 
-        public WebSocketBaseConnector(AbstractContainer link, Configuration config, ISerializer serializer) : base(link, config, serializer)
+        public WebSocketBaseConnector(AbstractContainer link, Configuration config) : base(link, config)
         {
         }
 

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using DSLink.Nodes.Actions;
 
@@ -49,7 +48,6 @@ namespace DSLink.Connection.Serializer
                 foreach (dynamic dict in data["requests"])
                 {
                     var req = new RequestObject();
-                    Debug.WriteLine(dict);
                     req.Deserialize(dict);
                     requests.Add(req);
                 }
@@ -166,7 +164,7 @@ namespace DSLink.Connection.Serializer
                 dict["columns"] = new List<dynamic>();
                 foreach (Column column in columns)
                 {
-                    dict["column"].Add(column.Serialize());
+                    dict["columns"].Add(column.Serialize());
                 }
             }
             if (updates != null && updates.Count > 0) dict["updates"] = updates;

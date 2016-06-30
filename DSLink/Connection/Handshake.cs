@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
 using DSLink.Util;
+using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -76,7 +77,8 @@ namespace DSLink.Connection
                 {"isResponder", _link.Config.Responder},
                 {"linkData", new JObject()},
                 {"version", DSA_VERSION},
-                {"formats", new JArray(SerializationManager.Serializers.Keys.ToArray())}
+                {"formats", new JArray(SerializationManager.Serializers.Keys.ToArray())},
+                {"enableWebSocketCompression", _link.Connector.SupportsCompression()}
             };
         }
     }

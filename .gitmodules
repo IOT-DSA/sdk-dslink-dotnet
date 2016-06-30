@@ -1,0 +1,4 @@
+[submodule "WebSocketSharp"]
+	path = WebSocketSharp
+	url = https://github.com/logangorence/websocket-sharp.git
+	branch = master

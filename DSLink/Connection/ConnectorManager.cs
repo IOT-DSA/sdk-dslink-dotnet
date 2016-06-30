@@ -6,18 +6,22 @@ namespace DSLink.Connection
 {
     public static class ConnectorManager
     {
-        private static Type _connectorType;
-
-        public static Connector Create(AbstractContainer link, Configuration config, ISerializer serializer)
+        public static Type ConnectorType
         {
-            return (Connector) Activator.CreateInstance(_connectorType, link, config, serializer);
+            private set;
+            get;
+        }
+
+        public static Connector Create(AbstractContainer link, Configuration config)
+        {
+            return (Connector) Activator.CreateInstance(ConnectorType, link, config);
         }
 
         public static void SetConnector(Type type)
         {
-            if (_connectorType == null)
+            if (ConnectorType == null)
             {
-                _connectorType = type;
+                ConnectorType = type;
             }
         }
     }

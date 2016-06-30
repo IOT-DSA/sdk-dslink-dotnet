@@ -23,4 +23,3 @@ namespace DSLink.Connection.Serializer
         }
     }
 }
-

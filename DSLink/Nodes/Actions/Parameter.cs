@@ -19,7 +19,6 @@ namespace DSLink.Nodes.Actions
 
         public override Dictionary<dynamic, dynamic> Serialize()
         {
-            Debug.WriteLine("Serializing here");
             var dict = new Dictionary<dynamic, dynamic>();
             dict["name"] = name;
             dict["type"] = type;

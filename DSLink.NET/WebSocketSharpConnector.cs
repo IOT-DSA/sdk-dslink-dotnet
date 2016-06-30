@@ -14,7 +14,7 @@ namespace DSLink.NET
         /// </summary>
         private WebSocket _webSocket;
 
-        public WebSocketSharpConnector(AbstractContainer link, Configuration config, ISerializer serializer) : base(link, config, serializer)
+        public WebSocketSharpConnector(AbstractContainer link, Configuration config) : base(link, config)
         {
         }
 
@@ -26,6 +26,7 @@ namespace DSLink.NET
             base.Connect();
 
             _webSocket = new WebSocket(WsUrl);
+            _webSocket.Compression = CompressionMethod.Deflate;
 
             _webSocket.OnOpen += (object sender, EventArgs e) =>
             {
@@ -82,6 +83,8 @@ namespace DSLink.NET
         {
             return _webSocket.IsAlive;
         }
+
+        public override bool SupportsCompression() => true;
 
         /// <summary>
         /// Writes a string to the WebSocket connection.

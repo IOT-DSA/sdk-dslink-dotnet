@@ -41,8 +41,9 @@ namespace DSLink
             CreateLogger("DSLink");
 
             Reconnect = true;
+            Connector = ConnectorManager.Create(this, Config);
             DoHandshake();
-            Connector = ConnectorManager.Create(this, Config, SerializationManager.Serializer);
+            Connector.Serializer = SerializationManager.Serializer;
             Connector.OnMessage += OnTextMessage;
             Connector.OnBinaryMessage += OnBinaryMessage;
             Connector.OnWrite += OnWrite;

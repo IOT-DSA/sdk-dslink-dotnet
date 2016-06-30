@@ -14,7 +14,7 @@ namespace DSLink.iOS
         /// </summary>
         private WebSocket _webSocket;
 
-        public iOSWebSocketConnector(AbstractContainer link, Configuration config, ISerializer serializer) : base(link, config, serializer)
+        public iOSWebSocketConnector(AbstractContainer link, Configuration config) : base(link, config)
         {
         }
 
@@ -100,6 +100,7 @@ namespace DSLink.iOS
         /// <param name="data">Binary data</param>
         public override void WriteBinary(byte[] data)
         {
+            _link.Logger.Debug("Sent binary " + BitConverter.ToString(data));
             _webSocket.Send(NSData.FromArray(data));
         }
     }

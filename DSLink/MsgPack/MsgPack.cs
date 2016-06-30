@@ -98,6 +98,10 @@ namespace DSLink.MsgPack
             {
                 PackDictionary(((Parameter)obj).Serialize());
             }
+            else if (obj is Column)
+            {
+                PackDictionary(((Column)obj).Serialize());
+            }
             else
             {
                 throw new Exception(string.Format("Could not pack type {0}.", obj));
@@ -228,12 +232,16 @@ namespace DSLink.MsgPack
             else if (values.Count < 0x100)
             {
                 Write(0xdc);
-                WriteBytes(BitConverter.GetBytes(values.Count));
+                byte[] bytes = BitConverter.GetBytes(values.Count);
+                Array.Reverse(bytes);
+                WriteBytes(bytes);
             }
             else
             {
                 Write(0xdd);
-                WriteBytes(BitConverter.GetBytes(values.Count));
+                byte[] bytes = BitConverter.GetBytes(values.Count);
+                Array.Reverse(bytes);
+                WriteBytes(bytes);
             }
 
             foreach (TValue value in values)
@@ -483,7 +491,7 @@ namespace DSLink.MsgPack
             var dict = new Dictionary<TKey, TValue>();
             for (int i = 0; i < length; ++i)
             {
-                dict[Unpack()] = Unpack();
+                dict.Add(Unpack(), Unpack());
             }
             return dict;
         }
