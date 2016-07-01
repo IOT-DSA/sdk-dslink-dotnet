@@ -17,6 +17,7 @@ namespace RNG
     {
         private Timer timer;
         private int counter;
+        private Random random = new Random();
 
         public ExampleDSLink(Configuration config) : base(config)
         {
@@ -42,7 +43,6 @@ namespace RNG
                                        .SetValue(new byte[] { 0x00 })
                                        .BuildNode();
 
-            var random = new Random();
             //byte[] buffer;
             //buffer = new byte[4000000];
             //Console.WriteLine("writing");

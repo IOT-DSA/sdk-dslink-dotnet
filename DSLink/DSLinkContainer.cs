@@ -44,11 +44,19 @@ namespace DSLink
             Connector = ConnectorManager.Create(this, Config);
             DoHandshake();
             Connector.Serializer = SerializationManager.Serializer;
+
+            // Events
             Connector.OnMessage += OnTextMessage;
             Connector.OnBinaryMessage += OnBinaryMessage;
             Connector.OnWrite += OnWrite;
             Connector.OnBinaryWrite += OnBinaryWrite;
+            Connector.OnOpen += OnOpen;
             Connector.OnClose += OnClose;
+
+            // Overridable events for DSLink writers
+            Connector.OnOpen += OnConnectionOpen;
+            Connector.OnClose += OnConnectionClosed;
+
             DoConnect();
 
             _pingTask = Task.Factory.StartNew(OnPingElapsed);
@@ -57,7 +65,7 @@ namespace DSLink
         /// <summary>
         /// Performs handshake with broker.
         /// </summary>
-        public void DoHandshake()
+        private void DoHandshake()
         {
             Handshake = new Handshake(this);
             Handshake.Shake();
@@ -67,7 +75,7 @@ namespace DSLink
         /// <summary>
         /// Connects to the Connector.
         /// </summary>
-        public void DoConnect()
+        private void DoConnect()
         {
             Connector.Connect();
         }
@@ -111,6 +119,18 @@ namespace DSLink
                 Connect();
             }
         }
+
+        /// <summary>
+        /// Called when the connection is opened to the broker.
+        /// Override when you need to do something after connection opens.
+        /// </summary>
+        protected void OnConnectionOpen() {}
+
+        /// <summary>
+        /// Called when the connection is closed to the broker.
+        /// Override when you need to do something after connection closes.
+        /// </summary>
+        protected void OnConnectionClosed() {}
 
         /// <summary>
         /// Event that fires when a plain text message is received from the broker.
