@@ -213,12 +213,17 @@ namespace DSLink.MsgPack
             else if (bytes.Length < 0x10000)
             {
                 Write(0xda);
-                WriteBytes(BitConverter.GetBytes(bytes.Length));
+                byte[] bites = BitConverter.GetBytes(bytes.Length);
+                Array.Reverse(bites);
+                WriteBytes(bites);
             }
             else
             {
                 Write(0xdb);
-                WriteBytes(BitConverter.GetBytes(bytes.Length));
+                byte[] bites = BitConverter.GetBytes(bytes.Length);
+                Array.Reverse(bites);
+                WriteBytes(bites);
+
             }
             WriteBytes(bytes);
         }
@@ -259,12 +264,17 @@ namespace DSLink.MsgPack
             else if (values.Count < 0x100)
             {
                 Write(0xde);
-                Write(BitConverter.GetBytes(values.Count));
+                byte[] bytes = BitConverter.GetBytes(values.Count);
+                Array.Reverse(bytes);
+                WriteBytes(bytes);
             }
             else
             {
                 Write(0xdf);
-                Write(BitConverter.GetBytes(values.Count));
+                byte[] bytes = BitConverter.GetBytes(values.Count);
+                Array.Reverse(bytes);
+                WriteBytes(bytes);
+
             }
 
             foreach (KeyValuePair<TKey, TValue> value in values)

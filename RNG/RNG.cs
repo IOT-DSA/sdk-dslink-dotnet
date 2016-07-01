@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using DSLink;
 using DSLink.NET;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
+using DSLink.Request;
 using DSLink.Respond;
 using DSLink.Util.Logger;
 using Action = DSLink.Nodes.Actions.Action;
@@ -19,24 +19,21 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            /*var testAction = Responder.SuperRoot.CreateChild("test_action")
+            var testAction = Responder.SuperRoot.CreateChild("test_action")
                                       .SetDisplayName("Test Action")
                                       .AddColumn(new Column("Test", "bool"))
                                       .SetConfig("invokable", new Value("write"))
-                                      .SetAction(new Action(Permission.Write, async (Dictionary<string, Value> parameters, DSLink.Request.InvokeRequest request) =>
+                                      .SetAction(new Action(Permission.Write, (Dictionary<string, Value> parameters, InvokeRequest request) =>
                                       {
                                           request.SendUpdates(new List<dynamic>
                                           {
-                                              true
+                                              new List<dynamic>
+                                              {
+                                                  true
+                                              }
                                           });
-                                          await Task.Delay(1000);
-                                          request.SendUpdates(new List<dynamic>
-                                          {
-                                              false
-                                          });
-                                          await Task.Delay(1000);
                                           request.Close();
-                                      }));*/
+                                      }));
 
             var myNum = Responder.SuperRoot.CreateChild("MyNum")
                 .SetDisplayName("My Number")
@@ -60,15 +57,14 @@ namespace RNG
                                        .SetValue(new byte[] { 0x00 })
                                        .BuildNode();
 
-            var random = new Random();
-            byte[] buffer;
-            buffer = new byte[4000000];
-            Console.WriteLine("writing");
-            randomBytes.Value.Set(buffer);
+            //var random = new Random();
+            //byte[] buffer;
+            //buffer = new byte[4000000];
+            //Console.WriteLine("writing");
+            //randomBytes.Value.Set(buffer);
 
 
-            /*
-            Responder.SuperRoot.CreateChild("TestAction")
+            /*Responder.SuperRoot.CreateChild("TestAction")
                 .AddParameter(new Parameter("Test", "string"))
                 .AddColumn(new Column("Status", "bool"))
                      .SetAction(new Action(Permission.Write, (parameters, request) =>
@@ -93,7 +89,6 @@ namespace RNG
             testValue.Value.Set(5);
 
             testValue.Value.Set(1);
-            Random random = new Random();
             timer = new Timer(obj =>
             {
                 if (testValue.Subscribed)
@@ -109,7 +104,7 @@ namespace RNG
         private static void Main(string[] args)
         {
             NETPlatform.Initialize();
-            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Info, brokerUrl: "http://10.0.1.177:8080/conn"));
+            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Debug));
 
             while (true)
             {

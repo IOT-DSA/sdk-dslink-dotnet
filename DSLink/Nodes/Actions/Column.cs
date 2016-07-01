@@ -10,6 +10,11 @@ namespace DSLink.Nodes.Actions
         private string _name;
         private string _type;
 
+        [JsonProperty("name")]
+        public string Name => _name;
+        [JsonProperty("type")]
+        public string Type => _type;
+
         public Column(string name, string type)
         {
             this._name = name;
