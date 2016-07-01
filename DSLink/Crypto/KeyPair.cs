@@ -29,9 +29,9 @@ namespace DSLink.Crypto
 
         private static AsymmetricCipherKeyPair Generate()
         {
-            ECKeyPairGenerator generator = new ECKeyPairGenerator();
-            SecureRandom secureRandom = new SecureRandom();
-            KeyGenerationParameters keyGenParams = new KeyGenerationParameters(secureRandom, KEY_SIZE);
+            var generator = new ECKeyPairGenerator();
+            var secureRandom = new SecureRandom();
+            var keyGenParams = new KeyGenerationParameters(secureRandom, KEY_SIZE);
             generator.Init(keyGenParams);
             return generator.GenerateKeyPair();
         }
@@ -92,11 +92,11 @@ namespace DSLink.Crypto
         {
             byte[] decoded = UrlBase64.Decode(tempKey);
             var privateKey = ((ECPrivateKeyParameters) BcKeyPair.Private);
-            ECDomainParameters param = privateKey.Parameters;
-            ECPoint point = param.Curve.DecodePoint(decoded);
-            ECPublicKeyParameters spec = new ECPublicKeyParameters(point, param);
+            var param = privateKey.Parameters;
+            var point = param.Curve.DecodePoint(decoded);
+            var spec = new ECPublicKeyParameters(point, param);
             point = spec.Q.Multiply(privateKey.D);
-            BigInteger bi = point.Normalize().XCoord.ToBigInteger();
+            var bi = point.Normalize().XCoord.ToBigInteger();
             return Normalize(bi.ToByteArray());
         }
 
