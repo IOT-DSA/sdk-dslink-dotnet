@@ -100,7 +100,10 @@ namespace DSLink.Connection
             }
             else
             {
-                _queue.Enqueue(serialized);
+                lock (_queue)
+                {
+                    _queue.Enqueue(serialized);
+                }
             }
         }
 
