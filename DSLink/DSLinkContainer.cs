@@ -124,13 +124,13 @@ namespace DSLink
         /// Called when the connection is opened to the broker.
         /// Override when you need to do something after connection opens.
         /// </summary>
-        protected void OnConnectionOpen() {}
+        protected virtual void OnConnectionOpen() {}
 
         /// <summary>
         /// Called when the connection is closed to the broker.
         /// Override when you need to do something after connection closes.
         /// </summary>
-        protected void OnConnectionClosed() {}
+        protected virtual void OnConnectionClosed() {}
 
         /// <summary>
         /// Event that fires when a plain text message is received from the broker.
