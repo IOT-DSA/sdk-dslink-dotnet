@@ -24,7 +24,6 @@ namespace DSLink.NET
             base.Connect();
 
             _webSocket = new WebSocket(WsUrl);
-            //_webSocket.Compression = CompressionMethod.Deflate;
 
             _webSocket.OnOpen += (object sender, EventArgs e) =>
             {

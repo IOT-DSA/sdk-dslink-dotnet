@@ -10,18 +10,25 @@ namespace DSLink.MsgPack
 {
     public class MsgPackEncoder
     {
-        private MemoryStream _stream;
-        private BinaryWriter _writer;
-
-        public MsgPackEncoder()
+        public MemoryStream stream
         {
-            _stream = new MemoryStream();
-            _writer = new BinaryWriter(_stream);
+            private set;
+            get;
+        }
+
+        private BinaryWriter _writer;
+        private bool _debug;
+
+        public MsgPackEncoder(bool debug = false)
+        {
+            stream = new MemoryStream();
+            _writer = new BinaryWriter(stream);
+            _debug = debug;
         }
 
         public byte[] ToArray()
         {
-            return _stream.ToArray();
+            return stream.ToArray();
         }
 
         public void Pack(dynamic obj)
@@ -108,13 +115,22 @@ namespace DSLink.MsgPack
             }
         }
 
-        private void Write(dynamic data)
+        private void DebugPrint(string debug)
         {
-            _writer.Write((byte)data);
+            if (_debug)
+            {
+                Debug.WriteLine(debug);
+            }
+        }
+
+        private void Write(byte data)
+        {
+            _writer.Write(data);
         }
 
         private void WriteBytes(byte[] bytes)
         {
+            DebugPrint(string.Format("Wrote {0} bytes", bytes.Length));
             foreach (byte bite in bytes)
             {
                 Write(bite);
@@ -203,12 +219,12 @@ namespace DSLink.MsgPack
 
             if (bytes.Length < 0x20)
             {
-                Write(0xa0 + bytes.Length);
+                Write((byte)(0xa0 + bytes.Length));
             }
             else if (bytes.Length < 0x100)
             {
                 Write(0xd9);
-                Write(bytes.Length);
+                Write((byte)bytes.Length);
             }
             else if (bytes.Length < 0x10000)
             {
@@ -232,19 +248,19 @@ namespace DSLink.MsgPack
         {
             if (values.Count < 16)
             {
-                Write(0x90 + values.Count);
+                Write((byte)(0x90 + values.Count));
             }
             else if (values.Count < 0x100)
             {
                 Write(0xdc);
-                byte[] bytes = BitConverter.GetBytes(values.Count);
+                byte[] bytes = BitConverter.GetBytes((ushort)values.Count);
                 Array.Reverse(bytes);
                 WriteBytes(bytes);
             }
             else
             {
                 Write(0xdd);
-                byte[] bytes = BitConverter.GetBytes(values.Count);
+                byte[] bytes = BitConverter.GetBytes((uint)values.Count);
                 Array.Reverse(bytes);
                 WriteBytes(bytes);
             }
@@ -259,19 +275,19 @@ namespace DSLink.MsgPack
         {
             if (values.Count < 16)
             {
-                Write(0x80 + values.Count);
+                Write((byte)(0x80 + values.Count));
             }
             else if (values.Count < 0x100)
             {
                 Write(0xde);
-                byte[] bytes = BitConverter.GetBytes(values.Count);
+                byte[] bytes = BitConverter.GetBytes((ushort)values.Count);
                 Array.Reverse(bytes);
                 WriteBytes(bytes);
             }
             else
             {
                 Write(0xdf);
-                byte[] bytes = BitConverter.GetBytes(values.Count);
+                byte[] bytes = BitConverter.GetBytes((uint)values.Count);
                 Array.Reverse(bytes);
                 WriteBytes(bytes);
 
@@ -289,21 +305,19 @@ namespace DSLink.MsgPack
             if (data.Length <= 255)
             {
                 Write(0xc4);
-                Write(data.Length);
+                Write((byte)data.Length);
             }
             else if (data.Length <= 65535)
             {
                 Write(0xc5);
-                Write((data.Length >> 8) & 0xff);
-                Write(data.Length & 0xff);
+                Array.Reverse(data);
+                WriteBytes(data);
             }
             else
             {
                 Write(0xc6);
-                Write((data.Length >> 24) & 0xff);
-                Write((data.Length >> 16) & 0xff);
-                Write((data.Length >> 8) & 0xff);
-                Write(data.Length & 0xff);
+                Array.Reverse(data);
+                WriteBytes(data);
             }
 
             WriteBytes(data);

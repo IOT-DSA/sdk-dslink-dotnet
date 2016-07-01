@@ -71,6 +71,8 @@
     <Compile Include="Nodes\RemoteNode.cs" />
     <Compile Include="Connection\Serializer\MsgPackSerializer.cs" />
     <Compile Include="MsgPack\MsgPack.cs" />
+    <Compile Include="MsgPack\MessagePackReader.cs" />
+    <Compile Include="MsgPack\MessagePackWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PCLStorage, Version=1.0.2.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
@@ -90,6 +92,9 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="MsgPack">
+      <HintPath>..\packages\MsgPack.Cli.0.6.8\lib\portable-net45+win+wpa81\MsgPack.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

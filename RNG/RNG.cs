@@ -7,7 +7,6 @@ using DSLink.NET;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using DSLink.Request;
-using DSLink.Respond;
 using DSLink.Util.Logger;
 using Action = DSLink.Nodes.Actions.Action;
 
@@ -15,65 +14,55 @@ namespace RNG
 {
     public class ExampleDSLink : DSLinkContainer
     {
-        private Timer timer;
-        private int counter;
         private Random random = new Random();
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            var myNum = Responder.SuperRoot.CreateChild("MyNum")
-                .SetDisplayName("My Number")
-                .SetType("int")
-                .SetValue(0)
-                .BuildNode();
+            var testNode = Responder.SuperRoot.CreateChild("test")
+                                    .SetDisplayName("Test")
+                                    .SetType("bytes")
+                                    .SetValue(new byte[] { 0x00, 0x01, 0x02 })
+                                    .BuildNode();
 
-            var addNum = Responder.SuperRoot.CreateChild("AddNum")
-                .SetDisplayName("Add Number")
-                .AddParameter(new Parameter("Number", "number"))
-                .SetAction(new Action(Permission.Write, (parameters, request) =>
-                {
-                    myNum.Value.Set(myNum.Value.Get() + parameters["Number"].Get());
-                    request.Close();
-                }))
-                .BuildNode();
+            var numberNode = Responder.SuperRoot.CreateChild("number")
+                                      .SetDisplayName("Number")
+                                      .SetType("number")
+                                      .SetValue(0.0)
+                                      .BuildNode();
 
-            var randomBytes = Responder.SuperRoot.CreateChild("Bytes")
-                                       .SetDisplayName("bytes")
-                                       .SetType("bytes")
-                                       .SetValue(new byte[] { 0x00 })
-                                       .BuildNode();
+            var numberAction = Responder.SuperRoot.CreateChild("set_number")
+                                        .SetDisplayName("Set Number")
+                                        .SetWritable(Permission.Write)
+                                        .AddParameter(new Parameter("Number", "number"))
+                                        .SetAction(new Action(Permission.Write, (Dictionary<string, Value> parameters, InvokeRequest request) =>
+                                        {
+                                            numberNode.Value.Set(parameters["Number"].Get());
+                                            request.Close();
+                                        }))
+                                        .BuildNode();
 
-            //byte[] buffer;
-            //buffer = new byte[4000000];
-            //Console.WriteLine("writing");
-            //randomBytes.Value.Set(buffer);
             /*var task = new Task(() =>
             {
-                while (true)
+                //while (true)
                 {
-                    if (testValue.Subscribed)
-                    {
-                        testValue.Value.Set(random.Next(0, 1000));
-                    }
-                    Responder.SuperRoot.RemoveChild("Test" + counter);
-                    Responder.SuperRoot.CreateChild("Test" + ++counter);
-                    Thread.Sleep(1);
+                    //byte[] buffer = new byte[random.Next(1, 10)];
+                    byte[] buffer = new byte[4000000];
+                    random.NextBytes(buffer);
+                    testNode.Value.Set(buffer);
+                    Thread.Sleep(10);
                 }
             });
             task.Start();*/
-            /*timer = new Timer(obj =>
-            {
-                if (testValue.Subscribed)
-                {
-                }
-            }, null, 1000, 1);*/
+        }
 
+        protected override void OnConnectionOpen()
+        {
         }
 
         private static void Main(string[] args)
         {
             NETPlatform.Initialize();
-            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Info));
+            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Debug));
 
             while (true)
             {
