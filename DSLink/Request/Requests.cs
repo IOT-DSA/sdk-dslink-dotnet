@@ -43,8 +43,8 @@ namespace DSLink.Request
         {
             return new RequestObject()
             {
-                rid = RequestID,
-                method = Method()
+                RequestId = RequestID,
+                Method = Method()
             };
         }
     }
@@ -87,7 +87,7 @@ namespace DSLink.Request
         public override RequestObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.path = Path;
+            baseSerialized.Path = Path;
             return baseSerialized;
         }
     }
@@ -118,9 +118,9 @@ namespace DSLink.Request
         public override RequestObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.path = Path;
-            baseSerialized.permit = Permission.ToString();
-            baseSerialized.value = Value.Get();
+            baseSerialized.Path = Path;
+            baseSerialized.Permit = Permission.ToString();
+            baseSerialized.Value = Value.Get();
             return baseSerialized;
         }
     }
@@ -142,7 +142,7 @@ namespace DSLink.Request
         public override RequestObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.path = Path;
+            baseSerialized.Path = Path;
             return baseSerialized;
         }
     }
@@ -179,12 +179,12 @@ namespace DSLink.Request
         public override RequestObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.path = Path;
-            if (baseSerialized.permit != null)
+            baseSerialized.Path = Path;
+            if (baseSerialized.Permit != null)
             {
-                baseSerialized.permit = Permission.ToString();
+                baseSerialized.Permit = Permission.ToString();
             }
-            baseSerialized.@params = Parameters;
+            baseSerialized.Parameters = Parameters;
             return baseSerialized;
         }
 
@@ -196,25 +196,25 @@ namespace DSLink.Request
             }
             var updateRootObject = new RootObject
             {
-                responses = new List<ResponseObject>
+                Responses = new List<ResponseObject>
                 {
                     new ResponseObject
                     {
-                        rid = RequestID,
-                        stream = (close ? "close" : "open"),
-                        updates = updates
+                        RequestId = RequestID,
+                        Stream = (close ? "close" : "open"),
+                        Updates = updates
                     }
                 }
             };
             if (_firstUpdate)
             {
                 _firstUpdate = false;
-                updateRootObject.responses[0].meta = new Dictionary<string, dynamic>
+                updateRootObject.Responses[0].Meta = new Dictionary<string, dynamic>
                 {
                     {"mode", "append"},
                     {"meta", new Dictionary<string, dynamic>()}
                 };
-                updateRootObject.responses[0].columns = _columns;
+                updateRootObject.Responses[0].Columns = _columns;
             }
             _link.Connector.Write(updateRootObject);
         }
@@ -227,12 +227,12 @@ namespace DSLink.Request
             }
             _link.Connector.Write(new RootObject
             {
-                responses = new List<ResponseObject>
+                Responses = new List<ResponseObject>
                 {
                     new ResponseObject
                     {
-                        rid = RequestID,
-                        stream = "closed"
+                        RequestId = RequestID,
+                        Stream = "closed"
                     }
                 }
             });

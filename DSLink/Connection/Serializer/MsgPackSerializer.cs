@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using DSLink.MsgPack;
+using Newtonsoft.Json;
 using Newtonsoft.Msgpack;
 using JSONSerializer = Newtonsoft.Json.JsonSerializer;
 
@@ -7,11 +7,14 @@ namespace DSLink.Connection.Serializer
 {
     public class MsgPackSerializer : ISerializer
     {
-        private JSONSerializer _serializer;
+        private readonly JSONSerializer _serializer;
 
         public MsgPackSerializer()
         {
-            _serializer = new JSONSerializer();
+            _serializer = new JSONSerializer()
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
         }
 
         public dynamic Serialize(RootObject data)

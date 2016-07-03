@@ -124,12 +124,12 @@ namespace DSLink.Respond
             _link.Requester._requestManager.StopRequest(RequestID);
             _link.Connector.Write(new RootObject
             {
-                requests = new List<RequestObject>
+                Requests = new List<RequestObject>
                 {
                     new RequestObject
                     {
-                        rid = RequestID,
-                        method = "close"
+                        RequestId = RequestID,
+                        Method = "close"
                     }
                 }
             });

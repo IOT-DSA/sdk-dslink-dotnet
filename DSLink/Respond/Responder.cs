@@ -56,34 +56,34 @@ namespace DSLink.Respond
             var responses = new List<ResponseObject>();
             foreach (var request in requests)
             {
-                switch (request.method)
+                switch (request.Method)
                 {
                     case "list":
                         {
-                            var node = SuperRoot.Get(request.path);
+                            var node = SuperRoot.Get(request.Path);
                             if (node != null)
                             {
-                                StreamManager.Open(request.rid.Value, node);
+                                StreamManager.Open(request.RequestId.Value, node);
                                 responses.Add(new ResponseObject
                                 {
-                                    rid = request.rid,
-                                    stream = "open",
-                                    updates = SuperRoot.Get(request.path).Serialize()
+                                    RequestId = request.RequestId,
+                                    Stream = "open",
+                                    Updates = SuperRoot.Get(request.Path).Serialize()
                                 });
                             }
                         }
                         break;
                     case "set":
                         {
-                            var node = SuperRoot.Get(request.path);
+                            var node = SuperRoot.Get(request.Path);
                             if (node != null)
                             {
-                                if (request.permit == null || request.permit.Equals(node.GetConfig("writable").Get())) {
-                                    node.Value.Set(request.value);
+                                if (request.Permit == null || request.Permit.Equals(node.GetConfig("writable").Get())) {
+                                    node.Value.Set(request.Value);
                                     responses.Add(new ResponseObject
                                     {
-                                        rid = request.rid,
-                                        stream = "closed"
+                                        RequestId = request.RequestId,
+                                        Stream = "closed"
                                     });
                                 }
                             }
@@ -91,28 +91,28 @@ namespace DSLink.Respond
                         break;
                     case "remove":
                         {
-                            SuperRoot.RemoveConfigAttribute(request.path);
+                            SuperRoot.RemoveConfigAttribute(request.Path);
                             responses.Add(new ResponseObject
                             {
-                                rid = request.rid,
-                                stream = "closed"
+                                RequestId = request.RequestId,
+                                Stream = "closed"
                             });
                         }
                         break;
                     case "invoke":
                         {
-                            var node = SuperRoot.Get(request.path);
+                            var node = SuperRoot.Get(request.Path);
                             if (node?.Action != null)
                             {
-                                if (request.permit == null || request.permit.Equals(node.Action.Permission.ToString()))
+                                if (request.Permit == null || request.Permit.Equals(node.Action.Permission.ToString()))
                                 {
-                                    var parameters = request.@params.ToDictionary(pair => pair.Key, pair => new Value(pair.Value));
+                                    var parameters = request.Parameters.ToDictionary(pair => pair.Key, pair => new Value(pair.Value));
                                     var columns = node.GetConfig("columns") != null
                                         ? node.GetConfig("columns").Get()
                                         : new List<Column>();
-                                    var permit = (request.permit != null) ? Permission._permMap[request.permit.ToLower()] : null;
-                                    var invokeRequest = new InvokeRequest(request.rid.Value, request.path,
-                                                                          permit, request.@params, link: _link,
+                                    var permit = (request.Permit != null) ? Permission._permMap[request.Permit.ToLower()] : null;
+                                    var invokeRequest = new InvokeRequest(request.RequestId.Value, request.Path,
+                                                                          permit, request.Parameters, link: _link,
                                                                           columns: columns);
                                     node.Action.Function.Invoke(parameters, invokeRequest);
                                 }
@@ -121,25 +121,25 @@ namespace DSLink.Respond
                         break;
                     case "subscribe":
                         {
-                            foreach (var pair in request.paths)
+                            foreach (var pair in request.Paths)
                             {
-                                var node = SuperRoot.Get(pair.path);
-                                if (node != null && pair.sid != null)
+                                var node = SuperRoot.Get(pair.Path);
+                                if (node != null && pair.SubscriptionId != null)
                                 {
-                                    SubscriptionManager.Subscribe(pair.sid.Value, SuperRoot.Get(pair.path));
+                                    SubscriptionManager.Subscribe(pair.SubscriptionId.Value, SuperRoot.Get(pair.Path));
                                     _link.Connector.Write(new RootObject
                                     {
-                                        msg = _link.MessageId,
-                                        responses = new List<ResponseObject>
+                                        Msg = _link.MessageId,
+                                        Responses = new List<ResponseObject>
                                         {
                                             new ResponseObject
                                             {
-                                                rid = 0,
-                                                updates = new List<dynamic>
+                                                RequestId = 0,
+                                                Updates = new List<dynamic>
                                                 {
                                                     new[]
                                                     {
-                                                        pair.sid.Value,
+                                                        pair.SubscriptionId.Value,
                                                         node.Value.Get(),
                                                         node.Value.LastUpdated
                                                     }
@@ -151,34 +151,34 @@ namespace DSLink.Respond
                             }
                             responses.Add(new ResponseObject
                             {
-                                rid = request.rid,
-                                stream = "closed"
+                                RequestId = request.RequestId,
+                                Stream = "closed"
                             });
                         }
                         break;
                     case "unsubscribe":
                         {
-                            foreach (var sid in request.sids)
+                            foreach (var sid in request.SubscriptionIds)
                             {
                                 SubscriptionManager.Unsubscribe(sid);
                             }
                             responses.Add(new ResponseObject
                             {
-                                rid = request.rid,
-                                stream = "closed"
+                                RequestId = request.RequestId,
+                                Stream = "closed"
                             });
                         }
                         break;
                     case "close":
                         {
-                            if (request.rid != null)
+                            if (request.RequestId != null)
                             {
-                                StreamManager.Close(request.rid.Value);
+                                StreamManager.Close(request.RequestId.Value);
                             }
                         }
                         break;
                     default:
-                        throw new ArgumentException(string.Format("Method {0} not implemented", request.method));
+                        throw new ArgumentException(string.Format("Method {0} not implemented", request.Method));
                 }
             }
             return responses;

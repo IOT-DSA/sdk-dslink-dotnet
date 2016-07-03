@@ -38,7 +38,6 @@
     <Compile Include="Connection\ConnectorManager.cs" />
     <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Handshake.cs" />
-    <Compile Include="Connection\Serializer\Serializable.cs" />
     <Compile Include="Connection\Serializer\ISerializer.cs" />
     <Compile Include="Connection\Serializer\JsonSerializer.cs" />
     <Compile Include="Connection\Serializer\SerializationManager.cs" />

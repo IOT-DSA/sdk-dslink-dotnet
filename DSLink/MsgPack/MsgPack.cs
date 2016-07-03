@@ -101,14 +101,6 @@ namespace DSLink.MsgPack
             {
                 PackString(obj);
             }
-            else if (obj is Parameter)
-            {
-                PackDictionary(((Parameter)obj).Serialize());
-            }
-            else if (obj is Column)
-            {
-                PackDictionary(((Column)obj).Serialize());
-            }
             else
             {
                 throw new Exception(string.Format("Could not pack type {0}.", obj));
