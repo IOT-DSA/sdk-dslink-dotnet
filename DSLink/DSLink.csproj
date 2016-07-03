@@ -93,8 +93,8 @@
     <Reference Include="MsgPack">
       <HintPath>..\packages\MsgPack.Cli.0.6.8\lib\portable-net45+win+wpa81\MsgPack.dll</HintPath>
     </Reference>
-    <Reference Include="BouncyCastle.Crypto">
-      <HintPath>..\packages\BouncyCastle.1.8.1\lib\BouncyCastle.Crypto.dll</HintPath>
+    <Reference Include="crypto">
+      <HintPath>..\packages\Portable.BouncyCastle-Signed.1.7.0.2\lib\portable-net4+sl5+wp8+win8+wpa81+MonoTouch10+MonoAndroid10+xamarinmac20+xamarinios10\crypto.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

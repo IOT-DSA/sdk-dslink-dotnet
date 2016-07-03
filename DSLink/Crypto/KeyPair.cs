@@ -96,19 +96,14 @@ namespace DSLink.Crypto
             var point = param.Curve.DecodePoint(decoded);
             var spec = new ECPublicKeyParameters(point, param);
             point = spec.Q.Multiply(privateKey.D);
-            var bi = point.Normalize().XCoord.ToBigInteger();
+            var bi = point.X.ToBigInteger();
             return Normalize(bi.ToByteArray());
         }
 
         private static ECDomainParameters GetParams()
         {
-            X9ECParameters ecp = SecNamedCurves.GetByName(CURVE);
-            ECCurve curve = ecp.Curve;
-            ECPoint g = ecp.G;
-            BigInteger n = ecp.N;
-            BigInteger h = ecp.H;
-            byte[] s = ecp.GetSeed();
-            return new ECDomainParameters(curve, g, n, h, s);
+            var ecp = SecNamedCurves.GetByName(CURVE);
+            return new ECDomainParameters(ecp.Curve, ecp.G, ecp.N, ecp.H, ecp.GetSeed());
         }
 
         private static byte[] Normalize(byte[] data)
