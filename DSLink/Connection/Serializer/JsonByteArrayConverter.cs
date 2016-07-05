@@ -1,6 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 using DSLink.Util;
+using JSONSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace DSLink.Connection.Serializer
 {
@@ -11,15 +12,14 @@ namespace DSLink.Connection.Serializer
 			return objectType == typeof(byte[]);
 		}
 
-		public override void WriteJson(JsonWriter writer, object value, Newtonsoft.Json.JsonSerializer serializer)
+		public override void WriteJson(JsonWriter writer, object value, JSONSerializer serializer)
 		{
 			writer.WriteValue("\x1B" + "bytes:" + UrlBase64.Encode((byte[]) value));
 		}
 
-		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
+		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JSONSerializer serializer)
 		{
 			throw new NotImplementedException();
 		}
 	}
 }
-

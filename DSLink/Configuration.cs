@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,22 +22,22 @@ namespace DSLink
         /// <summary>
         /// Name of the DSLink
         /// </summary>
-        public readonly string Name;
+        public string Name;
 
         /// <summary>
-        /// Requester features enabled
+        /// True when requester features are enabled.
         /// </summary>
         public readonly bool Requester;
 
         /// <summary>
-        /// Responder features enabled
+        /// True when responder features are enabled.
         /// </summary>
         public readonly bool Responder;
 
         /// <summary>
-        /// Full URL to Broker
+        /// Full URL to the Broker.
         /// </summary>
-        public readonly string BrokerUrl;
+        public string BrokerUrl;
 
         /// <summary>
         /// Location to store generated keypair
@@ -84,6 +83,9 @@ namespace DSLink
             get;
         }
 
+        /// <summary>
+        /// Log level
+        /// </summary>
         public LogLevel LogLevel
         {
             private set;

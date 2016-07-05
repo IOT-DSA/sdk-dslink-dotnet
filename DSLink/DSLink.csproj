@@ -69,7 +69,6 @@
     <Compile Include="Connection\Serializer\JsonByteArrayConverter.cs" />
     <Compile Include="Nodes\RemoteNode.cs" />
     <Compile Include="Connection\Serializer\MsgPackSerializer.cs" />
-    <Compile Include="MsgPack\MsgPack.cs" />
     <Compile Include="MsgPack\MessagePackReader.cs" />
     <Compile Include="MsgPack\MessagePackWriter.cs" />
   </ItemGroup>
