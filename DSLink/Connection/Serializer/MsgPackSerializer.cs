@@ -5,10 +5,25 @@ using JSONSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace DSLink.Connection.Serializer
 {
+    /// <summary>
+    /// MessagePack implementation of serializer. Uses an extension of Json.NET,
+    /// which uses its backend and generates MessagePack data via MsgPack.Cli.
+    /// </summary>
     public class MsgPackSerializer : ISerializer
     {
+        /// <summary>
+        /// Json.NET Serializer backend.
+        /// </summary>
         private readonly JSONSerializer _serializer;
 
+        /// <summary>
+        /// <see cref="ISerializer.RequiresBinaryStream"/> 
+        /// </summary>
+        public bool RequiresBinaryStream => true;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:DSLink.Connection.Serializer.MsgPackSerializer"/> class.
+        /// </summary>
         public MsgPackSerializer()
         {
             _serializer = new JSONSerializer()
@@ -17,6 +32,9 @@ namespace DSLink.Connection.Serializer
             };
         }
 
+        /// <summary>
+        /// <see cref="ISerializer.Serialize(RootObject)"/>
+        /// </summary>
         public dynamic Serialize(RootObject data)
         {
             var stream = new MemoryStream();
@@ -25,6 +43,9 @@ namespace DSLink.Connection.Serializer
             return stream.ToArray();
         }
 
+        /// <summary>
+        /// <see cref="ISerializer.Deserialize(dynamic)"/>
+        /// </summary>
         public RootObject Deserialize(dynamic data)
         {
             var stream = new MemoryStream(data);

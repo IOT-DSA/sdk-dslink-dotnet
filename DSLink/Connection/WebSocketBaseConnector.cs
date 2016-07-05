@@ -1,5 +1,4 @@
 using System;
-using DSLink.Connection.Serializer;
 using DSLink.Container;
 using Websockets;
 
@@ -12,7 +11,7 @@ namespace DSLink.Connection
         /// </summary>
         private IWebSocketConnection _webSocket;
 
-        public WebSocketBaseConnector(AbstractContainer link, Configuration config) : base(link, config)
+        public WebSocketBaseConnector(AbstractContainer link) : base(link)
         {
         }
 

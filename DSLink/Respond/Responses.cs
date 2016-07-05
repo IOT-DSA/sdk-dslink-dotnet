@@ -6,6 +6,9 @@ using DSLink.Nodes.Actions;
 
 namespace DSLink.Respond
 {
+    /// <summary>
+    /// Base response.
+    /// </summary>
     public class Response
     {
         /// <summary>
@@ -27,6 +30,9 @@ namespace DSLink.Respond
         }
     }
 
+    /// <summary>
+    /// List response.
+    /// </summary>
     public class ListResponse : Response
     {
         /// <summary>
@@ -60,6 +66,9 @@ namespace DSLink.Respond
         }
     }
 
+    /// <summary>
+    /// Invoke response.
+    /// </summary>
     public class InvokeResponse : Response
     {
         /// <summary>

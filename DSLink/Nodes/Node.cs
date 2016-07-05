@@ -10,6 +10,9 @@ using Action = DSLink.Nodes.Actions.Action;
 
 namespace DSLink.Nodes
 {
+    /// <summary>
+    /// Node
+    /// </summary>
     public class Node
     {
         /// <summary>
@@ -516,15 +519,6 @@ namespace DSLink.Nodes
                     Responses = responses
                 });
             }
-        }
-
-        /// <summary>
-        /// Internal utility
-        /// </summary>
-        internal static int NthIndexOf(string target, string value, int n)
-        {
-            var m = Regex.Match(target, "((" + Regex.Escape(value) + ").*?){" + n + "}");
-            return m.Success ? m.Groups[2].Captures[n - 1].Index : -1;
         }
     }
 }

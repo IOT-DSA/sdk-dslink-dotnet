@@ -1,6 +1,5 @@
 ﻿using System;
 using DSLink.Connection;
-using DSLink.Connection.Serializer;
 using DSLink.Container;
 using Foundation;
 using Square.SocketRocket;
@@ -14,7 +13,7 @@ namespace DSLink.iOS
         /// </summary>
         private WebSocket _webSocket;
 
-        public iOSWebSocketConnector(AbstractContainer link, Configuration config) : base(link, config)
+        public iOSWebSocketConnector(AbstractContainer link) : base(link)
         {
         }
 

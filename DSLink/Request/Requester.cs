@@ -11,11 +11,29 @@ using DSLink.Respond;
 
 namespace DSLink.Request
 {
+    /// <summary>
+    /// Requester module.
+    /// </summary>
     public class Requester
     {
+        /// <summary>
+        /// Link container.
+        /// </summary>
         private readonly AbstractContainer _link;
+
+        /// <summary>
+        /// Request manager.
+        /// </summary>
         internal readonly RequestManager _requestManager;
+
+        /// <summary>
+        /// Current request ID.
+        /// </summary>
         private int _rid = 1;
+
+        /// <summary>
+        /// Gets the next request identifier.
+        /// </summary>
         protected int NextRequestID => _rid++;
 
         internal Requester(AbstractContainer link)
@@ -24,6 +42,11 @@ namespace DSLink.Request
             _requestManager = new RequestManager();
         }
 
+        /// <summary>
+        /// Processes incoming requests.
+        /// </summary>
+        /// <param name="responses">Responses</param>
+        /// <returns>Requests</returns>
         internal List<RequestObject> ProcessRequests(List<ResponseObject> responses)
         {
             var requests = new List<RequestObject>();
@@ -65,6 +88,11 @@ namespace DSLink.Request
             return requests;
         }
 
+        /// <summary>
+        /// List the specified path.
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="callback">Callback</param>
         public ListRequest List(string path, Action<ListResponse> callback)
         {
             var request = new ListRequest(NextRequestID, callback, path);
@@ -79,6 +107,12 @@ namespace DSLink.Request
             return request;
         }
 
+        /// <summary>
+        /// Set the specified path value.
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="permission">Permission</param>
+        /// <param name="value">Value</param>
         public SetRequest Set(string path, Permission permission, Value value)
         {
             var request = new SetRequest(NextRequestID, path, permission, value);
@@ -93,6 +127,10 @@ namespace DSLink.Request
             return request;
         }
 
+        /// <summary>
+        /// Remove the specified path.
+        /// </summary>
+        /// <param name="path">Path</param>
         public RemoveRequest Remove(string path)
         {
             var request = new RemoveRequest(NextRequestID, path);
@@ -107,6 +145,13 @@ namespace DSLink.Request
             return request;
         }
 
+        /// <summary>
+        /// Invoke the specified path.
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="permission">Permission</param>
+        /// <param name="parameters">Parameters</param>
+        /// <param name="callback">Callback</param>
         public InvokeRequest Invoke(string path, Permission permission, Dictionary<string, dynamic> parameters, Action<InvokeResponse> callback)
         {
             var request = new InvokeRequest(NextRequestID, path, permission, parameters, callback);
@@ -121,30 +166,56 @@ namespace DSLink.Request
             return request;
         }
 
+        /// <summary>
+        /// Request manager handles outgoing requests.
+        /// </summary>
         internal class RequestManager
         {
-            private Dictionary<int, BaseRequest> requests;
+            /// <summary>
+            /// Dictionary of requests mapped to request IDs.
+            /// </summary>
+            private readonly Dictionary<int, BaseRequest> requests;
 
+            /// <summary>
+            /// Initializes a new instance of the
+            /// <see cref="T:DSLink.Request.Requester.RequestManager"/> class.
+            /// </summary>
             public RequestManager()
             {
                 requests = new Dictionary<int, BaseRequest>();
             }
 
+            /// <summary>
+            /// Starts a request.
+            /// </summary>
+            /// <param name="request">Request</param>
             public void StartRequest(BaseRequest request)
             {
                 requests.Add(request.RequestID, request);
             }
 
+            /// <summary>
+            /// Stops a request.
+            /// </summary>
+            /// <param name="requestID">Request identifier.</param>
             public void StopRequest(int requestID)
             {
                 requests.Remove(requestID);
             }
 
+            /// <summary>
+            /// Determines if a request is pending
+            /// </summary>
+            /// <param name="requestID">Request identifier</param>
             public bool RequestPending(int requestID)
             {
                 return requests.ContainsKey(requestID);
             }
 
+            /// <summary>
+            /// Gets the request for a request ID.
+            /// </summary>
+            /// <param name="requestID">Request identifier</param>
             public BaseRequest GetRequest(int requestID)
             {
                 return requests[requestID];

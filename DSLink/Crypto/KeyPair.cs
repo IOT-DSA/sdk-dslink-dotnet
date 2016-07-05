@@ -2,31 +2,59 @@ using System;
 using System.IO;
 using DSLink.Util;
 using Org.BouncyCastle.Asn1.Sec;
-using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Math.EC;
 using Org.BouncyCastle.Security;
 using PCLStorage;
 
 namespace DSLink.Crypto
 {
+    /// <summary>
+    /// Handles key generation, loading, and saving for handshake.
+    /// </summary>
     public class KeyPair
     {
+        /// <summary>
+        /// Key size.
+        /// </summary>
         private const int KEY_SIZE = 256;
+
+        /// <summary>
+        /// Curve type, prime256v1.
+        /// </summary>
         private const string CURVE = "SECP256R1";
+
+        /// <summary>
+        /// Location of key file to load from and save to.
+        /// </summary>
         private readonly string _location;
+
+        /// <summary>
+        /// BouncyCastle KeyPair.
+        /// </summary>
         public AsymmetricCipherKeyPair BcKeyPair;
+
+        /// <summary>
+        /// Gets the encoded public key.
+        /// </summary>
         public byte[] EncodedPublicKey => ((ECPublicKeyParameters) BcKeyPair.Public).Q.GetEncoded();
 
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Crypto.KeyPair"/> class.
+        /// </summary>
+        /// <param name="location">Location </param>
         public KeyPair(string location)
         {
             _location = location;
             BcKeyPair = Load();
         }
 
+        /// <summary>
+        /// Generate the KeyPair.
+        /// </summary>
         private static AsymmetricCipherKeyPair Generate()
         {
             var generator = new ECKeyPairGenerator();
@@ -36,6 +64,10 @@ namespace DSLink.Crypto
             return generator.GenerateKeyPair();
         }
 
+        /// <summary>
+        /// Load the KeyPair from the file, or generate a new one.
+        /// </summary>
+        /// <returns>BouncyCastle Asymmetric Cipher KeyPair</returns>
         private AsymmetricCipherKeyPair Load()
         {
             IFileSystem fileSystem = FileSystem.Current;
@@ -71,6 +103,10 @@ namespace DSLink.Crypto
             return key;
         }
 
+        /// <summary>
+        /// Save the specified KeyPair.
+        /// </summary>
+        /// <param name="keyPair">BouncyCastle Asymmetric KeyPair</param>
         private void Save(AsymmetricCipherKeyPair keyPair)
         {
             byte[] privateBytes = ((ECPrivateKeyParameters) keyPair.Private).D.ToByteArray();
@@ -88,6 +124,11 @@ namespace DSLink.Crypto
             }
         }
 
+        /// <summary>
+        /// Generates the shared secret.
+        /// </summary>
+        /// <returns>Shared secret</returns>
+        /// <param name="tempKey">Temporary key from server</param>
         public byte[] GenerateSharedSecret(string tempKey)
         {
             byte[] decoded = UrlBase64.Decode(tempKey);
@@ -100,12 +141,20 @@ namespace DSLink.Crypto
             return Normalize(bi.ToByteArray());
         }
 
+        /// <summary>
+        /// Get the parameters for the curve.
+        /// </summary>
+        /// <returns>The parameters.</returns>
         private static ECDomainParameters GetParams()
         {
             var ecp = SecNamedCurves.GetByName(CURVE);
             return new ECDomainParameters(ecp.Curve, ecp.G, ecp.N, ecp.H, ecp.GetSeed());
         }
 
+        /// <summary>
+        /// Normalize byte data to 32 bytes.
+        /// </summary>
+        /// <param name="data">Data.</param>
         private static byte[] Normalize(byte[] data)
         {
             if (data.Length < 32)

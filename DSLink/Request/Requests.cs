@@ -102,10 +102,24 @@ namespace DSLink.Request
         /// </summary>
         public readonly string Path;
 
+        /// <summary>
+        /// Permission of the request.
+        /// </summary>
         public readonly Permission Permission;
 
+        /// <summary>
+        /// Value of the request.
+        /// </summary>
         public readonly Value Value;
 
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Request.SetRequest"/> class.
+        /// </summary>
+        /// <param name="requestID">Request identifier</param>
+        /// <param name="path">Path</param>
+        /// <param name="permission">Permission</param>
+        /// <param name="value">Value</param>
         public SetRequest(int requestID, string path, Permission permission, Value value) : base(requestID)
         {
             Path = path;
@@ -113,8 +127,14 @@ namespace DSLink.Request
             Value = value;
         }
 
+        /// <summary>
+        /// Method of this request.
+        /// </summary>
         public override string Method() => "set";
 
+        /// <summary>
+        /// Serialize the request.
+        /// </summary>
         public override RequestObject Serialize()
         {
             var baseSerialized = base.Serialize();
@@ -127,18 +147,33 @@ namespace DSLink.Request
 
     public class RemoveRequest : BaseRequest
     {
+        /// <summary>
+        /// Path of the request.
+        /// </summary>
         public string Path
         {
             get;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Request.RemoveRequest"/> class.
+        /// </summary>
+        /// <param name="requestID">Request identifier</param>
+        /// <param name="path">Path.</param>
         public RemoveRequest(int requestID, string path) : base(requestID)
         {
             Path = path;
         }
 
+        /// <summary>
+        /// Method of the request.
+        /// </summary>
         public override string Method() => "remove";
 
+        /// <summary>
+        /// Serialize the request.
+        /// </summary>
         public override RequestObject Serialize()
         {
             var baseSerialized = base.Serialize();
@@ -149,20 +184,52 @@ namespace DSLink.Request
 
     public class InvokeRequest : BaseRequest
     {
+        /// <summary>
+        /// Path of the request.
+        /// </summary>
         public readonly string Path;
 
+        /// <summary>
+        /// Permission of the request.
+        /// </summary>
         public readonly Permission Permission;
 
+        /// <summary>
+        /// Parameters of the request.
+        /// </summary>
         public readonly Dictionary<string, dynamic> Parameters;
 
+        /// <summary>
+        /// Callback of the request.
+        /// </summary>
         public readonly Action<InvokeResponse> Callback;
 
+        /// <summary>
+        /// Link container.
+        /// </summary>
         private readonly AbstractContainer _link;
 
+        /// <summary>
+        /// Columns of the request.
+        /// </summary>
         private readonly List<Column> _columns;
 
+        /// <summary>
+        /// Whether this is the first update or not.
+        /// </summary>
         private bool _firstUpdate = true;
 
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Request.InvokeRequest"/> class.
+        /// </summary>
+        /// <param name="requestID">Request identifier</param>
+        /// <param name="path">Path</param>
+        /// <param name="permission">Permission</param>
+        /// <param name="parameters">Parameters</param>
+        /// <param name="callback">Callback</param>
+        /// <param name="link">Link</param>
+        /// <param name="columns">Columns</param>
         public InvokeRequest(int requestID, string path, Permission permission, Dictionary<string, dynamic> parameters,
                              Action<InvokeResponse> callback = null, AbstractContainer link = null, List<Column> columns = null) : base(requestID)
         {
@@ -174,8 +241,14 @@ namespace DSLink.Request
             _columns = columns;
         }
 
+        /// <summary>
+        /// Method of the request.
+        /// </summary>
         public override string Method() => "invoke";
 
+        /// <summary>
+        /// Serialize the request.
+        /// </summary>
         public override RequestObject Serialize()
         {
             var baseSerialized = base.Serialize();
@@ -188,6 +261,11 @@ namespace DSLink.Request
             return baseSerialized;
         }
 
+        /// <summary>
+        /// Sends an update to the requester.
+        /// </summary>
+        /// <param name="updates">Updates</param>
+        /// <param name="close">Whether to close the stream</param>
         public void SendUpdates(List<dynamic> updates, bool close = false)
         {
             if (_link == null || _columns == null)
@@ -219,6 +297,9 @@ namespace DSLink.Request
             _link.Connector.Write(updateRootObject);
         }
 
+        /// <summary>
+        /// Close the request.
+        /// </summary>
         public void Close()
         {
             if (_link == null)

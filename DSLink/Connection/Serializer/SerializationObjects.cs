@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 
 namespace DSLink.Connection.Serializer
 {
+    /// <summary>
+    /// Root DSA object.
+    /// </summary>
     public class RootObject
     {
         [JsonProperty("salt")]
@@ -18,6 +21,9 @@ namespace DSLink.Connection.Serializer
         public List<ResponseObject> Responses;
     }
 
+    /// <summary>
+    /// Request object.
+    /// </summary>
     public class RequestObject
     {
         [JsonProperty("rid")]
@@ -39,6 +45,9 @@ namespace DSLink.Connection.Serializer
         public Dictionary<string, dynamic> Parameters;
     }
 
+    /// <summary>
+    /// Response object.
+    /// </summary>
     public class ResponseObject
     {
         [JsonProperty("rid")]
@@ -53,6 +62,9 @@ namespace DSLink.Connection.Serializer
         public List<dynamic> Updates;
     }
 
+    /// <summary>
+    /// Add subscription object.
+    /// </summary>
     public class AddSubscriptionObject
     {
         [JsonProperty("path")]

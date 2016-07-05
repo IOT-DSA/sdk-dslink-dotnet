@@ -4,12 +4,30 @@ using DSLink.Util;
 
 namespace DSLink.Nodes
 {
+    /// <summary>
+    /// Represents a Value.
+    /// </summary>
     public class Value
     {
+        /// <summary>
+        /// Value.
+        /// </summary>
         private dynamic _val;
+
+        /// <summary>
+        /// When the value was last updated.
+        /// </summary>
         private DateTime _lastUpdated;
+
+        /// <summary>
+        /// Event occurs when value is set.
+        /// </summary>
         public event Action<Value> OnSet;
 
+        /// <summary>
+        /// Gets last updated time in ISO 8601 format.
+        /// </summary>
+        /// <value>The last updated.</value>
         public string LastUpdated => TimeUtil.ToIso8601(_lastUpdated);
 
         public Value()
@@ -110,6 +128,10 @@ namespace DSLink.Nodes
 			SetValue(val);
 		}
 
+        /// <summary>
+        /// Low level set method.
+        /// </summary>
+        /// <param name="val">Value.</param>
         private void SetValue(dynamic val)
         {
             _lastUpdated = DateTime.Now;
@@ -117,6 +139,9 @@ namespace DSLink.Nodes
             OnSet?.Invoke(this);
         }
 
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
         public object Clone() => new Value(_val) {_lastUpdated = _lastUpdated};
     }
 }

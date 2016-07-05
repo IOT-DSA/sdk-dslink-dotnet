@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace DSLink.Util
 {
-    public class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+    internal class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> _dictionary;
 
