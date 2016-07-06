@@ -150,7 +150,15 @@ namespace DSLink
         /// <param name="messageEvent">Binary message event</param>
         private void OnBinaryMessage(BinaryMessageEvent messageEvent)
         {
-            Logger.Debug("Binary Received: " + BitConverter.ToString(messageEvent.Message));
+            if (messageEvent.Message.Length < 500)
+            {
+                Logger.Debug("Binary Received: " + BitConverter.ToString(messageEvent.Message));
+            }
+            else
+            {
+                Logger.Debug("Binary Received: (over 5000 bytes)");
+            }
+
             OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
         }
 
@@ -203,7 +211,14 @@ namespace DSLink
         /// <param name="messageEvent">Binary message event</param>
         private void OnBinaryWrite(BinaryMessageEvent messageEvent)
         {
-            Logger.Debug("Binary Sent: " + BitConverter.ToString(messageEvent.Message));
+            if (messageEvent.Message.Length < 5000)
+            {
+                Logger.Debug("Binary Sent: " + BitConverter.ToString(messageEvent.Message));
+            }
+            else
+            {
+                Logger.Debug("Binary Sent: (over 5000 bytes)");
+            }
         }
 
         /// <summary>

@@ -405,7 +405,12 @@ namespace DSLink.Nodes
             foreach (var sid in Subscribers)
             {
                 hasUpdates = true;
-                rootObject.Responses[0].Updates.Add(new[] { sid, value.Get(), value.LastUpdated });
+                rootObject.Responses[0].Updates.Add(new List<dynamic>
+                {
+                    sid,
+                    value.Get(),
+                    value.LastUpdated
+                });
             }
             if (hasUpdates)
             {

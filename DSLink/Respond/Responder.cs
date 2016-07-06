@@ -127,23 +127,16 @@ namespace DSLink.Respond
                                 if (node != null && pair.SubscriptionId != null)
                                 {
                                     SubscriptionManager.Subscribe(pair.SubscriptionId.Value, SuperRoot.Get(pair.Path));
-                                    _link.Connector.Write(new RootObject
+                                    responses.Add(new ResponseObject
                                     {
-                                        Msg = _link.MessageId,
-                                        Responses = new List<ResponseObject>
+                                        RequestId = 0,
+                                        Updates = new List<dynamic>
                                         {
-                                            new ResponseObject
+                                            new List<dynamic>
                                             {
-                                                RequestId = 0,
-                                                Updates = new List<dynamic>
-                                                {
-                                                    new[]
-                                                    {
-                                                        pair.SubscriptionId.Value,
-                                                        node.Value.Get(),
-                                                        node.Value.LastUpdated
-                                                    }
-                                                }
+                                                pair.SubscriptionId.Value,
+                                                node.Value.Get(),
+                                                node.Value.LastUpdated
                                             }
                                         }
                                     });

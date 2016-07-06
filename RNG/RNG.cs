@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
+using System.IO;
 using DSLink;
 using DSLink.NET;
 using DSLink.Nodes;
@@ -14,11 +14,11 @@ namespace RNG
 {
     public class ExampleDSLink : DSLinkContainer
     {
-        private Random random = new Random();
+        private byte[] picture = File.ReadAllBytes("/Users/logan/Pictures/very_large_test.jpg");
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            var testNode = Responder.SuperRoot.CreateChild("test")
+            /*var testNode = Responder.SuperRoot.CreateChild("test")
                                     .SetDisplayName("Test")
                                     .SetType("bytes")
                                     .SetValue(new byte[] { 0x00, 0x01, 0x02 })
@@ -39,7 +39,26 @@ namespace RNG
                                             numberNode.Value.Set(parameters["Number"].Get());
                                             request.Close();
                                         }))
-                                        .BuildNode();
+                                        .BuildNode();*/
+
+            var test = Responder.SuperRoot.CreateChild("bytes")
+                                .SetType("binary")
+                                .BuildNode();
+
+            var getPicture = Responder.SuperRoot.CreateChild("get_picture")
+                                      .AddColumn(new Column("bytes", "binary"))
+                                      .SetInvokable(Permission.Write)
+                                      .SetAction(new Action(Permission.Write, (parameters, request) =>
+                                      {
+                                        request.SendUpdates(new List<dynamic>
+                                        {
+                                            new List<dynamic>
+                                            {
+                                                picture
+                                            }
+                                        }, true);
+                                      }))
+                                      .BuildNode();
 
             /*var task = new Task(() =>
             {
