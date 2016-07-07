@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes.Actions;
@@ -297,6 +296,24 @@ namespace DSLink.Nodes
         public void SetColumns(List<Column> columns)
         {
             SetConfig("columns", new Value(columns));
+        }
+
+        /// <summary>
+        /// Sets the action group.
+        /// </summary>
+        /// <param name="actionGroup">Action group</param>
+        public void SetActionGroup(string actionGroup)
+        {
+            SetConfig("actionGroup", new Value(actionGroup));
+        }
+
+        /// <summary>
+        /// Sets the action group subtitle.
+        /// </summary>
+        /// <param name="actionGroupSubtitle">Action group subtitle</param>
+        public void SetActionGroupSubtitle(string actionGroupSubtitle)
+        {
+            SetConfig("actionGroupSubTitle", new Value(actionGroupSubtitle));
         }
 
         /// <summary>

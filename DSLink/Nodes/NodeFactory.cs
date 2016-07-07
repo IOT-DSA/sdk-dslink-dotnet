@@ -104,6 +104,28 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
+        /// Sets the action group.
+        /// </summary>
+        /// <param name="actionGroup">Action group</param>
+        /// <returns>Node</returns>
+        public NodeFactory SetActionGroup(string actionGroup)
+        {
+            _node.SetActionGroup(actionGroup);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the action group subtitle.
+        /// </summary>
+        /// <param name="actionGroupSubtitle">Action group subtitle</param>
+        /// <returns>Node</returns>
+        public NodeFactory SetActionGroupSubtitle(string actionGroupSubtitle)
+        {
+            _node.SetActionGroupSubtitle(actionGroupSubtitle);
+            return this;
+        }
+
+        /// <summary>
         /// Sets whether the node is transient.
         /// </summary>
         /// <param name="transient">Transient</param>
