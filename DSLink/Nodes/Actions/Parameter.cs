@@ -23,7 +23,7 @@ namespace DSLink.Nodes.Actions
         /// Default value of the parameter.
         /// </summary>
         [JsonProperty("default")]
-        public readonly string Default;
+        public readonly dynamic Default;
 
         /// <summary>
         /// Initializes a new instance of the
