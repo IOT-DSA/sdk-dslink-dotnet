@@ -216,6 +216,13 @@ namespace DSLink.Nodes
             }
         }
 
+        private dynamic GetConfigValue(string key)
+        {
+            var result = GetConfig(key);
+            if (result == null) return null;
+            return result.Get();
+        }
+
         /// <summary>
         /// Set a Node attribute.
         /// </summary>
@@ -244,80 +251,128 @@ namespace DSLink.Nodes
             }
         }
 
-        /// <summary>
-        /// Set the Node's display name.
-        /// </summary>
-        /// <param name="displayName">Node display name</param>
-        public void SetDisplayName(string displayName)
+        public string DisplayName
         {
-            SetConfig("name", new Value(displayName));
+            get
+            {
+                return GetConfigValue("name");
+            }
+            set
+            {
+                SetConfig("name", new Value(value));
+            }
+        }
+
+        public string Profile
+        {
+            get
+            {
+                return GetConfigValue("profile");
+            }
+            set
+            {
+                SetConfig("profile", new Value(value));
+            }
         }
 
         /// <summary>
-        /// Set the Node's profile.
+        /// Gets or sets the writable permission.
         /// </summary>
-        /// <param name="profile">Node profile</param>
-        public void SetProfile(string profile)
+        /// <value>The writable.</value>
+        public Permission Writable
         {
-            SetConfig("is", new Value(profile));
+            get
+            {
+                return Permission._permMap[GetConfigValue("writable")];
+            }
+            set
+            {
+                SetConfig("writable", new Value(value.ToString()));
+            }
         }
 
         /// <summary>
-        /// Set the Node's writable permission.
+        /// Gets or sets the invokable permission.
         /// </summary>
-        /// <param name="permission">Writable permission</param>
-        public void SetWritable(Permission permission)
+        /// <value>Invokable permission</value>
+        public Permission Invokable
         {
-            SetConfig("writable", new Value(permission.ToString()));
+            get
+            {
+                return Permission._permMap[GetConfigValue("invokable")];
+            }
+            set
+            {
+                SetConfig("invokable", new Value(value.ToString()));
+            }
         }
 
         /// <summary>
-        /// Set the Node's invokable permission.
+        /// Gets or sets the parameters.
         /// </summary>
-        /// <param name="permission">Invoke permission</param>
-        public void SetInvokable(Permission permission)
+        /// <value>Parameters</value>
+        public List<Parameter> Parameters
         {
-            SetConfig("invokable", new Value(permission.ToString()));
+            get
+            {
+                return GetConfigValue("params");
+            }
+            set
+            {
+                SetConfig("params", new Value(value));
+            }
         }
 
         /// <summary>
-        /// Set the Node's invoke parameters.
+        /// Gets or sets the columns.
         /// </summary>
-        /// <param name="parameters">Invoke parameters</param>
-        public void SetParameters(List<Parameter> parameters)
+        /// <value>Columns</value>
+        public List<Column> Columns
         {
-            SetConfig("params", new Value(parameters));
+            get
+            {
+                return GetConfigValue("columns");
+            }
+            set
+            {
+                SetConfig("columns", new Value(value));
+            }
         }
 
         /// <summary>
-        /// Set the Node's invoke columns.
+        /// Gets or sets the action group.
         /// </summary>
-        /// <param name="columns">Invoke columns</param>
-        public void SetColumns(List<Column> columns)
+        /// <value>Action group</value>
+        public string ActionGroup
         {
-            SetConfig("columns", new Value(columns));
+            get
+            {
+                return GetConfigValue("actionGroup");
+            }
+            set
+            {
+                SetConfig("actionGroup", new Value(value));
+            }
         }
 
         /// <summary>
-        /// Sets the action group.
+        /// Gets or sets the action group subtitle.
         /// </summary>
-        /// <param name="actionGroup">Action group</param>
-        public void SetActionGroup(string actionGroup)
+        /// <value>Action group subtitle</value>
+        public string ActionGroupSubtitle
         {
-            SetConfig("actionGroup", new Value(actionGroup));
+            get
+            {
+                return GetConfigValue("actionGroupSubTitle");
+            }
+            set
+            {
+                SetConfig("actionGroupSubTitle", new Value(value));
+            }
         }
 
         /// <summary>
-        /// Sets the action group subtitle.
-        /// </summary>
-        /// <param name="actionGroupSubtitle">Action group subtitle</param>
-        public void SetActionGroupSubtitle(string actionGroupSubtitle)
-        {
-            SetConfig("actionGroupSubTitle", new Value(actionGroupSubtitle));
-        }
-
-        /// <summary>
-        /// Check if Node has a value.
+        /// True if Node has a value.
         /// </summary>
         /// <returns></returns>
         public bool HasValue()

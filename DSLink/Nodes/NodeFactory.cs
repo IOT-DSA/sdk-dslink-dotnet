@@ -66,7 +66,7 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory SetDisplayName(string displayName)
         {
-            _node.SetDisplayName(displayName);
+            _node.DisplayName = displayName;
             return this;
         }
 
@@ -77,7 +77,7 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory SetProfile(string profile)
         {
-            _node.SetProfile(profile);
+            _node.Profile = profile;
             return this;
         }
 
@@ -88,7 +88,7 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory SetWritable(Permission writable)
         {
-            _node.SetWritable(writable);
+            _node.Writable = writable;
             return this;
         }
 
@@ -99,7 +99,7 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory SetInvokable(Permission invokable)
         {
-            _node.SetInvokable(invokable);
+            _node.Invokable = invokable;
             return this;
         }
 
@@ -110,7 +110,7 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory SetActionGroup(string actionGroup)
         {
-            _node.SetActionGroup(actionGroup);
+            _node.ActionGroup = actionGroup;
             return this;
         }
 
@@ -121,7 +121,7 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory SetActionGroupSubtitle(string actionGroupSubtitle)
         {
-            _node.SetActionGroupSubtitle(actionGroupSubtitle);
+            _node.ActionGroupSubtitle = actionGroupSubtitle;
             return this;
         }
 
@@ -166,7 +166,7 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory SetAction(Action action)
         {
-            _node.SetInvokable(action.Permission);
+            _node.Invokable = action.Permission;
             _node.Action = action;
             return this;
         }
@@ -178,11 +178,11 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory AddParameter(Parameter parameter)
         {
-            if (_node.GetConfig("params") == null)
+            if (_node.Parameters == null)
             {
-                _node.SetParameters(new List<Parameter>());
+                _node.Parameters = new List<Parameter>();
             }
-            _node.GetConfig("params").Get().Add(parameter);
+            _node.Parameters.Add(parameter);
             return this;
         }
 
@@ -193,11 +193,11 @@ namespace DSLink.Nodes
         /// <returns>Node</returns>
         public NodeFactory AddColumn(Column column)
         {
-            if (_node.GetConfig("columns") == null)
+            if (_node.Columns == null)
             {
-                _node.SetColumns(new List<Column>());
+                _node.Columns = new List<Column>();
             }
-            _node.GetConfig("columns").Get().Add(column);
+            _node.Columns.Add(column);
             return this;
         }
     }
