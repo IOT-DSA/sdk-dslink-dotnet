@@ -54,11 +54,11 @@ namespace DSLink.Nodes
                 var value = a[1];
                 if (key.StartsWith("$"))
                 {
-                    SetConfig(key, new Value(value.ToString()));
+                    SetConfig(key.Substring(1), new Value(value.ToString()));
                 }
                 else if (key.StartsWith("@"))
                 {
-                    SetAttribute(key, new Value(value.ToString()));
+                    SetAttribute(key.Substring(1), new Value(value.ToString()));
                 }
                 else
                 {
@@ -67,11 +67,11 @@ namespace DSLink.Nodes
                     {
                         if (kp.Key.StartsWith("$"))
                         {
-                            child.SetConfig(kp.Key, new Value(kp.Value.ToString()));
+                            child.SetConfig(kp.Key.Substring(1), new Value(kp.Value.ToString()));
                         }
                         else if (kp.Key.StartsWith("@"))
                         {
-                            child.SetAttribute(kp.Key, new Value(kp.Value.ToString()));
+                            child.SetAttribute(kp.Key.Substring(1), new Value(kp.Value.ToString()));
                         }
                     }
                     AddChild(child);
