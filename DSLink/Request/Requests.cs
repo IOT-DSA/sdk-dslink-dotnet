@@ -145,6 +145,9 @@ namespace DSLink.Request
         }
     }
 
+    /// <summary>
+    /// Remove request object.
+    /// </summary>
     public class RemoveRequest : BaseRequest
     {
         /// <summary>
@@ -182,6 +185,9 @@ namespace DSLink.Request
         }
     }
 
+    /// <summary>
+    /// Invoke request object.
+    /// </summary>
     public class InvokeRequest : BaseRequest
     {
         /// <summary>
@@ -317,6 +323,87 @@ namespace DSLink.Request
                     }
                 }
             });
+        }
+    }
+
+    /// <summary>
+    /// Subscribe request object.
+    /// </summary>
+    public class SubscribeRequest : BaseRequest
+    {
+        /// <summary>
+        /// List of subscriptions paths.
+        /// </summary>
+        public readonly List<AddSubscriptionObject> Paths;
+
+        /// <summary>
+        /// Callback for value updates.
+        /// </summary>
+        public readonly Action<SubscriptionUpdate> Callback;
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Request.SubscribeRequest"/> class.
+        /// </summary>
+        /// <param name="requestID">Request identifier</param>
+        /// <param name="paths">Paths</param>
+        /// <param name="callback">Callback</param>
+        public SubscribeRequest(int requestID, List<AddSubscriptionObject> paths, Action<SubscriptionUpdate> callback) : base(requestID)
+        {
+            Paths = paths;
+            Callback = callback;
+        }
+
+        /// <summary>
+        /// Method of this request.
+        /// </summary>
+        public override string Method() => "subscribe";
+
+        /// <summary>
+        /// Serialize the request.
+        /// </summary>
+        public override RequestObject Serialize()
+        {
+            var baseSerialized = base.Serialize();
+            baseSerialized.Paths = Paths;
+            return baseSerialized;
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribe request object.
+    /// </summary>
+    public class UnsubscribeRequest : BaseRequest
+    {
+        /// <summary>
+        /// Subscription IDs.
+        /// </summary>
+        public readonly List<int> Sids;
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Request.UnsubscribeRequest"/> class.
+        /// </summary>
+        /// <param name="requestID">Request identifier</param>
+        /// <param name="sids">Subscription IDs</param>
+        public UnsubscribeRequest(int requestID, List<int> sids) : base(requestID)
+        {
+            Sids = sids;
+        }
+
+        /// <summary>
+        /// Method of this request.
+        /// </summary>
+        public override string Method() => "unsubscribe";
+
+        /// <summary>
+        /// Serialize the request.
+        /// </summary>
+        public override RequestObject Serialize()
+        {
+            var baseSerialized = base.Serialize();
+            baseSerialized.SubscriptionIds = Sids;
+            return baseSerialized;
         }
     }
 }

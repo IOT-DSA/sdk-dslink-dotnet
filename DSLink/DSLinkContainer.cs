@@ -173,21 +173,23 @@ namespace DSLink
                 Ack = message.Msg,
                 Msg = MessageId
             };
+            bool write = false;
             if (message.Requests != null)
             {
-                response.Responses = Responder.ProcessRequests(message.Requests);
+                var responses = Responder.ProcessRequests(message.Requests);
+                if (responses.Count > 0)
+                {
+                    response.Responses = responses;
+                }
+                write = true;
             }
             if (message.Responses != null)
             {
-                response.Requests = Requester.ProcessRequests(message.Responses);
-            }
-            bool write = false;
-            if (response.Requests != null && response.Requests.Count > 0)
-            {
-                write = true;
-            }
-            else if (response.Responses != null && response.Responses.Count > 0)
-            {
+                var requests = Requester.ProcessResponses(message.Responses);
+                if (requests.Count > 0)
+                {
+                    response.Requests = requests;
+                }
                 write = true;
             }
             if (write)

@@ -4,20 +4,23 @@ using System.Threading;
 using System.IO;
 using DSLink;
 using DSLink.NET;
-using DSLink.Nodes;
-using DSLink.Nodes.Actions;
 using DSLink.Request;
 using DSLink.Util.Logger;
-using Action = DSLink.Nodes.Actions.Action;
 
 namespace RNG
 {
     public class ExampleDSLink : DSLinkContainer
     {
-        private byte[] picture = File.ReadAllBytes("/Users/logan/Pictures/very_large_test.jpg");
+        //private byte[] picture = File.ReadAllBytes("/Users/logan/Pictures/very_large_test.jpg");
 
         public ExampleDSLink(Configuration config) : base(config)
         {
+            Requester.Subscribe("/sys/dataOutPerSecond", (SubscriptionUpdate obj) =>
+            {
+                Console.WriteLine(obj.Value);
+                Requester.Unsubscribe("/sys/dataOutPerSecond");
+            });
+
             /*var testNode = Responder.SuperRoot.CreateChild("test")
                                     .SetDisplayName("Test")
                                     .SetType("bytes")
@@ -41,7 +44,7 @@ namespace RNG
                                         }))
                                         .BuildNode();*/
 
-            var test = Responder.SuperRoot.CreateChild("bytes")
+            /*var test = Responder.SuperRoot.CreateChild("bytes")
                                 .SetType("binary")
                                 .BuildNode();
 
@@ -58,7 +61,7 @@ namespace RNG
                                             }
                                         }, true);
                                       }))
-                                      .BuildNode();
+                                      .BuildNode();*/
 
             /*var task = new Task(() =>
             {
@@ -81,7 +84,7 @@ namespace RNG
         private static void Main(string[] args)
         {
             NETPlatform.Initialize();
-            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Debug));
+            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Debug, communicationFormat: "json"));
 
             while (true)
             {

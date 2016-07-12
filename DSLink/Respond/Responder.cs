@@ -179,26 +179,28 @@ namespace DSLink.Respond
     }
 
     /// <summary>
-    /// Class to manage DSA subscriptions
+    /// Class to manage DSA subscriptions.
     /// </summary>
     internal class SubscriptionManager
     {
         /// <summary>
-        /// Map of subscription ID to a Node
+        /// Dictionary that maps a subscription ID to a Node.
         /// </summary>
-        private readonly Dictionary<int, Node> _subscriptions = new Dictionary<int, Node>();
+        private readonly Dictionary<int, Node> _subscriptions;
 
         /// <summary>
-        /// DSLink container instance
+        /// DSLink container instance.
         /// </summary>
         private readonly AbstractContainer _link;
 
         /// <summary>
-        /// SubscriptionManager constructor
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Respond.SubscriptionManager"/> class.
         /// </summary>
-        /// <param name="link"></param>
+        /// <param name="link">Link container instance</param>
         public SubscriptionManager(AbstractContainer link)
         {
+            _subscriptions = new Dictionary<int, Node>();
             _link = link;
         }
 

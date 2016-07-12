@@ -1,13 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
-using DSLink.Nodes.Actions;
-using DSLink.Request;
 using DSLink.Respond;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Request
 {
@@ -27,33 +26,73 @@ namespace DSLink.Request
         internal readonly RequestManager _requestManager;
 
         /// <summary>
+        /// Remote subscription manager.
+        /// </summary>
+        internal readonly RemoteSubscriptionManager _subscriptionManager;
+
+        /// <summary>
         /// Current request ID.
         /// </summary>
         private int _rid = 1;
+
+        /// <summary>
+        /// Current subscription ID.
+        /// </summary>
+        private int _sid = 0;
 
         /// <summary>
         /// Gets the next request identifier.
         /// </summary>
         protected int NextRequestID => _rid++;
 
+        /// <summary>
+        /// Gets the next subscription identifier.
+        /// </summary>
+        protected int NextSubID => _sid++;
+
         internal Requester(AbstractContainer link)
         {
             _link = link;
             _requestManager = new RequestManager();
+            _subscriptionManager = new RemoteSubscriptionManager();
         }
 
         /// <summary>
-        /// Processes incoming requests.
+        /// Processes incoming responses.
         /// </summary>
         /// <param name="responses">Responses</param>
         /// <returns>Requests</returns>
-        internal List<RequestObject> ProcessRequests(List<ResponseObject> responses)
+        internal List<RequestObject> ProcessResponses(List<ResponseObject> responses)
         {
             var requests = new List<RequestObject>();
 
             foreach (var response in responses)
             {
-                if (response.RequestId != null && _requestManager.RequestPending(response.RequestId.Value))
+                if (response.RequestId.HasValue && response.RequestId.Value == 0)
+                {
+                    foreach (dynamic update in response.Updates)
+                    {
+                        if (update is JArray)
+                        {
+                            int sid = update[0];
+                            dynamic value = update[1];
+                            string dt = update[2];
+                            _subscriptionManager.GetSub(sid).Callback(new SubscriptionUpdate(sid, value, dt));
+                        }
+                        else if (update is JObject)
+                        {
+                            int sid = update["sid"];
+                            dynamic value = update["value"];
+                            string ts = update["ts"];
+                            int count = update["count"];
+                            int sum = update["sum"];
+                            int min = update["min"];
+                            int max = update["max"];
+                            _subscriptionManager.GetSub(sid).Callback(new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
+                        }
+                    }
+                }
+                else if (response.RequestId.HasValue && _requestManager.RequestPending(response.RequestId.Value))
                 {
                     var request = _requestManager.GetRequest(response.RequestId.Value);
                     if (request is ListRequest)
@@ -167,6 +206,57 @@ namespace DSLink.Request
         }
 
         /// <summary>
+        /// Subscribe to the specified path.
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="callback">Callback</param>
+        /// <param name="qos">Quality of Service</param>
+        public SubscribeRequest Subscribe(string path, Action<SubscriptionUpdate> callback, int qos = 0)
+        {
+            var sid = NextSubID;
+            var request = new SubscribeRequest(NextRequestID, new List<AddSubscriptionObject>
+            {
+                new AddSubscriptionObject
+                {
+                    Path = path,
+                    SubscriptionId = sid,
+                    QualityOfService = qos
+                }
+            }, callback);
+
+            _subscriptionManager.Subscribe(sid, path, callback);
+            _link.Connector.Write(new RootObject
+            {
+                Requests = new List<RequestObject>
+                {
+                    request.Serialize()
+                }
+            });
+
+            return request;
+        }
+
+        /// <summary>
+        /// Unsubscribe from the specified path.
+        /// </summary>
+        /// <param name="path">Path</param>
+        public void Unsubscribe(string path)
+        {
+            int sid = _subscriptionManager.GetSubByPath(path).Value;
+            _subscriptionManager.Unsubscribe(sid);
+            _link.Connector.Write(new RootObject
+            {
+                Requests = new List<RequestObject>
+                {
+                    new UnsubscribeRequest(NextRequestID, new List<int>
+                    {
+                        sid
+                    }).Serialize()
+                }
+            });
+        }
+
+        /// <summary>
         /// Request manager handles outgoing requests.
         /// </summary>
         internal class RequestManager
@@ -219,6 +309,94 @@ namespace DSLink.Request
             public BaseRequest GetRequest(int requestID)
             {
                 return requests[requestID];
+            }
+        }
+
+        /// <summary>
+        /// Remote subscription manager.
+        /// </summary>
+        internal class RemoteSubscriptionManager
+        {
+            /// <summary>
+            /// Subscription IDs to Subscription objects.
+            /// </summary>
+            private readonly Dictionary<int, Subscription> _subscriptions;
+
+            /// <summary>
+            /// Initializes a new instance of the
+            /// <see cref="T:DSLink.Request.Requester.RemoteSubscriptionManager"/> class.
+            /// </summary>
+            public RemoteSubscriptionManager()
+            {
+                _subscriptions = new Dictionary<int, Subscription>();
+            }
+
+            /// <summary>
+            /// Subscribe to the specified subscription ID.
+            /// </summary>
+            /// <param name="subID">Subscription ID</param>
+            /// <param name="path">Path</param>
+            /// <param name="callback">Callback</param>
+            public void Subscribe(int subID, string path, Action<SubscriptionUpdate> callback)
+            {
+                if (_subscriptions.ContainsKey(subID))
+                {
+                    throw new Exception("Subscription ID is already used");
+                }
+                _subscriptions.Add(subID, new Subscription
+                {
+                    Path = path,
+                    Callback = callback
+                });
+            }
+
+            /// <summary>
+            /// Unsubscribe from the specified subscription ID.
+            /// </summary>
+            /// <param name="subID">Subscription ID</param>
+            public void Unsubscribe(int subID)
+            {
+                _subscriptions.Remove(subID);
+            }
+
+            /// <summary>
+            /// Get subscription ID from path.
+            /// </summary>
+            /// <param name="path">Path of node</param>
+            /// <returns>Subscription ID</returns>
+            public int? GetSubByPath(string path)
+            {
+                foreach (KeyValuePair<int, Subscription> kp in _subscriptions)
+                {
+                    if (kp.Value.Path == path)
+                    {
+                        return kp.Key;
+                    }
+                }
+                return null;
+            }
+
+            /// <summary>
+            /// Get the subscription object from a subscription ID.
+            /// </summary>
+            /// <param name="subID">Subscription ID</param>
+            /// <returns>Subscription object</returns>
+            public Subscription GetSub(int subID)
+            {
+                if (!_subscriptions.ContainsKey(subID))
+                {
+                    throw new Exception(string.Format("Remote sid {0} was not found in subscription manager", subID));
+                }
+                return _subscriptions[subID];
+            }
+
+            /// <summary>
+            /// Subscription object that maps a path and callback to an ID.
+            /// </summary>
+            public class Subscription
+            {
+                public string Path;
+                public Action<SubscriptionUpdate> Callback;
             }
         }
     }
