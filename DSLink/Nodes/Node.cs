@@ -463,7 +463,6 @@ namespace DSLink.Nodes
         {
             var rootObject = new RootObject
             {
-                Msg = _link.MessageId,
                 Responses = new List<ResponseObject>
                 {
                     new ResponseObject
@@ -592,7 +591,6 @@ namespace DSLink.Nodes
             {
                 _link.Connector.Write(new RootObject()
                 {
-                    Msg = _link.MessageId,
                     Responses = responses
                 });
             }

@@ -170,8 +170,7 @@ namespace DSLink
         {
             var response = new RootObject
             {
-                Ack = message.Msg,
-                Msg = MessageId
+                Ack = message.Msg
             };
             bool write = false;
             if (message.Requests != null)
