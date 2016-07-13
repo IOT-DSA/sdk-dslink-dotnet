@@ -26,7 +26,7 @@ namespace DSLink.Connection
         /// <summary>
         /// Queue used when the connection is in the closed state.
         /// </summary>
-        private Queue<dynamic> _queue;
+        private Queue<RootObject> _queue;
 
         /// <summary>
         /// True if the WebSocket implementation supports compression.
@@ -70,7 +70,7 @@ namespace DSLink.Connection
         protected Connector(AbstractContainer link)
         {
             _link = link;
-            _queue = new Queue<dynamic>();
+            _queue = new Queue<RootObject>();
         }
 
         /// <summary>
@@ -121,23 +121,19 @@ namespace DSLink.Connection
         /// <param name="data">Data.</param>
         public void Write(RootObject data)
         {
+            if (!Connected())
+            {
+                lock (_queue)
+                {
+                    _queue.Enqueue(data);
+                }
+                return;
+            }
             if (!data.Msg.HasValue)
             {
                 data.Msg = _link.MessageId;
             }
-            var serialized = Serializer.Serialize(data);
-
-            if (Connected())
-            {
-                WriteData(serialized);
-            }
-            else
-            {
-                lock (_queue)
-                {
-                    _queue.Enqueue(serialized);
-                }
-            }
+            WriteData(Serializer.Serialize(data));
         }
 
         /// <summary>
@@ -203,7 +199,7 @@ namespace DSLink.Connection
             {
                 while (_queue.Count > 0)
                 {
-                    WriteData(_queue.Dequeue());
+                    Write(_queue.Dequeue());
                 }
             }
         }

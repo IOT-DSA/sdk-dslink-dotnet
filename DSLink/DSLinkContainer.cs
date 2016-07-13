@@ -42,8 +42,6 @@ namespace DSLink
 
             Reconnect = true;
             Connector = ConnectorManager.Create(this);
-            DoHandshake();
-            Connector.Serializer = SerializationManager.Serializer;
 
             // Events
             Connector.OnMessage += OnTextMessage;
@@ -57,27 +55,14 @@ namespace DSLink
             Connector.OnOpen += OnConnectionOpen;
             Connector.OnClose += OnConnectionClosed;
 
-            DoConnect();
-
             _pingTask = Task.Factory.StartNew(OnPingElapsed);
         }
 
-        /// <summary>
-        /// Performs handshake with broker.
-        /// </summary>
-        private void DoHandshake()
+        private void Delay(int attempts)
         {
-            Handshake = new Handshake(this);
-            Handshake.Shake();
-            SerializationManager = new SerializationManager(Config.CommunicationFormat);
-        }
-
-        /// <summary>
-        /// Connects to the Connector.
-        /// </summary>
-        private void DoConnect()
-        {
-            Connector.Connect();
+            var delay = attempts * 1000;
+            Logger.Warning(string.Format("Failed to connect, delaying for {0}ms", delay));
+            Task.Delay(delay).Wait();
         }
 
         /// <summary>
@@ -86,8 +71,31 @@ namespace DSLink
         public void Connect()
         {
             Reconnect = true;
-            DoHandshake();
-            DoConnect();
+            Handshake = new Handshake(this);
+            var attemptsLeft = Config.ConnectionAttemptLimit;
+            var attempts = 1;
+            while (attemptsLeft == -1 || attemptsLeft > 0)
+            {
+                if (Handshake.Shake())
+                {
+                    SerializationManager = new SerializationManager(Config.CommunicationFormat);
+                    Connector.Serializer = SerializationManager.Serializer;
+                    Connector.Connect();
+                    if (Connector.Connected())
+                    {
+                        return;
+                    }
+                }
+
+                Delay(attempts);
+
+                if (attemptsLeft > 0)
+                {
+                    attemptsLeft--;
+                }
+                attempts++;
+            }
+            Logger.Warning("Failed to connect within the allotted connection attempt limit.");
         }
 
         /// <summary>

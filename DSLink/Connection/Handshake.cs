@@ -42,41 +42,29 @@ namespace DSLink.Connection
         /// <summary>
         /// Run handshake with the server.
         /// </summary>
-        public void Shake()
+        public bool Shake()
         {
-            var keepTrying = true;
-            var delay = 1;
-            while (keepTrying)
+            _link.Logger.Info("Handshaking with " + _link.Config.BrokerUrl + "?dsId=" + _link.Config.DsId);
+            HttpResponseMessage resp = null;
+            try
             {
-                _link.Logger.Info("Handshaking with " + _link.Config.BrokerUrl + "?dsId=" + _link.Config.DsId);
-                HttpResponseMessage resp = null;
-                try
+                resp = RunHandshake().Result;
+            }
+            catch (AggregateException e)
+            {
+                foreach (var innerException in e.InnerExceptions)
                 {
-                    resp = RunHandshake().Result;
-                }
-                catch (AggregateException e)
-                {
-                    foreach (var innerException in e.InnerExceptions)
-                    {
-                        Debug.WriteLine(innerException.Message);
-                    }
-                }
-                    
-
-                if (resp != null && resp.StatusCode == HttpStatusCode.OK)
-                {
-                    _link.Logger.Info("Handshake successful");
-                    _link.Config.RemoteEndpoint = JsonConvert.DeserializeObject<RemoteEndpoint>(resp.Content.ReadAsStringAsync().Result);
-                    break;
-                }
-
-                Task.Delay(delay * 1000).Wait();
-
-                if (delay <= 60)
-                {
-                    delay++;
+                    Debug.WriteLine(innerException.Message);
                 }
             }
+
+            if (resp != null && resp.StatusCode == HttpStatusCode.OK)
+            {
+                _link.Logger.Info("Handshake successful");
+                _link.Config.RemoteEndpoint = JsonConvert.DeserializeObject<RemoteEndpoint>(resp.Content.ReadAsStringAsync().Result);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

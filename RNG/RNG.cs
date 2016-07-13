@@ -77,14 +77,16 @@ namespace RNG
             task.Start();*/
         }
 
-        protected override void OnConnectionOpen()
-        {
-        }
-
         private static void Main(string[] args)
         {
             NETPlatform.Initialize();
-            new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet", responder: true, requester: true, logLevel: LogLevel.Debug, communicationFormat: "json"));
+            var dslink =
+                new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet",
+                                                    responder: true, requester: true,
+                                                    logLevel: LogLevel.Debug,
+                                                    communicationFormat: "json",
+                                                    connectionAttemptLimit: 5));
+            dslink.Connect();
 
             while (true)
             {

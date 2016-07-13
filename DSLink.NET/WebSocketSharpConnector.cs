@@ -80,7 +80,7 @@ namespace DSLink.NET
         /// </summary>
         public override bool Connected()
         {
-            return _webSocket.IsAlive;
+            return _webSocket != null && _webSocket.IsAlive;
         }
 
         /// <summary>

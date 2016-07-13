@@ -79,7 +79,7 @@ namespace DSLink.iOS
         /// </summary>
         public override bool Connected()
         {
-            return _webSocket.ReadyState == ReadyState.Open;
+            return _webSocket != null && _webSocket.ReadyState == ReadyState.Open;
         }
 
         /// <summary>

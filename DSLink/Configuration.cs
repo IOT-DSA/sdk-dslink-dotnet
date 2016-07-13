@@ -93,6 +93,16 @@ namespace DSLink
         }
 
         /// <summary>
+        /// Represents the amount of times the DSLink can attempt to connect
+        /// to the broker. -1 will allow infinite attempts.
+        /// </summary>
+        public int ConnectionAttemptLimit
+        {
+            private set;
+            get;
+        }
+
+        /// <summary>
         /// Configuration constructor
         /// </summary>
         /// <param name="args">Command line arguments</param>
@@ -104,7 +114,8 @@ namespace DSLink
         /// <param name="brokerUrl">Full URL of broker to connect to</param>
         public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false,
                              string keysLocation = ".keys", string communicationFormat = "",
-                             string brokerUrl = "http://localhost:8080/conn", LogLevel logLevel = null)
+                             string brokerUrl = "http://localhost:8080/conn", LogLevel logLevel = null,
+                             int connectionAttemptLimit = -1)
         {
             if (logLevel == null)
             {
@@ -132,6 +143,7 @@ namespace DSLink
 
             BrokerUrl = brokerUrl;
             LogLevel = logLevel;
+            ConnectionAttemptLimit = connectionAttemptLimit;
 
             KeyPair = new KeyPair(KeysLocation);
         }

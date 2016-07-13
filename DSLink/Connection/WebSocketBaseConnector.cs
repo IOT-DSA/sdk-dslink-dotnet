@@ -55,7 +55,7 @@ namespace DSLink.Connection
         /// </summary>
         public override bool Connected()
         {
-            return _webSocket.IsOpen;
+            return _webSocket != null && _webSocket.IsOpen;
         }
 
         /// <summary>

@@ -54,7 +54,7 @@ namespace DSLink.Request
         {
             _link = link;
             _requestManager = new RequestManager();
-            _subscriptionManager = new RemoteSubscriptionManager();
+            _subscriptionManager = new RemoteSubscriptionManager(_link);
         }
 
         /// <summary>
@@ -317,6 +317,11 @@ namespace DSLink.Request
         internal class RemoteSubscriptionManager
         {
             /// <summary>
+            /// DSLink container link instance.
+            /// </summary>
+            private readonly AbstractContainer _link;
+
+            /// <summary>
             /// Subscription IDs to Subscription objects.
             /// </summary>
             private readonly Dictionary<int, Subscription> _subscriptions;
@@ -325,8 +330,9 @@ namespace DSLink.Request
             /// Initializes a new instance of the
             /// <see cref="T:DSLink.Request.Requester.RemoteSubscriptionManager"/> class.
             /// </summary>
-            public RemoteSubscriptionManager()
+            public RemoteSubscriptionManager(AbstractContainer link)
             {
+                _link = link;
                 _subscriptions = new Dictionary<int, Subscription>();
             }
 
@@ -384,7 +390,7 @@ namespace DSLink.Request
             {
                 if (!_subscriptions.ContainsKey(subID))
                 {
-                    throw new Exception(string.Format("Remote sid {0} was not found in subscription manager", subID));
+                    _link.Logger.Debug(string.Format("Remote sid {0} was not found in subscription manager", subID));
                 }
                 return _subscriptions[subID];
             }
