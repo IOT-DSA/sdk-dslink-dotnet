@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DSLink.Container;
 using Websockets;
 
@@ -37,6 +38,9 @@ namespace DSLink.Connection
 
             _link.Logger.Info("WebSocket connecting to " + WsUrl);
             _webSocket.Open(WsUrl);
+
+            // Hack
+            Task.Delay(1000).Wait();
         }
 
         /// <summary>
