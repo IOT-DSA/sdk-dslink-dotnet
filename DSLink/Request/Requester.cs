@@ -102,7 +102,6 @@ namespace DSLink.Request
                         var node = new RemoteNode(name, null);
                         node.FromSerialized(response.Updates);
                         listRequest.Callback(new ListResponse(listRequest.RequestID, listRequest.Path, node));
-                        _requestManager.StopRequest(listRequest.RequestID);
                     }
                     else if (request is SetRequest)
                     {
@@ -134,7 +133,7 @@ namespace DSLink.Request
         /// <param name="callback">Callback</param>
         public ListRequest List(string path, Action<ListResponse> callback)
         {
-            var request = new ListRequest(NextRequestID, callback, path);
+            var request = new ListRequest(NextRequestID, callback, path, _link);
             _requestManager.StartRequest(request);
             _link.Connector.Write(new RootObject
             {

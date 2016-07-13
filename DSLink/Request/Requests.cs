@@ -65,15 +65,23 @@ namespace DSLink.Request
         public readonly string Path;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:DSLink.Request.ListRequest"/> class.
+        /// Link container instance.
+        /// </summary>
+        private readonly AbstractContainer _link;
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Request.ListRequest"/> class.
         /// </summary>
         /// <param name="requestID">Request identifier</param>
         /// <param name="callback">Callback</param>
         /// <param name="path">Path</param>
-        public ListRequest(int requestID, Action<ListResponse> callback, string path) : base(requestID)
+        /// <param name="link">Link</param>
+        public ListRequest(int requestID, Action<ListResponse> callback, string path, AbstractContainer link) : base(requestID)
         {
             Callback = callback;
             Path = path;
+            _link = link;
         }
 
         /// <summary>
@@ -89,6 +97,28 @@ namespace DSLink.Request
             var baseSerialized = base.Serialize();
             baseSerialized.Path = Path;
             return baseSerialized;
+        }
+
+        /// <summary>
+        /// Close the list request.
+        /// </summary>
+        public void Close()
+        {
+            if (_link == null)
+            {
+                throw new NotSupportedException("Link is null, cannot close stream.");
+            }
+            _link.Connector.Write(new RootObject
+            {
+                Responses = new List<ResponseObject>
+                {
+                    new ResponseObject
+                    {
+                        RequestId = RequestID,
+                        Stream = "closed"
+                    }
+                }
+            });
         }
     }
 
