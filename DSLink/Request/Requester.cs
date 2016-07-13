@@ -77,7 +77,11 @@ namespace DSLink.Request
                             int sid = update[0];
                             dynamic value = update[1];
                             string dt = update[2];
-                            _subscriptionManager.GetSub(sid).Callback(new SubscriptionUpdate(sid, value, dt));
+                            var sub = _subscriptionManager.GetSub(sid);
+                            if (sub != null)
+                            {
+                                sub.Callback(new SubscriptionUpdate(sid, value, dt));
+                            }
                         }
                         else if (update is JObject)
                         {
@@ -88,7 +92,11 @@ namespace DSLink.Request
                             int sum = update["sum"];
                             int min = update["min"];
                             int max = update["max"];
-                            _subscriptionManager.GetSub(sid).Callback(new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
+                            var sub = _subscriptionManager.GetSub(sid);
+                            if (sub != null)
+                            {
+                                sub.Callback(new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
+                            }
                         }
                     }
                 }
@@ -391,6 +399,7 @@ namespace DSLink.Request
                 if (!_subscriptions.ContainsKey(subID))
                 {
                     _link.Logger.Debug(string.Format("Remote sid {0} was not found in subscription manager", subID));
+                    return null;
                 }
                 return _subscriptions[subID];
             }
