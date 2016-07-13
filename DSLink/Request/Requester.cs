@@ -249,18 +249,30 @@ namespace DSLink.Request
         /// <param name="path">Path</param>
         public void Unsubscribe(string path)
         {
-            int sid = _subscriptionManager.GetSubByPath(path).Value;
-            _subscriptionManager.Unsubscribe(sid);
-            _link.Connector.Write(new RootObject
+            int? sid = _subscriptionManager.GetSubByPath(path);
+            if (sid.HasValue)
             {
-                Requests = new List<RequestObject>
+                _subscriptionManager.Unsubscribe(sid.Value);
+                _link.Connector.Write(new RootObject
                 {
-                    new UnsubscribeRequest(NextRequestID, new List<int>
+                    Requests = new List<RequestObject>
                     {
-                        sid
-                    }).Serialize()
-                }
-            });
+                        new UnsubscribeRequest(NextRequestID, new List<int>
+                        {
+                            sid.Value
+                        }).Serialize()
+                    }
+                });
+            }
+            else
+            {
+                _link.Logger.Warning(
+                    string.Format(
+                        "Attempted to unsubscribe from {0}, but was not subscribed to it.",
+                        path
+                    )
+                );
+            }
         }
 
         /// <summary>
