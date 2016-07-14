@@ -299,7 +299,7 @@ namespace DSLink.Nodes
         {
             get
             {
-                return Permission._permMap[GetConfigValue("invokable")];
+                return Permission.FromString(GetConfigValue("invokable"));
             }
             set
             {

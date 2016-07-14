@@ -98,28 +98,6 @@ namespace DSLink.Request
             baseSerialized.Path = Path;
             return baseSerialized;
         }
-
-        /// <summary>
-        /// Close the list request.
-        /// </summary>
-        public void Close()
-        {
-            if (_link == null)
-            {
-                throw new NotSupportedException("Link is null, cannot close stream.");
-            }
-            _link.Connector.Write(new RootObject
-            {
-                Responses = new List<ResponseObject>
-                {
-                    new ResponseObject
-                    {
-                        RequestId = RequestID,
-                        Stream = "closed"
-                    }
-                }
-            });
-        }
     }
 
     /// <summary>

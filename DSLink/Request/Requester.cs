@@ -109,7 +109,8 @@ namespace DSLink.Request
                         string name = listRequest.Path.Split('/').Last();
                         var node = new RemoteNode(name, null);
                         node.FromSerialized(response.Updates);
-                        listRequest.Callback(new ListResponse(listRequest.RequestID, listRequest.Path, node));
+                        listRequest.Callback(new ListResponse(_link, listRequest.RequestID,
+                                                              listRequest.Path, node));
                     }
                     else if (request is SetRequest)
                     {
@@ -122,7 +123,9 @@ namespace DSLink.Request
                     else if (request is InvokeRequest)
                     {
                         var invokeRequest = request as InvokeRequest;
-                        invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID, invokeRequest.Path, response.Columns, response.Updates));
+                        invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID,
+                                                                  invokeRequest.Path, response.Columns,
+                                                                  response.Updates));
                     }
                 }
                 else if (response.RequestId == null)

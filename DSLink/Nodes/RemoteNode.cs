@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using DSLink.Nodes.Actions;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes
@@ -54,11 +56,34 @@ namespace DSLink.Nodes
                 var value = a[1];
                 if (key.StartsWith("$"))
                 {
-                    SetConfig(key.Substring(1), new Value(value.ToString()));
+                    key = key.Substring(1);
+                    if (key.Equals("params") && value.Type == JTokenType.Array)
+                    {
+                        var parameters = new List<Parameter>();
+                        foreach (var parameter in value.Value<JArray>())
+                        {
+                            parameters.Add(parameter.ToObject<Parameter>());
+                        }
+                        SetConfig(key, new Value(parameters));
+                    }
+                    else if (key.Equals("columns") && value.Type == JTokenType.Array)
+                    {
+                        var columns = new List<Column>();
+                        foreach (var column in value.Value<JArray>())
+                        {
+                            columns.Add(column.ToObject<Column>());
+                        }
+                        SetConfig(key, new Value(columns));
+                    }
+                    else
+                    {
+                        SetConfig(key, new Value(value.ToString()));
+                    }
                 }
                 else if (key.StartsWith("@"))
                 {
-                    SetAttribute(key.Substring(1), new Value(value.ToString()));
+                    key = key.Substring(1);
+                    SetAttribute(key, new Value(value.ToString()));
                 }
                 else
                 {

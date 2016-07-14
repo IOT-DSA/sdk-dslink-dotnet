@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
@@ -12,6 +13,11 @@ namespace DSLink.Respond
     public class Response
     {
         /// <summary>
+        /// DSLink container.
+        /// </summary>
+        private readonly AbstractContainer _link;
+
+        /// <summary>
         /// Request identifier for request.
         /// </summary>
         public int RequestID
@@ -21,12 +27,38 @@ namespace DSLink.Respond
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:DSLink.Respond.Response"/> class.
+        /// Initializes a new instance of the
+        /// <see cref="T:DSLink.Respond.Response"/> class.
         /// </summary>
+        /// <param name="link">Link instance</param>
         /// <param name="requestID">Request identifier</param>
-        public Response(int requestID)
+        public Response(AbstractContainer link, int requestID)
         {
+            _link = link;
             RequestID = requestID;
+        }
+
+        /// <summary>
+        /// Close the request.
+        /// </summary>
+        public void Close()
+        {
+            if (_link == null)
+            {
+                throw new NullReferenceException("Link is null, cannot close stream.");
+            }
+            _link.Requester._requestManager.StopRequest(RequestID);
+            _link.Connector.Write(new RootObject
+            {
+                Responses = new List<ResponseObject>
+                {
+                    new ResponseObject
+                    {
+                        RequestId = RequestID,
+                        Stream = "closed"
+                    }
+                }
+            });
         }
     }
 
@@ -59,7 +91,9 @@ namespace DSLink.Respond
         /// <param name="requestID">Request identifier</param>
         /// <param name="path">Path</param>
         /// <param name="node">Node</param>
-        public ListResponse(int requestID, string path, Node node) : base(requestID)
+        public ListResponse(AbstractContainer link, int requestID,
+                            string path, Node node)
+            : base(link, requestID)
         {
             Path = path;
             Node = node;
@@ -71,11 +105,6 @@ namespace DSLink.Respond
     /// </summary>
     public class InvokeResponse : Response
     {
-        /// <summary>
-        /// DSLink container.
-        /// </summary>
-        private AbstractContainer _link;
-
         /// <summary>
         /// Path of the Node.
         /// </summary>
@@ -117,31 +146,14 @@ namespace DSLink.Respond
         /// <param name="path">Path</param>
         /// <param name="columns">Columns</param>
         /// <param name="updates">Updates</param>
-        public InvokeResponse(AbstractContainer link, int requestID, string path, List<Column> columns, List<dynamic> updates) : base(requestID)
+        public InvokeResponse(AbstractContainer link, int requestID,
+                              string path, List<Column> columns,
+                              List<dynamic> updates)
+            : base(link, requestID)
         {
-            _link = link;
             Path = path;
             Columns = columns;
             Updates = updates;
-        }
-
-        /// <summary>
-        /// Close the request.
-        /// </summary>
-        public void Close()
-        {
-            _link.Requester._requestManager.StopRequest(RequestID);
-            _link.Connector.Write(new RootObject
-            {
-                Requests = new List<RequestObject>
-                {
-                    new RequestObject
-                    {
-                        RequestId = RequestID,
-                        Method = "close"
-                    }
-                }
-            });
         }
     }
 }

@@ -39,11 +39,22 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// Converts to String.
+        /// Converts to string.
         /// </summary>
         public override string ToString()
         {
             return Permit;
+        }
+
+        /// <summary>
+        /// Converts from string.
+        /// </summary>
+        /// <param name="permit">Permission</param>
+        /// <returns>Permission from specific string</returns>
+        public static Permission FromString(string permit)
+        {
+            permit = permit.ToLower();
+            return _permMap.ContainsKey(permit) ? _permMap[permit] : null;
         }
     }
 }
