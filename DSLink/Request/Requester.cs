@@ -279,6 +279,33 @@ namespace DSLink.Request
         }
 
         /// <summary>
+        /// Unsubscribe from the specified paths.
+        /// </summary>
+        /// <param name="paths">List of paths</param>
+        public void Unsubscribe(List<string> paths)
+        {
+            var sids = new List<int>();
+            foreach (string path in paths)
+            {
+                var sid = _subscriptionManager.GetSubByPath(path);
+                if (sid.HasValue)
+                {
+                    sids.Add(sid.Value);
+                }
+            }
+            if (sids.Count > 0)
+            {
+                _link.Connector.Write(new RootObject
+                {
+                    Requests = new List<RequestObject>
+                    {
+                        new UnsubscribeRequest(NextRequestID, sids).Serialize()
+                    }
+                });
+            }
+        }
+
+        /// <summary>
         /// Request manager handles outgoing requests.
         /// </summary>
         internal class RequestManager
