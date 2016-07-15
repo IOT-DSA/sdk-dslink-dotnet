@@ -53,6 +53,10 @@ namespace DSLink.Nodes
         /// <returns>Permission from specific string</returns>
         public static Permission FromString(string permit)
         {
+            if (string.IsNullOrEmpty(permit))
+            {
+                return null;
+            }
             permit = permit.ToLower();
             return _permMap.ContainsKey(permit) ? _permMap[permit] : null;
         }
