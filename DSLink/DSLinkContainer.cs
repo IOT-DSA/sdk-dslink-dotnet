@@ -58,17 +58,22 @@ namespace DSLink
             _pingTask = Task.Factory.StartNew(OnPingElapsed);
         }
 
-        private void Delay(int attempts)
+        /// <summary>
+        /// Delays for a specified amount of time. This time is the number of
+        /// attempts for the number of seconds to delay.
+        /// </summary>
+        /// <param name="attempts">Attempts</param>
+        private async Task Delay(int attempts)
         {
             var delay = attempts * 1000;
             Logger.Warning(string.Format("Failed to connect, delaying for {0}ms", delay));
-            Task.Delay(delay).Wait();
+            await Task.Delay(delay);
         }
 
         /// <summary>
         /// Connect to the broker.
         /// </summary>
-        public void Connect()
+        public async void Connect()
         {
             Reconnect = true;
             Handshake = new Handshake(this);
@@ -76,18 +81,19 @@ namespace DSLink
             var attempts = 1;
             while (attemptsLeft == -1 || attemptsLeft > 0)
             {
-                if (Handshake.Shake())
+                bool handshakeStatus = await Handshake.Shake();
+                if (handshakeStatus)
                 {
                     SerializationManager = new SerializationManager(Config.CommunicationFormat);
                     Connector.Serializer = SerializationManager.Serializer;
-                    Connector.Connect();
+                    await Connector.ConnectAsync();
                     if (Connector.Connected())
                     {
                         return;
                     }
                 }
 
-                Delay(attempts);
+                await Delay(attempts);
 
                 if (attemptsLeft > 0)
                 {
@@ -145,10 +151,10 @@ namespace DSLink
         /// This deserializes the message and hands it off to OnMessage.
         /// </summary>
         /// <param name="messageEvent">Text message event</param>
-        private void OnTextMessage(MessageEvent messageEvent)
+        private async void OnTextMessage(MessageEvent messageEvent)
         {
             Logger.Debug("Text Received: " + messageEvent.Message);
-            OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
+            await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
         }
 
         /// <summary>
@@ -156,7 +162,7 @@ namespace DSLink
         /// This deserializes the message and hands it off to OnMessage.
         /// </summary>
         /// <param name="messageEvent">Binary message event</param>
-        private void OnBinaryMessage(BinaryMessageEvent messageEvent)
+        private async void OnBinaryMessage(BinaryMessageEvent messageEvent)
         {
             if (messageEvent.Message.Length < 500)
             {
@@ -167,14 +173,14 @@ namespace DSLink
                 Logger.Debug("Binary Received: (over 5000 bytes)");
             }
 
-            OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
+            await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
         }
 
         /// <summary>
         /// Called when a message is received from the server, and is passed in deserialized data.
         /// </summary>
         /// <param name="message">Deserialized data</param>
-        private void OnMessage(RootObject message)
+        private async Task OnMessage(RootObject message)
         {
             var response = new RootObject
             {
@@ -183,7 +189,7 @@ namespace DSLink
             bool write = false;
             if (message.Requests != null)
             {
-                var responses = Responder.ProcessRequests(message.Requests);
+                var responses = await Responder.ProcessRequests(message.Requests);
                 if (responses.Count > 0)
                 {
                     response.Responses = responses;
@@ -192,7 +198,7 @@ namespace DSLink
             }
             if (message.Responses != null)
             {
-                var requests = Requester.ProcessResponses(message.Responses);
+                var requests = await Requester.ProcessResponses(message.Responses);
                 if (requests.Count > 0)
                 {
                     response.Requests = requests;

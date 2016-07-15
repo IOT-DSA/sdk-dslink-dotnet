@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
@@ -51,7 +52,7 @@ namespace DSLink.Respond
         /// </summary>
         /// <param name="requests">List of requests</param>
         /// <returns>List of responses</returns>
-        internal List<ResponseObject> ProcessRequests(List<RequestObject> requests)
+        internal async Task<List<ResponseObject>> ProcessRequests(List<RequestObject> requests)
         {
             var responses = new List<ResponseObject>();
             foreach (var request in requests)
@@ -78,7 +79,8 @@ namespace DSLink.Respond
                             var node = SuperRoot.Get(request.Path);
                             if (node != null)
                             {
-                                if (request.Permit == null || request.Permit.Equals(node.GetConfig("writable").Get())) {
+                                if (request.Permit == null || request.Permit.Equals(node.GetConfig("writable").Get()))
+                                {
                                     node.Value.Set(request.Value);
                                     responses.Add(new ResponseObject
                                     {
@@ -114,7 +116,7 @@ namespace DSLink.Respond
                                     var invokeRequest = new InvokeRequest(request.RequestId.Value, request.Path,
                                                                           permit, request.Parameters, link: _link,
                                                                           columns: columns);
-                                    node.Action.Function.Invoke(parameters, invokeRequest);
+                                    await Task.Run(() => node.Action.Function.Invoke(parameters, invokeRequest));
                                 }
                             }
                         }
@@ -236,7 +238,7 @@ namespace DSLink.Respond
         /// Ran when the connection is lost.
         /// Clears all subscriptions.
         /// </summary>
-        internal void ClearAll()
+        public void ClearAll()
         {
             _subscriptions.Clear();
         }

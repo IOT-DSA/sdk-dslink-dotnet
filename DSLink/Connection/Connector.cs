@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 
@@ -124,6 +125,12 @@ namespace DSLink.Connection
                 return sb.ToString();
             }
         }
+
+        public async Task ConnectAsync()
+        {
+            await Task.Run(() => Connect());
+        }
+
         /// <summary>
         /// Connect to the broker.
         /// </summary>
@@ -144,6 +151,15 @@ namespace DSLink.Connection
         /// True if connected to a broker.
         /// </summary>
         public abstract bool Connected();
+
+        /// <summary>
+        /// Write the specified data asynchronously.
+        /// </summary>
+        /// <param name="data">Data.</param>
+        public async Task WriteAsync(RootObject data)
+        {
+            await Task.Run(() => Write(data));
+        }
 
         /// <summary>
         /// Write the specified data.

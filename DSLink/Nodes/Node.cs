@@ -589,7 +589,7 @@ namespace DSLink.Nodes
             }).ToList();
             if (responses.Count > 0)
             {
-                _link.Connector.Write(new RootObject()
+                _link.Connector.Write(new RootObject
                 {
                     Responses = responses
                 });

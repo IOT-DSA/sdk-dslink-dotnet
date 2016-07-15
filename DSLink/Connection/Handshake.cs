@@ -16,7 +16,7 @@ namespace DSLink.Connection
         /// <summary>
         /// DSA Version.
         /// </summary>
-        private const string DSA_VERSION = "1.1.2";
+        private const string DSAVersion = "1.1.2";
 
         /// <summary>
         /// Instance of link container.
@@ -42,13 +42,13 @@ namespace DSLink.Connection
         /// <summary>
         /// Run handshake with the server.
         /// </summary>
-        public bool Shake()
+        public async Task<bool> Shake()
         {
             _link.Logger.Info("Handshaking with " + _link.Config.BrokerUrl + "?dsId=" + _link.Config.DsId);
             HttpResponseMessage resp = null;
             try
             {
-                resp = RunHandshake().Result;
+                resp = await RunHandshake();
             }
             catch (AggregateException e)
             {
@@ -61,7 +61,10 @@ namespace DSLink.Connection
             if (resp != null && resp.StatusCode == HttpStatusCode.OK)
             {
                 _link.Logger.Info("Handshake successful");
-                _link.Config.RemoteEndpoint = JsonConvert.DeserializeObject<RemoteEndpoint>(resp.Content.ReadAsStringAsync().Result);
+                _link.Config.RemoteEndpoint = await Task.Run(async () =>
+                {
+                    return JsonConvert.DeserializeObject<RemoteEndpoint>(await resp.Content.ReadAsStringAsync());
+                });
                 return true;
             }
             return false;
@@ -88,7 +91,7 @@ namespace DSLink.Connection
                 {"isRequester", _link.Config.Requester},
                 {"isResponder", _link.Config.Responder},
                 {"linkData", new JObject()},
-                {"version", DSA_VERSION},
+                {"version", DSAVersion},
                 {"formats", new JArray(SerializationManager.Serializers.Keys.ToArray())},
                 {"enableWebSocketCompression", _link.Connector.SupportsCompression}
             };

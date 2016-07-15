@@ -15,8 +15,6 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            Connector.EnableQueue = true;
-
             Requester.Subscribe("/sys/dataOutPerSecond", (SubscriptionUpdate obj) =>
             {
                 Console.WriteLine(obj.Value);
@@ -28,8 +26,6 @@ namespace RNG
                 Console.WriteLine(obj.Value);
                 Requester.Unsubscribe("/sys/dataInPerSecond");
             });
-
-            Connector.EnableQueue = false;
 
             /*var testNode = Responder.SuperRoot.CreateChild("test")
                                     .SetDisplayName("Test")

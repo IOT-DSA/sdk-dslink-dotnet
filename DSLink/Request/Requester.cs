@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
@@ -62,7 +63,7 @@ namespace DSLink.Request
         /// </summary>
         /// <param name="responses">Responses</param>
         /// <returns>Requests</returns>
-        internal List<RequestObject> ProcessResponses(List<ResponseObject> responses)
+        internal async Task<List<RequestObject>> ProcessResponses(List<ResponseObject> responses)
         {
             var requests = new List<RequestObject>();
 
@@ -80,7 +81,7 @@ namespace DSLink.Request
                             var sub = _subscriptionManager.GetSub(sid);
                             if (sub != null)
                             {
-                                sub.Callback(new SubscriptionUpdate(sid, value, dt));
+                                await Task.Run(() => sub.Callback(new SubscriptionUpdate(sid, value, dt)));
                             }
                         }
                         else if (update is JObject)
@@ -95,7 +96,7 @@ namespace DSLink.Request
                             var sub = _subscriptionManager.GetSub(sid);
                             if (sub != null)
                             {
-                                sub.Callback(new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
+                                await Task.Run(() => sub.Callback(new SubscriptionUpdate(sid, value, ts, count, sum, min, max)));
                             }
                         }
                     }
@@ -109,8 +110,8 @@ namespace DSLink.Request
                         string name = listRequest.Path.Split('/').Last();
                         var node = new RemoteNode(name, null);
                         node.FromSerialized(response.Updates);
-                        listRequest.Callback(new ListResponse(_link, listRequest.RequestID,
-                                                              listRequest.Path, node));
+                        await Task.Run(() => listRequest.Callback(new ListResponse(_link, listRequest.RequestID,
+                                                                                   listRequest.Path, node)));
                     }
                     else if (request is SetRequest)
                     {
@@ -123,9 +124,9 @@ namespace DSLink.Request
                     else if (request is InvokeRequest)
                     {
                         var invokeRequest = request as InvokeRequest;
-                        invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID,
-                                                                  invokeRequest.Path, response.Columns,
-                                                                  response.Updates));
+                        await Task.Run(() => invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID,
+                                                                                       invokeRequest.Path, response.Columns,
+                                                                                       response.Updates)));
                     }
                 }
                 else if (response.RequestId == null)
@@ -142,11 +143,11 @@ namespace DSLink.Request
         /// </summary>
         /// <param name="path">Path</param>
         /// <param name="callback">Callback</param>
-        public ListRequest List(string path, Action<ListResponse> callback)
+        public async Task<ListRequest> List(string path, Action<ListResponse> callback)
         {
             var request = new ListRequest(NextRequestID, callback, path, _link);
             _requestManager.StartRequest(request);
-            _link.Connector.Write(new RootObject
+            await _link.Connector.WriteAsync(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
@@ -162,11 +163,11 @@ namespace DSLink.Request
         /// <param name="path">Path</param>
         /// <param name="permission">Permission</param>
         /// <param name="value">Value</param>
-        public SetRequest Set(string path, Permission permission, Value value)
+        public async Task<SetRequest> Set(string path, Permission permission, Value value)
         {
             var request = new SetRequest(NextRequestID, path, permission, value);
             _requestManager.StartRequest(request);
-            _link.Connector.Write(new RootObject
+            await _link.Connector.WriteAsync(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
@@ -180,11 +181,11 @@ namespace DSLink.Request
         /// Remove the specified path.
         /// </summary>
         /// <param name="path">Path</param>
-        public RemoveRequest Remove(string path)
+        public async Task<RemoveRequest> Remove(string path)
         {
             var request = new RemoveRequest(NextRequestID, path);
             _requestManager.StartRequest(request);
-            _link.Connector.Write(new RootObject
+            await _link.Connector.WriteAsync(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
@@ -201,11 +202,11 @@ namespace DSLink.Request
         /// <param name="permission">Permission</param>
         /// <param name="parameters">Parameters</param>
         /// <param name="callback">Callback</param>
-        public InvokeRequest Invoke(string path, Permission permission, Dictionary<string, dynamic> parameters, Action<InvokeResponse> callback)
+        public async Task<InvokeRequest> Invoke(string path, Permission permission, Dictionary<string, dynamic> parameters, Action<InvokeResponse> callback)
         {
             var request = new InvokeRequest(NextRequestID, path, permission, parameters, callback);
             _requestManager.StartRequest(request);
-            _link.Connector.Write(new RootObject
+            await _link.Connector.WriteAsync(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
@@ -221,7 +222,7 @@ namespace DSLink.Request
         /// <param name="path">Path</param>
         /// <param name="callback">Callback</param>
         /// <param name="qos">Quality of Service</param>
-        public SubscribeRequest Subscribe(string path, Action<SubscriptionUpdate> callback, int qos = 0)
+        public async Task<SubscribeRequest> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos = 0)
         {
             var sid = NextSubID;
             var request = new SubscribeRequest(NextRequestID, new List<AddSubscriptionObject>
@@ -235,7 +236,7 @@ namespace DSLink.Request
             }, callback);
 
             _subscriptionManager.Subscribe(sid, path, callback);
-            _link.Connector.Write(new RootObject
+            await _link.Connector.WriteAsync(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
