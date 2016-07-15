@@ -73,7 +73,7 @@ namespace DSLink
         /// <summary>
         /// Connect to the broker.
         /// </summary>
-        public async void Connect()
+        public async Task Connect()
         {
             Reconnect = true;
             Handshake = new Handshake(this);
