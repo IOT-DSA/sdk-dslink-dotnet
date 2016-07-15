@@ -147,7 +147,7 @@ namespace DSLink.Request
         {
             var request = new ListRequest(NextRequestID, callback, path, _link);
             _requestManager.StartRequest(request);
-            await _link.Connector.WriteAsync(new RootObject
+            await _link.Connector.Write(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
@@ -167,7 +167,7 @@ namespace DSLink.Request
         {
             var request = new SetRequest(NextRequestID, path, permission, value);
             _requestManager.StartRequest(request);
-            await _link.Connector.WriteAsync(new RootObject
+            await _link.Connector.Write(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
@@ -185,7 +185,7 @@ namespace DSLink.Request
         {
             var request = new RemoveRequest(NextRequestID, path);
             _requestManager.StartRequest(request);
-            await _link.Connector.WriteAsync(new RootObject
+            await _link.Connector.Write(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
@@ -206,7 +206,7 @@ namespace DSLink.Request
         {
             var request = new InvokeRequest(NextRequestID, path, permission, parameters, callback);
             _requestManager.StartRequest(request);
-            await _link.Connector.WriteAsync(new RootObject
+            await _link.Connector.Write(new RootObject
             {
                 Requests = new List<RequestObject>
                 {
@@ -236,7 +236,7 @@ namespace DSLink.Request
             }, callback);
 
             _subscriptionManager.Subscribe(sid, path, callback);
-            await _link.Connector.WriteAsync(new RootObject
+            await _link.Connector.Write(new RootObject
             {
                 Requests = new List<RequestObject>
                 {

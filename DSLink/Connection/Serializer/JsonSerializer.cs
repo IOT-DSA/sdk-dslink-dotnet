@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -21,7 +22,7 @@ namespace DSLink.Connection.Serializer
             return JsonConvert.SerializeObject(data, Formatting.None, new JsonSerializerSettings()
             {
                 NullValueHandling = NullValueHandling.Ignore,
-				Converters = new List<JsonConverter>(){new JsonByteArrayConverter()}
+                Converters = new List<JsonConverter>() { new JsonByteArrayConverter() }
             });
         }
 

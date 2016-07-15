@@ -6,6 +6,8 @@ using DSLink;
 using DSLink.NET;
 using DSLink.Request;
 using DSLink.Util.Logger;
+using DSLink.Respond;
+using DSLink.Nodes;
 
 namespace RNG
 {
@@ -15,7 +17,7 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            Requester.Subscribe("/sys/dataOutPerSecond", (SubscriptionUpdate obj) =>
+            /*Requester.Subscribe("/sys/dataOutPerSecond", (SubscriptionUpdate obj) =>
             {
                 Console.WriteLine(obj.Value);
                 Requester.Unsubscribe("/sys/dataOutPerSecond");
@@ -25,7 +27,15 @@ namespace RNG
             {
                 Console.WriteLine(obj.Value);
                 Requester.Unsubscribe("/sys/dataInPerSecond");
-            });
+            });*/
+
+            /*Requester.List("/data/", (ListResponse response) =>
+            {
+                foreach (KeyValuePair<string, Node> kp in response.Node.Children)
+                {
+                    Console.WriteLine(kp.Value.Name);
+                }
+            });*/
 
             /*var testNode = Responder.SuperRoot.CreateChild("test")
                                     .SetDisplayName("Test")
@@ -85,19 +95,25 @@ namespace RNG
 
         private static void Main(string[] args)
         {
-            NETPlatform.Initialize();
-            var dslink =
-                new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet",
-                                                    responder: true, requester: true,
-                                                    logLevel: LogLevel.Debug,
-                                                    communicationFormat: "json",
-                                                    connectionAttemptLimit: 5));
-            dslink.Connect();
+            Initialize();
 
             while (true)
             {
                 Thread.Sleep(1000);
             }
+        }
+
+        public static async void Initialize()
+        {
+            NETPlatform.Initialize();
+            var dslink =
+                new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet",
+                                                    responder: true, requester: true,
+                                                    logLevel: LogLevel.Debug,
+                                                    //communicationFormat: "json",
+                                                    connectionAttemptLimit: -1));
+            
+            dslink.Connect();
         }
     }
 }

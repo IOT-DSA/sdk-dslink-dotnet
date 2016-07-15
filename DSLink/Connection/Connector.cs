@@ -48,11 +48,11 @@ namespace DSLink.Connection
         {
             set
             {
+                _enableQueue = value;
                 if (!value)
                 {
                     Flush();
                 }
-                _enableQueue = value;
             }
             get
             {
@@ -153,19 +153,10 @@ namespace DSLink.Connection
         public abstract bool Connected();
 
         /// <summary>
-        /// Write the specified data asynchronously.
-        /// </summary>
-        /// <param name="data">Data.</param>
-        public async Task WriteAsync(RootObject data)
-        {
-            await Task.Run(() => Write(data));
-        }
-
-        /// <summary>
         /// Write the specified data.
         /// </summary>
-        /// <param name="data">Data.</param>
-        public void Write(RootObject data)
+        /// <param name="data">RootObject to serialize and send</param>
+        public async Task Write(RootObject data)
         {
             if (!data.Msg.HasValue)
             {
@@ -266,7 +257,7 @@ namespace DSLink.Connection
                 {
                     if (_queue != null)
                     {
-                        Write(_queue);
+                        Write(_queue).Wait();
                         _queue = null;
                     }
                 }

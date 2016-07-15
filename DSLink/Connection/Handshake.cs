@@ -50,12 +50,9 @@ namespace DSLink.Connection
             {
                 resp = await RunHandshake();
             }
-            catch (AggregateException e)
+            catch (Exception e)
             {
-                foreach (var innerException in e.InnerExceptions)
-                {
-                    Debug.WriteLine(innerException.Message);
-                }
+                _link.Logger.Warning(e.Message);
             }
 
             if (resp != null && resp.StatusCode == HttpStatusCode.OK)

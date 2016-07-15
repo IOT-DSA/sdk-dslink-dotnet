@@ -59,21 +59,9 @@ namespace DSLink
         }
 
         /// <summary>
-        /// Delays for a specified amount of time. This time is the number of
-        /// attempts for the number of seconds to delay.
-        /// </summary>
-        /// <param name="attempts">Attempts</param>
-        private async Task Delay(int attempts)
-        {
-            var delay = attempts * 1000;
-            Logger.Warning(string.Format("Failed to connect, delaying for {0}ms", delay));
-            await Task.Delay(delay);
-        }
-
-        /// <summary>
         /// Connect to the broker.
         /// </summary>
-        public async Task Connect()
+        public async void Connect()
         {
             Reconnect = true;
             Handshake = new Handshake(this);
@@ -93,7 +81,13 @@ namespace DSLink
                     }
                 }
 
-                await Delay(attempts);
+                var delay = attempts;
+                if (delay > Config.MaxConnectionCooldown)
+                {
+                    delay = Config.MaxConnectionCooldown;
+                }
+                Logger.Warning(string.Format("Failed to connect, delaying for {0} seconds", delay));
+                await Task.Delay(TimeSpan.FromSeconds(delay));
 
                 if (attemptsLeft > 0)
                 {
@@ -164,7 +158,7 @@ namespace DSLink
         /// <param name="messageEvent">Binary message event</param>
         private async void OnBinaryMessage(BinaryMessageEvent messageEvent)
         {
-            if (messageEvent.Message.Length < 500)
+            if (messageEvent.Message.Length < 5000)
             {
                 Logger.Debug("Binary Received: " + BitConverter.ToString(messageEvent.Message));
             }
@@ -207,7 +201,7 @@ namespace DSLink
             }
             if (write)
             {
-                Connector.Write(response);
+                await Connector.Write(response);
             }
         }
 
@@ -239,7 +233,7 @@ namespace DSLink
         /// <summary>
         /// Task used to send pings occasionally to keep the connection alive.
         /// </summary>
-        private void OnPingElapsed()
+        private async void OnPingElapsed()
         {
             while (_pingTask.Status != TaskStatus.Canceled)
             {
@@ -247,10 +241,10 @@ namespace DSLink
                 {
                     // Write a blank message containing no responses/requests.
                     Logger.Debug("Sent ping");
-                    Connector.Write(new RootObject());
+                    await Connector.Write(new RootObject());
                 }
                 // TODO: Extract the amount of time to the configuration object.
-                Task.Delay(30000).Wait();
+                await Task.Delay(30000);
             }
         }
     }

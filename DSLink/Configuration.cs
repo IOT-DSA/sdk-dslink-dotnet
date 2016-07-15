@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -84,7 +85,7 @@ namespace DSLink
         }
 
         /// <summary>
-        /// Log level
+        /// Highest log level that the logger will output to the console.
         /// </summary>
         public LogLevel LogLevel
         {
@@ -103,6 +104,16 @@ namespace DSLink
         }
 
         /// <summary>
+        /// Represents the amount of time in seconds that the DSLink will
+        /// delay after a connection failure.
+        /// </summary>
+        public int MaxConnectionCooldown
+        {
+            private set;
+            get;
+        }
+
+        /// <summary>
         /// Configuration constructor
         /// </summary>
         /// <param name="args">Command line arguments</param>
@@ -115,7 +126,7 @@ namespace DSLink
         public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false,
                              string keysLocation = ".keys", string communicationFormat = "",
                              string brokerUrl = "http://localhost:8080/conn", LogLevel logLevel = null,
-                             int connectionAttemptLimit = -1)
+                             int connectionAttemptLimit = -1, int maxConnectionCooldown = 60)
         {
             if (logLevel == null)
             {
@@ -144,6 +155,11 @@ namespace DSLink
             BrokerUrl = brokerUrl;
             LogLevel = logLevel;
             ConnectionAttemptLimit = connectionAttemptLimit;
+            if (maxConnectionCooldown < 1)
+            {
+                throw new InvalidOperationException("Cooldown must be greater than 0");
+            }
+            MaxConnectionCooldown = maxConnectionCooldown;
 
             KeyPair = new KeyPair(KeysLocation);
         }
