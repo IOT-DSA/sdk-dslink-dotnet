@@ -24,9 +24,40 @@ namespace DSLink.Connection
         }
 
         /// <summary>
-        /// Queue used when the connection is in the closed state.
+        /// Queue object for queueing up data when the WebSocket is either closed
+        /// or we want to send a large amount of data in one burst. When set to
+        /// false, the flush method is automatically called.
         /// </summary>
-        private Queue<RootObject> _queue;
+        private RootObject _queue;
+
+        /// <summary>
+        /// Queue lock object.
+        /// </summary>
+        private object _queueLock = new object();
+
+        /// <summary>
+        /// Whether we should enable the queueing of messages.
+        /// </summary>
+        private bool _enableQueue;
+
+        /// <summary>
+        /// Whether we should enable the queueing of messages.
+        /// </summary>
+        public bool EnableQueue
+        {
+            set
+            {
+                if (!value)
+                {
+                    Flush();
+                }
+                _enableQueue = value;
+            }
+            get
+            {
+                return _enableQueue;
+            }
+        }
 
         /// <summary>
         /// True if the WebSocket implementation supports compression.
@@ -70,7 +101,6 @@ namespace DSLink.Connection
         protected Connector(AbstractContainer link)
         {
             _link = link;
-            _queue = new Queue<RootObject>();
         }
 
         /// <summary>
@@ -121,18 +151,36 @@ namespace DSLink.Connection
         /// <param name="data">Data.</param>
         public void Write(RootObject data)
         {
-            if (!Connected())
-            {
-                lock (_queue)
-                {
-                    _queue.Enqueue(data);
-                }
-                return;
-            }
             if (!data.Msg.HasValue)
             {
                 data.Msg = _link.MessageId;
             }
+
+            if (!Connected() || EnableQueue)
+            {
+                lock (_queueLock)
+                {
+                    if (_queue == null)
+                    {
+                        _queue = new RootObject
+                        {
+                            Msg = data.Msg,
+                            Responses = new List<ResponseObject>(),
+                            Requests = new List<RequestObject>()
+                        };
+                    }
+                    if (data.Responses != null)
+                    {
+                        _queue.Responses.AddRange(data.Responses);
+                    }
+                    if (data.Requests != null)
+                    {
+                        _queue.Requests.AddRange(data.Requests);
+                    }
+                }
+                return;
+            }
+
             WriteData(Serializer.Serialize(data));
         }
 
@@ -195,11 +243,16 @@ namespace DSLink.Connection
         /// </summary>
         internal void Flush()
         {
-            lock (_queue)
+            if (Connected())
             {
-                while (_queue.Count > 0)
+                _link.Logger.Debug("Flushing the queue");
+                lock (_queueLock)
                 {
-                    Write(_queue.Dequeue());
+                    if (_queue != null)
+                    {
+                        Write(_queue);
+                        _queue = null;
+                    }
                 }
             }
         }
