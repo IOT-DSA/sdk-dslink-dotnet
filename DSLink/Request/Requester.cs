@@ -252,30 +252,10 @@ namespace DSLink.Request
         /// <param name="path">Path</param>
         public void Unsubscribe(string path)
         {
-            int? sid = _subscriptionManager.GetSubByPath(path);
-            if (sid.HasValue)
+            Unsubscribe(new List<string>
             {
-                _subscriptionManager.Unsubscribe(sid.Value);
-                _link.Connector.Write(new RootObject
-                {
-                    Requests = new List<RequestObject>
-                    {
-                        new UnsubscribeRequest(NextRequestID, new List<int>
-                        {
-                            sid.Value
-                        }).Serialize()
-                    }
-                });
-            }
-            else
-            {
-                _link.Logger.Warning(
-                    string.Format(
-                        "Attempted to unsubscribe from {0}, but was not subscribed to it.",
-                        path
-                    )
-                );
-            }
+                path
+            });
         }
 
         /// <summary>
@@ -290,6 +270,7 @@ namespace DSLink.Request
                 var sid = _subscriptionManager.GetSubByPath(path);
                 if (sid.HasValue)
                 {
+                    _subscriptionManager.Unsubscribe(sid.Value);
                     sids.Add(sid.Value);
                 }
             }
