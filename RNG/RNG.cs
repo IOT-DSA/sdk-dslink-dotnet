@@ -17,7 +17,7 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            /*Requester.Subscribe("/sys/dataOutPerSecond", (SubscriptionUpdate obj) =>
+            Requester.Subscribe("/sys/dataOutPerSecond", (SubscriptionUpdate obj) =>
             {
                 Console.WriteLine(obj.Value);
                 Requester.Unsubscribe("/sys/dataOutPerSecond");
@@ -27,7 +27,7 @@ namespace RNG
             {
                 Console.WriteLine(obj.Value);
                 Requester.Unsubscribe("/sys/dataInPerSecond");
-            });*/
+            });
 
             /*Requester.List("/data/", (ListResponse response) =>
             {
@@ -110,7 +110,7 @@ namespace RNG
                 new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet",
                                                     responder: true, requester: true,
                                                     logLevel: LogLevel.Debug,
-                                                    //communicationFormat: "json",
+                                                    communicationFormat: "json",
                                                     connectionAttemptLimit: -1));
             
             dslink.Connect();

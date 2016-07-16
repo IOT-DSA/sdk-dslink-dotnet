@@ -15,6 +15,15 @@ namespace DSLink.Connection
         protected readonly AbstractContainer _link;
 
         /// <summary>
+        /// Gets the state of the WebSocket connection.
+        /// </summary>
+        public ConnectionState ConnectionState
+        {
+            private set;
+            get;
+        }
+
+        /// <summary>
         /// Instance of serializer, used to serialize data going through the
         /// connection.
         /// </summary>
@@ -102,6 +111,19 @@ namespace DSLink.Connection
         protected Connector(AbstractContainer link)
         {
             _link = link;
+            ConnectionState = ConnectionState.Disconnected;
+
+            OnOpen += () =>
+            {
+                ConnectionState = ConnectionState.Connected;
+                _link.Logger.Info("Connected");
+            };
+
+            OnClose += () =>
+            {
+                ConnectionState = ConnectionState.Disconnected;
+                _link.Logger.Info("Disconnected");
+            };
         }
 
         /// <summary>
@@ -126,6 +148,10 @@ namespace DSLink.Connection
             }
         }
 
+        /// <summary>
+        /// Connect to the broker asynchronously.
+        /// </summary>
+        /// <returns>The async.</returns>
         public async Task ConnectAsync()
         {
             await Task.Run(() => Connect());
@@ -136,6 +162,7 @@ namespace DSLink.Connection
         /// </summary>
         public virtual void Connect()
         {
+            ConnectionState = ConnectionState.Connecting;
             _link.Logger.Info("Connecting");
         }
 
@@ -144,6 +171,7 @@ namespace DSLink.Connection
         /// </summary>
         public virtual void Disconnect()
         {
+            ConnectionState = ConnectionState.Disconnecting;
             _link.Logger.Info("Disconnecting");
         }
 
