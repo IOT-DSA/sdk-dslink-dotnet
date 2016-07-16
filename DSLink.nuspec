@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>DSLink</id>
+    <version>0.1.0</version>
+    <title>DSLink SDK</title>
+    <authors>Logan Gorence</authors>
+    <owners>Logan Gorence</owners>
+    <!--<licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl>
+    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
+    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>IOT-DSA DSLink SDK for .NET</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <!--<tags>Tag1 Tag2</tags>-->
+    <dependencies>
+      <!--<dependency id="SampleDependency" version="1.0" />-->
+      <group>
+      	<dependency id="Mono.Options-PCL" version="2.0.40" />
+	    <dependency id="MsgPack.Cli" version="0.6.8" />
+	    <dependency id="Newtonsoft.Json" version="9.0.1" />
+	    <dependency id="PCLStorage" version="1.0.2" />
+        <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
+	    <dependency id="Websockets.Pcl" version="1.1.9" />
+      </group>
+      <group targetFramework="MonoAndroid60">
+        <dependency id="PCLStorage" version="1.0.2" />
+        <dependency id="Websockets.Pcl" version="1.1.9" />
+      </group>
+      <group targetFramework="Xamarin.iOS10">
+        <dependency id="PCLStorage" version="1.0.2" />
+        <dependency id="Square.SocketRocket" version="0.5.0.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <!-- PCL -->
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib/portable-net45+win+wpa81+MonoTouch10+MonoAndroid10+xamarinmac20+xamarintvos10+xamarinwatchos10+xamarinios10" />
+
+    <!-- iOS -->
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib/Xamarin.iOS10" />
+    <file src="DSLink.iOS/bin/Release/DSLink.iOS.dll" target="lib/Xamarin.iOS10" />
+
+    <!-- Android -->
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib/MonoAndroid10" />
+    <file src="DSLink.Android/bin/Release/DSLink.Android.dll" target="lib/MonoAndroid10" />
+  </files>
+</package>
