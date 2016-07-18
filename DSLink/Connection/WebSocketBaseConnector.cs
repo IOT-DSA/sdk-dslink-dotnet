@@ -19,9 +19,9 @@ namespace DSLink.Connection
         /// <summary>
         /// Connect to the WebSocket.
         /// </summary>
-        public override void Connect()
+        public async override Task Connect()
         {
-            base.Connect();
+            await base.Connect();
 
             _webSocket = WebSocketFactory.Create();
 
@@ -38,9 +38,6 @@ namespace DSLink.Connection
 
             _link.Logger.Info("WebSocket connecting to " + WsUrl);
             _webSocket.Open(WsUrl);
-
-            // Hack
-            Task.Delay(1000).Wait();
         }
 
         /// <summary>
@@ -50,8 +47,11 @@ namespace DSLink.Connection
         {
             base.Disconnect();
 
-            _webSocket.Close();
-            _webSocket.Dispose();
+            if (_webSocket != null)
+            {
+                _webSocket.Close();
+                _webSocket.Dispose();
+            }
         }
 
         /// <summary>

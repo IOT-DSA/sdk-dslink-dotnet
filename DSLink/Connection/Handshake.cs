@@ -55,15 +55,13 @@ namespace DSLink.Connection
                 _link.Logger.Warning(e.Message);
             }
 
-            if (resp != null && resp.StatusCode == HttpStatusCode.OK)
+            if (resp != null && resp.IsSuccessStatusCode)
             {
                 _link.Logger.Info("Handshake successful");
-                _link.Config.RemoteEndpoint = await Task.Run(async () =>
-                {
-                    return JsonConvert.DeserializeObject<RemoteEndpoint>(await resp.Content.ReadAsStringAsync());
-                });
+                _link.Config.RemoteEndpoint = JsonConvert.DeserializeObject<RemoteEndpoint>(await resp.Content.ReadAsStringAsync());
                 return true;
             }
+
             return false;
         }
 

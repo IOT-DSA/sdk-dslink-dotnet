@@ -61,7 +61,7 @@ namespace DSLink
         /// <summary>
         /// Connect to the broker.
         /// </summary>
-        public async void Connect()
+        public async Task Connect()
         {
             Reconnect = true;
             Handshake = new Handshake(this);
@@ -74,11 +74,8 @@ namespace DSLink
                 {
                     SerializationManager = new SerializationManager(Config.CommunicationFormat);
                     Connector.Serializer = SerializationManager.Serializer;
-                    await Connector.ConnectAsync();
-                    if (Connector.Connected())
-                    {
-                        return;
-                    }
+                    await Connector.Connect();
+                    return;
                 }
 
                 var delay = attempts;
@@ -119,13 +116,13 @@ namespace DSLink
         /// <summary>
         /// Event that fires when the connection is closed to the broker.
         /// </summary>
-        private void OnClose()
+        private async void OnClose()
         {
             Responder.SubscriptionManager.ClearAll();
             Responder.StreamManager.ClearAll();
             if (Reconnect)
             {
-                Connect();
+                await Connect();
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Container;
 using WebSocketSharp;
@@ -21,9 +22,9 @@ namespace DSLink.NET
         /// <summary>
         /// Connect to the WebSocket.
         /// </summary>
-        public override void Connect()
+        public async override Task Connect()
         {
-            base.Connect();
+            await base.Connect();
 
             _webSocket = new WebSocket(WsUrl);
 
@@ -62,7 +63,7 @@ namespace DSLink.NET
                 }
             };
 
-            _webSocket.Connect();
+            _webSocket.ConnectAsync();
         }
 
         /// <summary>

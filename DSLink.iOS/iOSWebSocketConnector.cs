@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Container;
 using Foundation;
@@ -20,12 +21,11 @@ namespace DSLink.iOS
         /// <summary>
         /// Connect to the WebSocket.
         /// </summary>
-        public override void Connect()
+        public async override Task Connect()
         {
-            base.Connect();
+            await base.Connect();
 
             _webSocket = new WebSocket(new NSUrl(WsUrl));
-            _webSocket.Open();
 
             _webSocket.WebSocketOpened += (object sender, EventArgs e) =>
             {
@@ -61,6 +61,8 @@ namespace DSLink.iOS
                     EmitMessage(new MessageEvent(e.Message.ToString()));
                 }
             };
+
+            _webSocket.Open();
         }
 
         /// <summary>

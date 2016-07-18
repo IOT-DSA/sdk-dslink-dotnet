@@ -1,13 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.IO;
 using DSLink;
 using DSLink.NET;
-using DSLink.Request;
 using DSLink.Util.Logger;
-using DSLink.Respond;
-using DSLink.Nodes;
+using System.Threading.Tasks;
 
 namespace RNG
 {
@@ -17,16 +13,15 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            Requester.Subscribe("/sys/dataOutPerSecond", (SubscriptionUpdate obj) =>
+            Task.Run(async () =>
             {
-                Console.WriteLine(obj.Value);
-                Requester.Unsubscribe("/sys/dataOutPerSecond");
-            });
-
-            Requester.Subscribe("/sys/dataInPerSecond", (SubscriptionUpdate obj) =>
-            {
-                Console.WriteLine(obj.Value);
-                Requester.Unsubscribe("/sys/dataInPerSecond");
+                await Task.Delay(2000);
+                while (true)
+                {
+                    Disconnect();
+                    await Connect();
+                    await Task.Delay(50);
+                }
             });
 
             /*Requester.List("/data/", (ListResponse response) =>

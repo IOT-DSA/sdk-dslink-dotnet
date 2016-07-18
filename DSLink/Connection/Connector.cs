@@ -149,18 +149,9 @@ namespace DSLink.Connection
         }
 
         /// <summary>
-        /// Connect to the broker asynchronously.
-        /// </summary>
-        /// <returns>The async.</returns>
-        public async Task ConnectAsync()
-        {
-            await Task.Run(() => Connect());
-        }
-
-        /// <summary>
         /// Connect to the broker.
         /// </summary>
-        public virtual void Connect()
+        public virtual async Task Connect()
         {
             ConnectionState = ConnectionState.Connecting;
             _link.Logger.Info("Connecting");
