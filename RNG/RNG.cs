@@ -4,6 +4,9 @@ using DSLink;
 using DSLink.NET;
 using DSLink.Util.Logger;
 using System.Threading.Tasks;
+using DSLink.Respond;
+using DSLink.Nodes;
+using System;
 
 namespace RNG
 {
@@ -13,7 +16,7 @@ namespace RNG
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            Task.Run(async () =>
+            /*Task.Run(async () =>
             {
                 await Task.Delay(2000);
                 while (true)
@@ -22,15 +25,16 @@ namespace RNG
                     await Connect();
                     await Task.Delay(50);
                 }
-            });
+            });*/
 
-            /*Requester.List("/data/", (ListResponse response) =>
+            Requester.List("/upstream/GorenceHome/downstream/", (ListResponse response) =>
             {
+                Console.WriteLine(response.Node.Path);
                 foreach (KeyValuePair<string, Node> kp in response.Node.Children)
                 {
-                    Console.WriteLine(kp.Value.Name);
+                    Console.WriteLine(kp.Value.Path);
                 }
-            });*/
+            });
 
             /*var testNode = Responder.SuperRoot.CreateChild("test")
                                     .SetDisplayName("Test")

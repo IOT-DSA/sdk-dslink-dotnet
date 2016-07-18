@@ -108,7 +108,7 @@ namespace DSLink.Request
                     {
                         var listRequest = request as ListRequest;
                         string name = listRequest.Path.Split('/').Last();
-                        var node = new RemoteNode(name, null);
+                        var node = new RemoteNode(name, null, listRequest.Path);
                         node.FromSerialized(response.Updates);
                         await Task.Run(() => listRequest.Callback(new ListResponse(_link, listRequest.RequestID,
                                                                                    listRequest.Path, node)));

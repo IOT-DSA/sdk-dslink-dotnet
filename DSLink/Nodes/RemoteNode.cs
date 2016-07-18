@@ -16,8 +16,9 @@ namespace DSLink.Nodes
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="parent">Parent</param>
-        public RemoteNode(string name, Node parent) : base(name, parent, null)
+        public RemoteNode(string name, Node parent, string path) : base(name, parent, null)
         {
+            Path = path;
         }
 
         /// <summary>
@@ -86,7 +87,7 @@ namespace DSLink.Nodes
                 }
                 else
                 {
-                    var child = new RemoteNode(key, this);
+                    var child = new RemoteNode(key, this, Path + "/" + key);
                     foreach (KeyValuePair<string, JToken> kp in value as JObject)
                     {
                         if (kp.Key.StartsWith("$"))

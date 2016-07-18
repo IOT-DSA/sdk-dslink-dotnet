@@ -72,10 +72,22 @@ namespace DSLink.Nodes
         /// </summary>
         public string Name { get; }
 
+        private string _path;
+
         /// <summary>
         /// Node path
         /// </summary>
-        public string Path { get; }
+        public string Path
+        {
+            get
+            {
+                return _path;
+            }
+            internal set
+            {
+                _path = value.TrimEnd(new char[] { '/' });
+            }
+        }
 
         /// <summary>
         /// Node parent
