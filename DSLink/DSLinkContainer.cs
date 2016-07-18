@@ -96,6 +96,7 @@ namespace DSLink
                 attempts++;
             }
             Logger.Warning("Failed to connect within the allotted connection attempt limit.");
+            OnConnectionFailed();
         }
 
         /// <summary>
@@ -139,6 +140,12 @@ namespace DSLink
         /// Override when you need to do something after connection closes.
         /// </summary>
         protected virtual void OnConnectionClosed() {}
+
+        /// <summary>
+        /// Called when the connection fails to connect to the broker.
+        /// Override when you need to detect a failure to connect.
+        /// </summary>
+        protected virtual void OnConnectionFailed() {}
 
         /// <summary>
         /// Event that fires when a plain text message is received from the broker.

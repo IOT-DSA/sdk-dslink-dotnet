@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>DSLink</id>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <title>DSLink SDK</title>
     <authors>Logan Gorence</authors>
     <owners>Logan Gorence</owners>
@@ -12,10 +12,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>IOT-DSA DSLink SDK for .NET</description>
     <releaseNotes></releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <copyright>Copyright 2016 DGLogik</copyright>
     <!--<tags>Tag1 Tag2</tags>-->
     <dependencies>
-      <!--<dependency id="SampleDependency" version="1.0" />-->
       <group>
       	<dependency id="Mono.Options-PCL" version="2.0.40" />
 	    <dependency id="MsgPack.Cli" version="0.6.8" />
