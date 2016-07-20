@@ -18,7 +18,7 @@ namespace DSLink.Nodes
         /// Set of banned characters from DSA names.
         /// </summary>
         public static readonly char[] BannedChars = {
-            '%', '.', '/', '\\', '?', '*', ':', '|', '<', '>', '$', '@', ','
+            '%', '.', '/', '\\', '?', '*', ':', '|', '<', '>', '$', '@', ',', '\'', '"'
         };
 
         /// <summary>
