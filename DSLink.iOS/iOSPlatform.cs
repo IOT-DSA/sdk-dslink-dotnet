@@ -1,4 +1,5 @@
 ﻿using DSLink.Connection;
+using DSLink.Util.Logger;
 
 namespace DSLink.iOS
 {
@@ -7,6 +8,7 @@ namespace DSLink.iOS
         public static void Initialize()
         {
             ConnectorManager.SetConnector(typeof(iOSWebSocketConnector));
+            BaseLogger.Logger = typeof(iOSLogger);
         }
     }
 }

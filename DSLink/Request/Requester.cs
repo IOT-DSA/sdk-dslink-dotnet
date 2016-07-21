@@ -75,9 +75,10 @@ namespace DSLink.Request
                     {
                         if (update is JArray)
                         {
-                            int sid = update[0];
-                            dynamic value = update[1];
-                            string dt = update[2];
+                            JArray arrayUpdate = update;
+                            int sid = arrayUpdate[0].Value<int>();
+                            dynamic value = arrayUpdate[1];
+                            string dt = arrayUpdate[2].Value<string>();
                             var sub = _subscriptionManager.GetSub(sid);
                             if (sub != null)
                             {
@@ -86,13 +87,14 @@ namespace DSLink.Request
                         }
                         else if (update is JObject)
                         {
-                            int sid = update["sid"];
-                            dynamic value = update["value"];
-                            string ts = update["ts"];
-                            int count = update["count"];
-                            int sum = update["sum"];
-                            int min = update["min"];
-                            int max = update["max"];
+                            JObject objectUpdate = update;
+                            int sid = objectUpdate["sid"].Value<int>();
+                            dynamic value = objectUpdate["value"];
+                            string ts = objectUpdate["ts"].Value<string>();
+                            int count = objectUpdate["count"].Value<int>();
+                            int sum = objectUpdate["sum"].Value<int>();
+                            int min = objectUpdate["min"].Value<int>();
+                            int max = objectUpdate["max"].Value<int>();
                             var sub = _subscriptionManager.GetSub(sid);
                             if (sub != null)
                             {

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using DSLink.Util;
 using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Crypto;
@@ -49,7 +50,6 @@ namespace DSLink.Crypto
         public KeyPair(string location)
         {
             _location = location;
-            BcKeyPair = Load();
         }
 
         /// <summary>
@@ -67,15 +67,14 @@ namespace DSLink.Crypto
         /// <summary>
         /// Load the KeyPair from the file, or generate a new one.
         /// </summary>
-        /// <returns>BouncyCastle Asymmetric Cipher KeyPair</returns>
-        private AsymmetricCipherKeyPair Load()
+        public async Task Load()
         {
             IFileSystem fileSystem = FileSystem.Current;
-            IFile file = fileSystem.GetFileFromPathAsync(_location).Result;
+            IFile file = await fileSystem.GetFileFromPathAsync(_location);
             
             if (file != null)
             {
-                var reader = new StreamReader(file.OpenAsync(FileAccess.Read).Result);
+                var reader = new StreamReader(await file.OpenAsync(FileAccess.Read));
                 string data = reader.ReadLine();
 
                 if (data != null)
@@ -95,19 +94,20 @@ namespace DSLink.Crypto
                     var d = new BigInteger(Convert.FromBase64String(split[0]));
                     var privParams = new ECPrivateKeyParameters(d, ecp);
 
-                    return new AsymmetricCipherKeyPair(pubParams, privParams);
+                    BcKeyPair = new AsymmetricCipherKeyPair(pubParams, privParams);
                 }
             }
+
             var key = Generate();
-            Save(key);
-            return key;
+            await Save(key);
+            BcKeyPair = key;
         }
 
         /// <summary>
         /// Save the specified KeyPair.
         /// </summary>
         /// <param name="keyPair">BouncyCastle Asymmetric KeyPair</param>
-        private void Save(AsymmetricCipherKeyPair keyPair)
+        private async Task Save(AsymmetricCipherKeyPair keyPair)
         {
             byte[] privateBytes = ((ECPrivateKeyParameters) keyPair.Private).D.ToByteArray();
             byte[] publicBytes = ((ECPublicKeyParameters) keyPair.Public).Q.GetEncoded();
@@ -115,10 +115,10 @@ namespace DSLink.Crypto
             string data = Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
 
             IFileSystem fileSystem = FileSystem.Current;
-            IFolder folder = fileSystem.GetFolderFromPathAsync(".").Result;
-            IFile file = folder.CreateFileAsync(_location, CreationCollisionOption.ReplaceExisting).Result;
+            IFolder folder = await fileSystem.GetFolderFromPathAsync(".");
+            IFile file = await folder.CreateFileAsync(_location, CreationCollisionOption.ReplaceExisting);
 
-            using (StreamWriter writer = new StreamWriter(file.OpenAsync(FileAccess.ReadAndWrite).Result))
+            using (StreamWriter writer = new StreamWriter(await file.OpenAsync(FileAccess.ReadAndWrite)))
             {
                 writer.WriteLine(data);
             }

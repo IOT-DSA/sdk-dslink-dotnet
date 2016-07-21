@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Crypto;
 using DSLink.Util;
@@ -162,6 +163,7 @@ namespace DSLink
             MaxConnectionCooldown = maxConnectionCooldown;
 
             KeyPair = new KeyPair(KeysLocation);
+            Task.Run(async () => await KeyPair.Load()).Wait();
         }
     }
 }
