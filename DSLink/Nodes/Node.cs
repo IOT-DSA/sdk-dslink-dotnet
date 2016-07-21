@@ -48,34 +48,44 @@ namespace DSLink.Nodes
         internal readonly List<int> Subscribers;
 
         /// <summary>
+        /// Event fired when something subscribes to this node.
+        /// </summary>
+        public Action<int> OnSubscribed;
+
+        /// <summary>
+        /// Event fired when something unsubscribes to this node.
+        /// </summary>
+        public Action<int> OnUnsubscribed;
+
+        /// <summary>
         /// List of request IDs belonging to this Node
         /// </summary>
         internal readonly List<int> Streams;
 
         /// <summary>
-        /// DSLink container instance
+        /// DSLink container instance.
         /// </summary>
         private readonly AbstractContainer _link;
 
         /// <summary>
-        /// Used to lock the children dictionary
+        /// Used to lock the children dictionary.
         /// </summary>
         private readonly object _childrenLock = new object();
 
         /// <summary>
-        /// Used to lock the removed children list
+        /// Used to lock the removed children list.
         /// </summary>
         private readonly object _removedChildrenLock = new object();
 
         /// <summary>
-        /// Node name
+        /// Name of this node.
         /// </summary>
         public string Name { get; }
 
         private string _path;
 
         /// <summary>
-        /// Node path
+        /// Path of this Node.
         /// </summary>
         public string Path
         {
@@ -90,12 +100,12 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// Node parent
+        /// Parent of this Node.
         /// </summary>
         public Node Parent { get; }
 
         /// <summary>
-        /// Node value
+        /// Value of this Node.
         /// </summary>
         public Value Value { get; }
 

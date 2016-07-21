@@ -214,6 +214,7 @@ namespace DSLink.Respond
         public void Subscribe(int sid, Node node)
         {
             node.Subscribers.Add(sid);
+            node.OnSubscribed?.Invoke(sid);
             _subscriptions.Add(sid, node);
         }
 
@@ -226,6 +227,7 @@ namespace DSLink.Respond
             try
             {
                 _subscriptions[sid].Subscribers.Remove(sid);
+                _subscriptions[sid].OnUnsubscribed?.Invoke(sid);
                 _subscriptions.Remove(sid);
             }
             catch (KeyNotFoundException)
