@@ -48,7 +48,7 @@ namespace DSLink.Nodes
         /// Deserializes.
         /// </summary>
         /// <param name="serialized">Serialized</param>
-        public void FromSerialized(List<dynamic> serialized)
+        public void FromSerialized(JArray serialized)
         {
             foreach (JArray a in serialized)
             {

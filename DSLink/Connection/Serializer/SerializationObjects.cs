@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DSLink.Nodes.Actions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Connection.Serializer
 {
@@ -39,10 +40,10 @@ namespace DSLink.Connection.Serializer
         [JsonProperty("permit")]
         public string Permit;
         [JsonProperty("value")]
-        public dynamic Value;
+        public JToken Value;
         // TODO: Swap out dynamic for Parameter
         [JsonProperty("params")]
-        public Dictionary<string, dynamic> Parameters;
+        public Dictionary<string, JToken> Parameters;
     }
 
     /// <summary>
@@ -59,7 +60,7 @@ namespace DSLink.Connection.Serializer
         [JsonProperty("columns")]
         public List<Column> Columns;
         [JsonProperty("updates")]
-        public List<dynamic> Updates;
+        public JArray Updates;
     }
 
     /// <summary>

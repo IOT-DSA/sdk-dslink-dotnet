@@ -7,6 +7,7 @@ using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using DSLink.Request;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Respond
 {
@@ -132,7 +133,7 @@ namespace DSLink.Respond
                                     responses.Add(new ResponseObject
                                     {
                                         RequestId = 0,
-                                        Updates = new List<dynamic>
+                                        Updates = new JArray
                                         {
                                             new List<dynamic>
                                             {

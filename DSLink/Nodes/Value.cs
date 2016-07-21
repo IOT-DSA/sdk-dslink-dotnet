@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using DSLink.Util;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes
 {
@@ -12,7 +13,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Value.
         /// </summary>
-        private dynamic _val;
+        private JToken _val;
 
         /// <summary>
         /// When the value was last updated.
@@ -75,6 +76,11 @@ namespace DSLink.Nodes
 			Set(val);
 		}
 
+        public Value(JToken jtoken)
+        {
+            Set(jtoken);
+        }
+
         public dynamic Get()
         {
             return _val;
@@ -128,6 +134,11 @@ namespace DSLink.Nodes
 			SetValue(val);
 		}
 
+        public void Set(JToken jtoken)
+        {
+            SetValue(jtoken);
+        }
+
         /// <summary>
         /// Low level set method.
         /// </summary>
@@ -142,6 +153,9 @@ namespace DSLink.Nodes
         /// <summary>
         /// Clone this instance.
         /// </summary>
-        public object Clone() => new Value(_val) {_lastUpdated = _lastUpdated};
+        public object Clone()
+        {
+            return new Value(_val.DeepClone());
+        }
     }
 }

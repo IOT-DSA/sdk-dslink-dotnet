@@ -5,6 +5,7 @@ using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using DSLink.Respond;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Request
 {
@@ -211,7 +212,7 @@ namespace DSLink.Request
         /// <summary>
         /// Parameters of the request.
         /// </summary>
-        public readonly Dictionary<string, dynamic> Parameters;
+        public readonly Dictionary<string, JToken> Parameters;
 
         /// <summary>
         /// Callback of the request.
@@ -244,7 +245,7 @@ namespace DSLink.Request
         /// <param name="callback">Callback</param>
         /// <param name="link">Link</param>
         /// <param name="columns">Columns</param>
-        public InvokeRequest(int requestID, string path, Permission permission, Dictionary<string, dynamic> parameters,
+        public InvokeRequest(int requestID, string path, Permission permission, Dictionary<string, JToken> parameters,
                              Action<InvokeResponse> callback = null, AbstractContainer link = null, List<Column> columns = null) : base(requestID)
         {
             Path = path;
@@ -280,7 +281,7 @@ namespace DSLink.Request
         /// </summary>
         /// <param name="updates">Updates</param>
         /// <param name="close">Whether to close the stream</param>
-        public void SendUpdates(List<dynamic> updates, bool close = false)
+        public void SendUpdates(JArray updates, bool close = false)
         {
             if (_link == null || _columns == null)
             {

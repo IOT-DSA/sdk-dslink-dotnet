@@ -5,6 +5,7 @@ using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes.Actions;
 using DSLink.Util;
+using Newtonsoft.Json.Linq;
 using Action = DSLink.Nodes.Actions.Action;
 
 namespace DSLink.Nodes
@@ -490,7 +491,7 @@ namespace DSLink.Nodes
                     new ResponseObject
                     {
                         RequestId = 0,
-                        Updates = new List<dynamic>()
+                        Updates = new JArray()
                     }
                 }
             };
@@ -498,7 +499,7 @@ namespace DSLink.Nodes
             foreach (var sid in Subscribers)
             {
                 hasUpdates = true;
-                rootObject.Responses[0].Updates.Add(new List<dynamic>
+                rootObject.Responses[0].Updates.Add(new JArray
                 {
                     sid,
                     value.Get(),
@@ -515,9 +516,9 @@ namespace DSLink.Nodes
         /// Serialize the Node.
         /// </summary>
         /// <returns>Serialized data</returns>
-        public List<dynamic> Serialize()
+        public JArray Serialize()
         {
-            var val = new List<dynamic>();
+            var val = new JArray();
             foreach (var pair in _configs)
             {
                 val.Add(new List<dynamic>
@@ -557,11 +558,15 @@ namespace DSLink.Nodes
 
             lock (_removedChildrenLock)
             {
-                val.AddRange(_removedChildren.Select(child => new Dictionary<string, dynamic>
+                dynamic i = _removedChildren.Select(child => new Dictionary<string, dynamic>
                 {
                     {"name", child.Name},
                     {"change", "remove"}
-                }));
+                });
+                foreach (dynamic node in i)
+                {
+                    _removedChildren.Add(node);
+                }
                 _removedChildren.Clear();
             }
 

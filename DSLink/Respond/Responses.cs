@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Respond
 {
@@ -41,14 +43,14 @@ namespace DSLink.Respond
         /// <summary>
         /// Close the request.
         /// </summary>
-        public void Close()
+        public async Task Close()
         {
             if (_link == null)
             {
                 throw new NullReferenceException("Link is null, cannot close stream.");
             }
             _link.Requester._requestManager.StopRequest(RequestID);
-            _link.Connector.Write(new RootObject
+            await _link.Connector.Write(new RootObject
             {
                 Responses = new List<ResponseObject>
                 {
@@ -124,7 +126,7 @@ namespace DSLink.Respond
         /// <summary>
         /// Updates from Response.
         /// </summary>
-        public List<dynamic> Updates
+        public JArray Updates
         {
             get;
         }
@@ -148,7 +150,7 @@ namespace DSLink.Respond
         /// <param name="updates">Updates</param>
         public InvokeResponse(AbstractContainer link, int requestID,
                               string path, List<Column> columns,
-                              List<dynamic> updates)
+                              JArray updates)
             : base(link, requestID)
         {
             Path = path;

@@ -77,7 +77,7 @@ namespace DSLink.Request
                         {
                             JArray arrayUpdate = update;
                             int sid = arrayUpdate[0].Value<int>();
-                            dynamic value = arrayUpdate[1];
+                            JToken value = arrayUpdate[1];
                             string dt = arrayUpdate[2].Value<string>();
                             var sub = _subscriptionManager.GetSub(sid);
                             if (sub != null)
@@ -89,7 +89,7 @@ namespace DSLink.Request
                         {
                             JObject objectUpdate = update;
                             int sid = objectUpdate["sid"].Value<int>();
-                            dynamic value = objectUpdate["value"];
+                            JToken value = objectUpdate["value"];
                             string ts = objectUpdate["ts"].Value<string>();
                             int count = objectUpdate["count"].Value<int>();
                             int sum = objectUpdate["sum"].Value<int>();
@@ -204,7 +204,7 @@ namespace DSLink.Request
         /// <param name="permission">Permission</param>
         /// <param name="parameters">Parameters</param>
         /// <param name="callback">Callback</param>
-        public async Task<InvokeRequest> Invoke(string path, Permission permission, Dictionary<string, dynamic> parameters, Action<InvokeResponse> callback)
+        public async Task<InvokeRequest> Invoke(string path, Permission permission, Dictionary<string, JToken> parameters, Action<InvokeResponse> callback)
         {
             var request = new InvokeRequest(NextRequestID, path, permission, parameters, callback);
             _requestManager.StartRequest(request);

@@ -85,7 +85,7 @@ namespace DSLink.iOS.Example
         {
             await Requester.Subscribe("/sys/dataInPerSecond", (response) =>
             {
-                Console.WriteLine("Subscribed");
+                Console.WriteLine(response.Value);
             });
         }
     }
