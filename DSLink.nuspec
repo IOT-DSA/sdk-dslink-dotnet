@@ -2,26 +2,26 @@
 <package >
   <metadata>
     <id>DSLink</id>
-    <version>0.1.3</version>
+    <version>0.1.4-alpha</version>
     <title>DSLink SDK</title>
     <authors>Logan Gorence</authors>
     <owners>Logan Gorence</owners>
-    <!--<licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl>
-    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
-    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+    <licenseUrl>https://github.com/IOT-DSA/sdk-dslink-dotnet/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/IOT-DSA/sdk-dslink-dotnet/</projectUrl>
+    <!--<iconUrl></iconUrl>-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>IOT-DSA DSLink SDK for .NET</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2016 DGLogik</copyright>
-    <!--<tags>Tag1 Tag2</tags>-->
+    <tags>iot dslink dsa</tags>
     <dependencies>
       <group>
-      	<dependency id="Mono.Options-PCL" version="2.0.40" />
-	    <dependency id="MsgPack.Cli" version="0.6.8" />
-	    <dependency id="Newtonsoft.Json" version="9.0.1" />
-	    <dependency id="PCLStorage" version="1.0.2" />
+        <dependency id="Mono.Options-PCL" version="2.0.40" />
+        <dependency id="MsgPack.Cli" version="0.6.8" />
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="PCLStorage" version="1.0.2" />
         <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
-	    <dependency id="Websockets.Pcl" version="1.1.9" />
+        <dependency id="Websockets.Pcl" version="1.1.9" />
       </group>
       <group targetFramework="MonoAndroid60">
         <dependency id="PCLStorage" version="1.0.2" />
@@ -31,11 +31,19 @@
         <dependency id="PCLStorage" version="1.0.2" />
         <dependency id="Square.SocketRocket" version="0.5.0.0" />
       </group>
+      <group targetFramework="net45">
+        <dependency id="PCLStorage" version="1.0.2" />
+        <dependency id="WebSocketSharp" version="1.0.3-rc11" />
+      </group>
     </dependencies>
   </metadata>
   <files>
     <!-- PCL -->
     <file src="DSLink/bin/Release/DSLink.dll" target="lib/portable-net45+win+wpa81+MonoTouch10+MonoAndroid10+xamarinmac20+xamarintvos10+xamarinwatchos10+xamarinios10" />
+
+    <!-- .NET -->
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib/net45" />
+    <file src="DSLink.NET/bin/Release/DSLink.NET.dll" target="lib/net45" />
 
     <!-- iOS -->
     <file src="DSLink/bin/Release/DSLink.dll" target="lib/Xamarin.iOS10" />
