@@ -58,7 +58,7 @@ namespace DSLink.Connection.Serializer
         [JsonProperty("meta")]
         public Dictionary<string, dynamic> Meta;
         [JsonProperty("columns")]
-        public List<Column> Columns;
+        public JArray Columns;
         [JsonProperty("updates")]
         public JArray Updates;
     }

@@ -334,7 +334,7 @@ namespace DSLink.Nodes
         /// Gets or sets the parameters.
         /// </summary>
         /// <value>Parameters</value>
-        public List<Parameter> Parameters
+        public JArray Parameters
         {
             get
             {
@@ -350,7 +350,7 @@ namespace DSLink.Nodes
         /// Gets or sets the columns.
         /// </summary>
         /// <value>Columns</value>
-        public List<Column> Columns
+        public JArray Columns
         {
             get
             {
@@ -521,16 +521,18 @@ namespace DSLink.Nodes
             var val = new JArray();
             foreach (var pair in _configs)
             {
-                val.Add(new List<dynamic>
+                val.Add(new JArray
                 {
-                    pair.Key, pair.Value.Get()
+                    pair.Key,
+                    pair.Value.Get()
                 });
             }
             foreach (var pair in _attributes)
             {
-                val.Add(new List<dynamic>
+                val.Add(new JArray
                 {
-                    pair.Key, pair.Value.Get()
+                    pair.Key,
+                    pair.Value.Get()
                 });
             }
 
@@ -538,21 +540,25 @@ namespace DSLink.Nodes
             {
                 foreach (var child in _children)
                 {
-                    var value = new Dictionary<string, dynamic>();
+                    var value = new JObject();
                     foreach (var config in child.Value._configs)
                     {
-                        value.Add(config.Key, config.Value.Get());
+                        value[config.Key] = config.Value.Get();
                     }
                     foreach (var attr in child.Value._attributes)
                     {
-                        value.Add(attr.Key, attr.Value.Get());
+                        value[attr.Key] = attr.Value.Get();
                     }
                     if (child.Value.HasValue())
                     {
-                        value.Add("value", child.Value.Value.Get());
-                        value.Add("ts", child.Value.Value.LastUpdated);
+                        value["value"] = child.Value.Value.Get();
+                        value["ts"] = child.Value.Value.LastUpdated;
                     }
-                    val.Add(new List<dynamic> { child.Key, value });
+                    val.Add(new JArray
+                    {
+                        child.Key,
+                        value
+                    });
                 }
             }
 

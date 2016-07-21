@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DSLink.Connection.Serializer;
+using Newtonsoft.Json.Linq;
 
 namespace Benchmarks.NET
 {
@@ -23,9 +24,9 @@ namespace Benchmarks.NET
                 {
                     new ResponseObject
                     {
-                        Updates = new List<dynamic>
+                        Updates = new JArray
                         {
-                            new List<dynamic>
+                            new JArray
                             {
                                 byteBuffer
                             }

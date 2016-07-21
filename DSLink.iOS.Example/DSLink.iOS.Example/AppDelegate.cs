@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using DSLink.Nodes;
+using DSLink.Nodes.Actions;
 using DSLink.Util.Logger;
 using Foundation;
 using UIKit;
+using Action = DSLink.Nodes.Actions.Action;
 
 namespace DSLink.iOS.Example
 {
@@ -78,15 +81,23 @@ namespace DSLink.iOS.Example
     {
         public ExampleDSLink(Configuration config) : base(config)
         {
-            Console.WriteLine("here2");
+            var testAction = Responder.SuperRoot.CreateChild("Test")
+                                      .AddParameter(new Parameter("parameter", "string"))
+                                      .AddColumn(new Column("success", "bool"))
+                                      .SetAction(new Action(Permission.Write, (parameters, request) =>
+                                      {
+                                          Console.WriteLine("Invoked");
+                                      }))
+                                      .SetInvokable(Permission.Read)
+                                      .BuildNode();
         }
 
         public async void Subscribe()
         {
-            await Requester.Subscribe("/sys/dataInPerSecond", (response) =>
+            /*await Requester.Subscribe("/sys/dataInPerSecond", (response) =>
             {
                 Console.WriteLine(response.Value);
-            });
+            });*/
         }
     }
 }

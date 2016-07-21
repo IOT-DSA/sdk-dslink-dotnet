@@ -1,23 +1,33 @@
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes.Actions
 {
     /// <summary>
     /// Column of an action.
     /// </summary>
-    public class Column
+    public class Column : JObject
     {
         /// <summary>
         /// Name of the column.
         /// </summary>
-        [JsonProperty("name")]
-        public readonly string Name;
+        public string Name
+        {
+            get
+            {
+                return this["name"].Value<string>();
+            }
+        }
 
         /// <summary>
         /// Type of the column.
         /// </summary>
-        [JsonProperty("type")]
-        public readonly string Type;
+        public string ValueType
+        {
+            get
+            {
+                return this["type"].Value<string>();
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the
@@ -27,8 +37,8 @@ namespace DSLink.Nodes.Actions
         /// <param name="type">Type</param>
         public Column(string name, string type)
         {
-            Name = name;
-            Type = type;
+            this["name"] = name;
+            this["type"] = type;
         }
     }
 }

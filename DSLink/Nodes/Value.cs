@@ -61,16 +61,6 @@ namespace DSLink.Nodes
             Set(val);
         }
 
-        public Value(IList val)
-        {
-            Set(val);
-        }
-
-        public Value(IDictionary val)
-        {
-            Set(val);
-        }
-
 		public Value(byte[] val)
 		{
 			Set(val);
@@ -81,7 +71,7 @@ namespace DSLink.Nodes
             Set(jtoken);
         }
 
-        public dynamic Get()
+        public JToken Get()
         {
             return _val;
         }
@@ -91,62 +81,59 @@ namespace DSLink.Nodes
             if (val.StartsWith("\x1B" + "bytes:") || val.StartsWith("\\u001bbytes:"))
             {
                 byte[] bytes = UrlBase64.Decode(val.Substring(val.IndexOf(":") + 1));
-                SetValue(bytes);
+                _val = bytes;
+                SetValue();
             }
             else
             {
-                SetValue(val);
+                _val = val;
             }
+            SetValue();
         }
 
         public void Set(bool val)
         {
-            SetValue(val);
+            _val = val;
+            SetValue();
         }
 
         public void Set(int val)
         {
-            SetValue(val);
+            _val = val;
+            SetValue();
         }
 
         public void Set(double val)
         {
-            SetValue(val);
+            _val = val;
+            SetValue();
         }
 
         public void Set(float val)
         {
-            SetValue(val);
-        }
-
-        public void Set(IList val)
-        {
-            SetValue(val);
-        }
-
-        public void Set(IDictionary val)
-        {
-            SetValue(val);
+            _val = val;
+            SetValue();
         }
 
 		public void Set(byte[] val)
 		{
-			SetValue(val);
+            _val = val;
+			SetValue();
 		}
 
         public void Set(JToken jtoken)
         {
-            SetValue(jtoken);
+            _val = jtoken;
+            SetValue();
         }
 
         /// <summary>
         /// Low level set method.
         /// </summary>
         /// <param name="val">Value.</param>
-        private void SetValue(dynamic val)
+        private void SetValue()
         {
             _lastUpdated = DateTime.Now;
-            _val = val;
             OnSet?.Invoke(this);
         }
 

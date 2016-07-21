@@ -184,7 +184,9 @@ namespace DSLink
             {
                 Ack = message.Msg
             };
+
             bool write = false;
+
             if (message.Requests != null)
             {
                 var responses = await Responder.ProcessRequests(message.Requests);
@@ -194,6 +196,7 @@ namespace DSLink
                 }
                 write = true;
             }
+
             if (message.Responses != null)
             {
                 var requests = await Requester.ProcessResponses(message.Responses);
@@ -203,6 +206,7 @@ namespace DSLink
                 }
                 write = true;
             }
+
             if (write)
             {
                 await Connector.Write(response);

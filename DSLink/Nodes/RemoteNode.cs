@@ -59,7 +59,7 @@ namespace DSLink.Nodes
                     key = key.Substring(1);
                     if (key.Equals("params") && value.Type == JTokenType.Array)
                     {
-                        var parameters = new List<Parameter>();
+                        var parameters = new JArray();
                         foreach (var parameter in value.Value<JArray>())
                         {
                             parameters.Add(parameter.ToObject<Parameter>());
@@ -68,7 +68,7 @@ namespace DSLink.Nodes
                     }
                     else if (key.Equals("columns") && value.Type == JTokenType.Array)
                     {
-                        var columns = new List<Column>();
+                        var columns = new JArray();
                         foreach (var column in value.Value<JArray>())
                         {
                             columns.Add(column.ToObject<Column>());

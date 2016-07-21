@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DSLink.Nodes.Actions;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes
 {
@@ -180,7 +181,7 @@ namespace DSLink.Nodes
         {
             if (_node.Parameters == null)
             {
-                _node.Parameters = new List<Parameter>();
+                _node.Parameters = new JArray();
             }
             _node.Parameters.Add(parameter);
             return this;
@@ -195,7 +196,7 @@ namespace DSLink.Nodes
         {
             if (_node.Columns == null)
             {
-                _node.Columns = new List<Column>();
+                _node.Columns = new JArray();
             }
             _node.Columns.Add(column);
             return this;

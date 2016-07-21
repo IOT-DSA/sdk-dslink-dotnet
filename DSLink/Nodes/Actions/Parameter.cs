@@ -1,29 +1,38 @@
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes.Actions
 {
     /// <summary>
     /// Parameter for an action.
     /// </summary>
-    public class Parameter
+    public class Parameter : JObject
     {
         /// <summary>
         /// Name of the parameter.
         /// </summary>
-        [JsonProperty("name")]
-        public readonly string Name;
+        public string Name
+        {
+            get
+            {
+                return this["name"].Value<string>();
+            }
+        }
 
-        /// <summary>
-        /// Type of the parameter.
-        /// </summary>
-        [JsonProperty("type")]
-        public readonly string Type;
+        public string ValueType
+        {
+            get
+            {
+                return this["type"].Value<string>();
+            }
+        }
 
-        /// <summary>
-        /// Default value of the parameter.
-        /// </summary>
-        [JsonProperty("default")]
-        public readonly dynamic Default;
+        public string Default
+        {
+            get
+            {
+                return this["default"].Value<string>();
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the
@@ -34,9 +43,9 @@ namespace DSLink.Nodes.Actions
         /// <param name="def">Default</param>
         public Parameter(string name, string type, dynamic def = null)
         {
-            Name = name;
-            Type = type;
-            Default = def;
+            this["name"] = name;
+            this["type"] = type;
+            this["default"] = def;
         }
     }
 }

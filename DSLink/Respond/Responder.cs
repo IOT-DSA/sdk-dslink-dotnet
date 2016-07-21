@@ -109,15 +109,20 @@ namespace DSLink.Respond
                             {
                                 if (request.Permit == null || request.Permit.Equals(node.Action.Permission.ToString()))
                                 {
-                                    var parameters = request.Parameters.ToDictionary(pair => pair.Key, pair => new Value(pair.Value));
-                                    var columns = node.GetConfig("columns") != null
-                                        ? node.GetConfig("columns").Get()
-                                        : new List<Column>();
+                                    JArray columns = null;
+                                    if (node.Columns != null)
+                                    {
+                                        columns = node.Columns;
+                                    }
+                                    else
+                                    {
+                                        columns = new JArray();
+                                    }
                                     var permit = (request.Permit != null) ? Permission._permMap[request.Permit.ToLower()] : null;
                                     var invokeRequest = new InvokeRequest(request.RequestId.Value, request.Path,
                                                                           permit, request.Parameters, link: _link,
                                                                           columns: columns);
-                                    await Task.Run(() => node.Action.Function.Invoke(parameters, invokeRequest));
+                                    await Task.Run(() => node.Action.Function.Invoke(request.Parameters, invokeRequest));
                                 }
                             }
                         }

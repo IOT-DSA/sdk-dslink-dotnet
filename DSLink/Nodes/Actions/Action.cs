@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DSLink.Request;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes.Actions
 {
@@ -17,9 +18,9 @@ namespace DSLink.Nodes.Actions
         /// <summary>
         /// Callback for action.
         /// </summary>
-        public readonly Action<Dictionary<string, Value>, InvokeRequest> Function;
+        public readonly Action<Dictionary<string, JToken>, InvokeRequest> Function;
 
-        public Action(Permission permission, Action<Dictionary<string, Value>, InvokeRequest> function)
+        public Action(Permission permission, Action<Dictionary<string, JToken>, InvokeRequest> function)
         {
             Permission = permission;
             Function = function;

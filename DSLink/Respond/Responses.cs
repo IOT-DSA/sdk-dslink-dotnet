@@ -118,7 +118,7 @@ namespace DSLink.Respond
         /// <summary>
         /// Columns from Response.
         /// </summary>
-        public List<Column> Columns
+        public JArray Columns
         {
             get;
         }
@@ -149,7 +149,7 @@ namespace DSLink.Respond
         /// <param name="columns">Columns</param>
         /// <param name="updates">Updates</param>
         public InvokeResponse(AbstractContainer link, int requestID,
-                              string path, List<Column> columns,
+                              string path, JArray columns,
                               JArray updates)
             : base(link, requestID)
         {

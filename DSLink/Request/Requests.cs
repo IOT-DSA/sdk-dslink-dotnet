@@ -227,7 +227,7 @@ namespace DSLink.Request
         /// <summary>
         /// Columns of the request.
         /// </summary>
-        private readonly List<Column> _columns;
+        private readonly JArray _columns;
 
         /// <summary>
         /// Whether this is the first update or not.
@@ -246,7 +246,7 @@ namespace DSLink.Request
         /// <param name="link">Link</param>
         /// <param name="columns">Columns</param>
         public InvokeRequest(int requestID, string path, Permission permission, Dictionary<string, JToken> parameters,
-                             Action<InvokeResponse> callback = null, AbstractContainer link = null, List<Column> columns = null) : base(requestID)
+                             Action<InvokeResponse> callback = null, AbstractContainer link = null, JArray columns = null) : base(requestID)
         {
             Path = path;
             Permission = permission;
