@@ -140,12 +140,11 @@ namespace DSLink.Nodes
         /// <summary>
         /// Sets the type.
         /// </summary>
-        /// <param name="type">Type string</param>
-        /// <returns>Node</returns>
-        public NodeFactory SetType(string type)
+        /// <param name="valueType">ValueType</param>
+        /// <returns>NodeFactory</returns>
+        public NodeFactory SetType(ValueType valueType)
         {
-            // TODO: Check for valid type.
-            _node.SetConfig("type", new Value(type));
+            _node.ValueType = valueType;
             return this;
         }
 

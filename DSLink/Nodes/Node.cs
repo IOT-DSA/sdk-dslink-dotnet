@@ -308,6 +308,26 @@ namespace DSLink.Nodes
             }
         }
 
+        public ValueType ValueType
+        {
+            get
+            {
+                var config = GetConfig("type");
+                if (config != null)
+                {
+                    return ValueType.FromString(config.String);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                SetConfig("type", value.TypeValue);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the writable permission.
         /// </summary>

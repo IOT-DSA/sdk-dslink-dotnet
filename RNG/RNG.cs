@@ -25,6 +25,11 @@ namespace RNG
                                     await request.Close();
                                 }))
                                 .BuildNode();
+
+            var testValue = Responder.SuperRoot.CreateChild("TestValue")
+                                     .SetWritable(Permission.Read)
+                                     .SetValue(0.1)
+                                     .BuildNode();
         }
 
         private static void Main(string[] args)

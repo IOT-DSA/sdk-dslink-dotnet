@@ -7,7 +7,7 @@ using DSLink.Util.Logger;
 using Foundation;
 using Newtonsoft.Json.Linq;
 using UIKit;
-using Action = DSLink.Nodes.Actions.Action;
+using Action = DSLink.Nodes.Actions.ActionHandler;
 
 namespace DSLink.iOS.Example
 {
@@ -35,7 +35,6 @@ namespace DSLink.iOS.Example
                                                     responder: true,
                                                     requester: true,
                                                     logLevel: LogLevel.Debug,
-                                                    communicationFormat: "json",
                                                     keysLocation: Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/dsa_mobile.keys",
                                                     connectionAttemptLimit: -1));
             
@@ -84,20 +83,18 @@ namespace DSLink.iOS.Example
             var testAction = Responder.SuperRoot.CreateChild("Test")
                                       .AddParameter(new Parameter("parameter", "string"))
                                       .AddColumn(new Column("success", "bool"))
-                                      .SetAction(new Action(Permission.Write, Test))
+                                      .SetAction(new ActionHandler(Permission.Write, Test))
                                       .SetInvokable(Permission.Read)
                                       .BuildNode();
         }
 
-        public void Test(Dictionary<string, JToken> parameters, InvokeRequest request)
+        public async void Test(InvokeRequest request)
         {
-            request.SendUpdates(new JArray
+            await Requester.List("/", async (listResponse) =>
             {
-                new JArray
-                {
-                    true
-                }
-            }, true);
+                await request.SendUpdates(true);
+                await request.Close();
+            });
         }
 
         public async void Subscribe()
