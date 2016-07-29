@@ -6,7 +6,6 @@ using DSLink.Container;
 using DSLink.Nodes.Actions;
 using DSLink.Util;
 using Newtonsoft.Json.Linq;
-using Action = DSLink.Nodes.Actions.Action;
 
 namespace DSLink.Nodes
 {
@@ -41,7 +40,7 @@ namespace DSLink.Nodes
         /// List of removed children, used to notify watchers about
         /// removed children.
         /// </summary>
-        private readonly IList<Node> _removedChildren;
+        private readonly List<Node> _removedChildren;
 
         /// <summary>
         /// List of subscription IDs belonging to this Node
@@ -81,7 +80,10 @@ namespace DSLink.Nodes
         /// <summary>
         /// Name of this node.
         /// </summary>
-        public string Name { get; }
+        public string Name
+        {
+            get;
+        }
 
         private string _path;
 
@@ -103,22 +105,28 @@ namespace DSLink.Nodes
         /// <summary>
         /// Parent of this Node.
         /// </summary>
-        public Node Parent { get; }
+        public Node Parent
+        {
+            get;
+        }
 
         /// <summary>
         /// Value of this Node.
         /// </summary>
-        public Value Value { get; }
+        public Value Value
+        {
+            get;
+        }
 
         /// <summary>
         /// Node action
         /// </summary>
-        public Action Action;
+        public ActionHandler ActionHandler;
 
         /// <summary>
-        /// Node is transient
+        /// Node is serializable
         /// </summary>
-        public bool Transient;
+        public bool Serializable = false;
 
         /// <summary>
         /// Node is still being created via NodeFactory
@@ -193,7 +201,6 @@ namespace DSLink.Nodes
 
             Value = new Value();
             Value.OnSet += ValueSet;
-            Transient = false;
 
             if (parent != null)
             {
@@ -239,13 +246,6 @@ namespace DSLink.Nodes
             }
         }
 
-        private dynamic GetConfigValue(string key)
-        {
-            var result = GetConfig(key);
-            if (result == null) return null;
-            return result.Get();
-        }
-
         /// <summary>
         /// Set a Node attribute.
         /// </summary>
@@ -274,11 +274,16 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Gets or sets the display name.
+        /// </summary>
+        /// <value>Display name</value>
         public string DisplayName
         {
             get
             {
-                return GetConfigValue("name");
+                var config = GetConfig("name");
+                return config != null ? config.String : null;
             }
             set
             {
@@ -286,27 +291,33 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Gets or sets the profile.
+        /// </summary>
+        /// <value>Node profile</value>
         public string Profile
         {
             get
             {
-                return GetConfigValue("profile");
+                var config = GetConfig("is");
+                return config != null ? config.String : null;
             }
             set
             {
-                SetConfig("profile", new Value(value));
+                SetConfig("is", new Value(value));
             }
         }
 
         /// <summary>
         /// Gets or sets the writable permission.
         /// </summary>
-        /// <value>The writable.</value>
+        /// <value>Writable permission</value>
         public Permission Writable
         {
             get
             {
-                return Permission._permMap[GetConfigValue("writable")];
+                var writable = GetConfig("writable");
+                return writable != null ? Permission.FromString(writable.String) : null;
             }
             set
             {
@@ -322,7 +333,8 @@ namespace DSLink.Nodes
         {
             get
             {
-                return Permission.FromString(GetConfigValue("invokable"));
+                var config = GetConfig("invokable");
+                return config != null ? Permission.FromString(config.String) : null;
             }
             set
             {
@@ -338,7 +350,8 @@ namespace DSLink.Nodes
         {
             get
             {
-                return GetConfigValue("params");
+                var config = GetConfig("params");
+                return config != null ? config.JArray : null;
             }
             set
             {
@@ -354,7 +367,8 @@ namespace DSLink.Nodes
         {
             get
             {
-                return GetConfigValue("columns");
+                var columns = GetConfig("columns");
+                return columns != null ? columns.JArray : null;
             }
             set
             {
@@ -370,7 +384,8 @@ namespace DSLink.Nodes
         {
             get
             {
-                return GetConfigValue("actionGroup");
+                var actionGroup = GetConfig("actionGroupSubTitle");
+                return actionGroup != null ? actionGroup.String : null;
             }
             set
             {
@@ -386,7 +401,8 @@ namespace DSLink.Nodes
         {
             get
             {
-                return GetConfigValue("actionGroupSubTitle");
+                var actionGroupSubtitle = GetConfig("actionGroupSubTitle");
+                return actionGroupSubtitle != null ? actionGroupSubtitle.String : null;
             }
             set
             {
@@ -395,12 +411,12 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// True if Node has a value.
+        /// Check whether this Node has a value.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True when Node has a value</returns>
         public bool HasValue()
         {
-            return Value.Get() != null;
+            return Value != null && !Value.IsNull;
         }
 
         /// <summary>
@@ -482,33 +498,33 @@ namespace DSLink.Nodes
         /// Event fired when the value is set.
         /// </summary>
         /// <param name="value"></param>
-        protected virtual void ValueSet(Value value)
+        protected async virtual void ValueSet(Value value)
         {
-            var rootObject = new RootObject
+            var rootObject = new JObject
             {
-                Responses = new List<ResponseObject>
+                new JProperty("responses", new JArray
                 {
-                    new ResponseObject
+                    new JObject
                     {
-                        RequestId = 0,
-                        Updates = new JArray()
+                        new JProperty("rid", 0),
+                        new JProperty("updates", new JArray())
                     }
-                }
+                })
             };
             bool hasUpdates = false;
             foreach (var sid in Subscribers)
             {
                 hasUpdates = true;
-                rootObject.Responses[0].Updates.Add(new JArray
+                rootObject["response"].First["updates"].Value<JArray>().Add(new JArray
                 {
                     sid,
-                    value.Get(),
+                    value.JToken,
                     value.LastUpdated
                 });
             }
             if (hasUpdates)
             {
-                _link.Connector.Write(rootObject);
+                await _link.Connector.Write(rootObject);
             }
         }
 
@@ -519,20 +535,22 @@ namespace DSLink.Nodes
         public JArray Serialize()
         {
             var val = new JArray();
+
             foreach (var pair in _configs)
             {
                 val.Add(new JArray
                 {
                     pair.Key,
-                    pair.Value.Get()
+                    pair.Value.JToken
                 });
             }
+
             foreach (var pair in _attributes)
             {
                 val.Add(new JArray
                 {
                     pair.Key,
-                    pair.Value.Get()
+                    pair.Value.JToken
                 });
             }
 
@@ -543,15 +561,15 @@ namespace DSLink.Nodes
                     var value = new JObject();
                     foreach (var config in child.Value._configs)
                     {
-                        value[config.Key] = config.Value.Get();
+                        value[config.Key] = config.Value.JToken;
                     }
                     foreach (var attr in child.Value._attributes)
                     {
-                        value[attr.Key] = attr.Value.Get();
+                        value[attr.Key] = attr.Value.JToken;
                     }
                     if (child.Value.HasValue())
                     {
-                        value["value"] = child.Value.Value.Get();
+                        value["value"] = child.Value.Value.JToken;
                         value["ts"] = child.Value.Value.LastUpdated;
                     }
                     val.Add(new JArray
@@ -600,7 +618,7 @@ namespace DSLink.Nodes
             }
             catch (KeyNotFoundException)
             {
-                _link?.Logger.Warning("Non-existant Node requested");
+                _link?.Logger.Warning(string.Format("Non-existant Node({0}) requested", path));
                 return null;
             }
         }
@@ -608,23 +626,23 @@ namespace DSLink.Nodes
         /// <summary>
         /// Update all subscribers of this Node.
         /// </summary>
-        internal virtual void UpdateSubscribers()
+        internal async virtual void UpdateSubscribers()
         {
             if (Building)
             {
                 return;
             }
-            var responses = Streams.Select(stream => new ResponseObject
+
+            if (Streams.Count > 0)
             {
-                RequestId = stream,
-                Stream = "open",
-                Updates = Serialize()
-            }).ToList();
-            if (responses.Count > 0)
-            {
-                _link.Connector.Write(new RootObject
+                await _link.Connector.Write(new JObject
                 {
-                    Responses = responses
+                    new JProperty("responses", Streams.Select(stream => new JObject
+                    {
+                        new JProperty("rid", stream),
+                        new JProperty("stream", "open"),
+                        new JProperty("updates", Serialize())
+                    }))
                 });
             }
         }

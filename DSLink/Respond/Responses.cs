@@ -50,16 +50,16 @@ namespace DSLink.Respond
                 throw new NullReferenceException("Link is null, cannot close stream.");
             }
             _link.Requester._requestManager.StopRequest(RequestID);
-            await _link.Connector.Write(new RootObject
+            await _link.Connector.Write(new JObject
             {
-                Responses = new List<ResponseObject>
+                new JProperty("responses", new JObject
                 {
-                    new ResponseObject
+                    new JObject
                     {
-                        RequestId = RequestID,
-                        Stream = "closed"
+                        new JProperty("rid", RequestID),
+                        new JProperty("stream", "closed")
                     }
-                }
+                })
             });
         }
     }

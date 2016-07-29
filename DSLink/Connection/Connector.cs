@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Connection
 {
@@ -38,7 +39,7 @@ namespace DSLink.Connection
         /// or we want to send a large amount of data in one burst. When set to
         /// false, the flush method is automatically called.
         /// </summary>
-        private RootObject _queue;
+        private JObject _queue;
 
         /// <summary>
         /// Queue lock object.
@@ -175,37 +176,37 @@ namespace DSLink.Connection
         /// Write the specified data.
         /// </summary>
         /// <param name="data">RootObject to serialize and send</param>
-        public async Task Write(RootObject data)
+        public async Task Write(JObject data)
         {
-            if (!data.Msg.HasValue)
+            if (data["msg"] == null)
             {
-                data.Msg = _link.MessageId;
+                data["msg"] = _link.MessageId;
             }
 
-            if (!Connected() || EnableQueue)
+            /*if (!Connected() || EnableQueue)
             {
                 lock (_queueLock)
                 {
                     if (_queue == null)
                     {
-                        _queue = new RootObject
+                        _queue = new JObject
                         {
-                            Msg = data.Msg,
-                            Responses = new List<ResponseObject>(),
-                            Requests = new List<RequestObject>()
+                            new JProperty("msg", data["msg"]),
+                            new JProperty("responses", new JArray()),
+                            new JProperty("requests", new JArray())
                         };
                     }
-                    if (data.Responses != null)
+                    if (data["responses"] != null)
                     {
-                        _queue.Responses.AddRange(data.Responses);
+                        //_queue["responses"].AddRange(data.Responses);
                     }
-                    if (data.Requests != null)
+                    if (data["requests"] != null)
                     {
-                        _queue.Requests.AddRange(data.Requests);
+                        _queue["responses"].Value<JArray>().(data.Requests);
                     }
                 }
                 return;
-            }
+            }*/
 
             WriteData(Serializer.Serialize(data));
         }

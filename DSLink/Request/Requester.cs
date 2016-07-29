@@ -63,15 +63,15 @@ namespace DSLink.Request
         /// </summary>
         /// <param name="responses">Responses</param>
         /// <returns>Requests</returns>
-        internal async Task<List<RequestObject>> ProcessResponses(List<ResponseObject> responses)
+        internal async Task<JArray> ProcessResponses(JArray responses)
         {
-            var requests = new List<RequestObject>();
+            var requests = new JArray();
 
-            foreach (var response in responses)
+            foreach (JObject response in responses)
             {
-                if (response.RequestId.HasValue && response.RequestId.Value == 0)
+                if (response["rid"].Type == JTokenType.Integer && response["rid"].Value<int>() == 0)
                 {
-                    foreach (dynamic update in response.Updates)
+                    foreach (dynamic update in response["updates"])
                     {
                         if (update is JArray)
                         {
@@ -103,15 +103,15 @@ namespace DSLink.Request
                         }
                     }
                 }
-                else if (response.RequestId.HasValue && _requestManager.RequestPending(response.RequestId.Value))
+                else if (response["rid"].Type == JTokenType.Integer && _requestManager.RequestPending(response["rid"].Value<int>()))
                 {
-                    var request = _requestManager.GetRequest(response.RequestId.Value);
+                    var request = _requestManager.GetRequest(response["rid"].Value<int>());
                     if (request is ListRequest)
                     {
                         var listRequest = request as ListRequest;
                         string name = listRequest.Path.Split('/').Last();
                         var node = new RemoteNode(name, null, listRequest.Path);
-                        node.FromSerialized(response.Updates);
+                        node.FromSerialized(response["updates"].Value<JArray>());
                         await Task.Run(() => listRequest.Callback(new ListResponse(_link, listRequest.RequestID,
                                                                                    listRequest.Path, node)));
                     }
@@ -127,11 +127,11 @@ namespace DSLink.Request
                     {
                         var invokeRequest = request as InvokeRequest;
                         await Task.Run(() => invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID,
-                                                                                       invokeRequest.Path, response.Columns,
-                                                                                       response.Updates)));
+                                                                                       invokeRequest.Path, response["columns"].Value<JArray>(),
+                                                                                       response["updates"].Value<JArray>())));
                     }
                 }
-                else if (response.RequestId == null)
+                else if (response["rid"].Type == JTokenType.Null)
                 {
                     _link.Logger.Warning("Incoming request has null request ID.");
                 }
@@ -149,12 +149,12 @@ namespace DSLink.Request
         {
             var request = new ListRequest(NextRequestID, callback, path, _link);
             _requestManager.StartRequest(request);
-            await _link.Connector.Write(new RootObject
+            await _link.Connector.Write(new JObject
             {
-                Requests = new List<RequestObject>
+                new JProperty("requests", new JArray
                 {
                     request.Serialize()
-                }
+                })
             });
             return request;
         }
@@ -169,12 +169,12 @@ namespace DSLink.Request
         {
             var request = new SetRequest(NextRequestID, path, permission, value);
             _requestManager.StartRequest(request);
-            await _link.Connector.Write(new RootObject
+            await _link.Connector.Write(new JObject
             {
-                Requests = new List<RequestObject>
+                new JProperty("requests", new JArray
                 {
                     request.Serialize()
-                }
+                })
             });
             return request;
         }
@@ -187,12 +187,12 @@ namespace DSLink.Request
         {
             var request = new RemoveRequest(NextRequestID, path);
             _requestManager.StartRequest(request);
-            await _link.Connector.Write(new RootObject
+            await _link.Connector.Write(new JObject
             {
-                Requests = new List<RequestObject>
+                new JProperty("requests", new JArray
                 {
                     request.Serialize()
-                }
+                })
             });
             return request;
         }
@@ -204,16 +204,16 @@ namespace DSLink.Request
         /// <param name="permission">Permission</param>
         /// <param name="parameters">Parameters</param>
         /// <param name="callback">Callback</param>
-        public async Task<InvokeRequest> Invoke(string path, Permission permission, Dictionary<string, JToken> parameters, Action<InvokeResponse> callback)
+        public async Task<InvokeRequest> Invoke(string path, Permission permission, JObject parameters, Action<InvokeResponse> callback)
         {
             var request = new InvokeRequest(NextRequestID, path, permission, parameters, callback);
             _requestManager.StartRequest(request);
-            await _link.Connector.Write(new RootObject
+            await _link.Connector.Write(new JObject
             {
-                Requests = new List<RequestObject>
+                new JProperty("requests", new JArray
                 {
                     request.Serialize()
-                }
+                })
             });
             return request;
         }
@@ -227,23 +227,23 @@ namespace DSLink.Request
         public async Task<SubscribeRequest> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos = 0)
         {
             var sid = NextSubID;
-            var request = new SubscribeRequest(NextRequestID, new List<AddSubscriptionObject>
+            var request = new SubscribeRequest(NextRequestID, new JArray
             {
-                new AddSubscriptionObject
+                new JObject
                 {
-                    Path = path,
-                    SubscriptionId = sid,
-                    QualityOfService = qos
+                    new JProperty("path", path),
+                    new JProperty("sid", sid),
+                    new JProperty("qos", qos)
                 }
             }, callback);
 
             _subscriptionManager.Subscribe(sid, path, callback);
-            await _link.Connector.Write(new RootObject
+            await _link.Connector.Write(new JObject
             {
-                Requests = new List<RequestObject>
+                new JProperty("requests", new JArray
                 {
                     request.Serialize()
-                }
+                })
             });
 
             return request;
@@ -267,7 +267,7 @@ namespace DSLink.Request
         /// <param name="paths">List of paths</param>
         public void Unsubscribe(List<string> paths)
         {
-            var sids = new List<int>();
+            var sids = new JArray();
             foreach (string path in paths)
             {
                 var sid = _subscriptionManager.GetSubByPath(path);
@@ -279,12 +279,12 @@ namespace DSLink.Request
             }
             if (sids.Count > 0)
             {
-                _link.Connector.Write(new RootObject
+                _link.Connector.Write(new JObject
                 {
-                    Requests = new List<RequestObject>
+                    new JProperty("requests", new JArray
                     {
                         new UnsubscribeRequest(NextRequestID, sids).Serialize()
-                    }
+                    })
                 });
             }
         }

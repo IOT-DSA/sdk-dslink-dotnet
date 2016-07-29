@@ -8,7 +8,7 @@ namespace DSLink.Nodes.Actions
     /// <summary>
     /// Used for action callbacks and permission.
     /// </summary>
-    public class Action
+    public class ActionHandler
     {
         /// <summary>
         /// Permission of the action.
@@ -18,9 +18,14 @@ namespace DSLink.Nodes.Actions
         /// <summary>
         /// Callback for action.
         /// </summary>
-        public readonly Action<Dictionary<string, JToken>, InvokeRequest> Function;
+        public readonly Action<InvokeRequest> Function;
 
-        public Action(Permission permission, Action<Dictionary<string, JToken>, InvokeRequest> function)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:DSLink.Nodes.Actions.ActionHandler"/> class.
+        /// </summary>
+        /// <param name="permission">Permission</param>
+        /// <param name="function">Function</param>
+        public ActionHandler(Permission permission, Action<InvokeRequest> function)
         {
             Permission = permission;
             Function = function;

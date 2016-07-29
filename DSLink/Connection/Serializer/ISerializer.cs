@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+
 namespace DSLink.Connection.Serializer
 {
     /// <summary>
@@ -18,13 +20,13 @@ namespace DSLink.Connection.Serializer
         /// </summary>
         /// <param name="data">Data to serialize in serialization object form.</param>
         /// <returns>Serialized data</returns>
-        dynamic Serialize(RootObject data);
+        dynamic Serialize(JObject data);
 
         /// <summary>
         /// Deserialize the specified data.
         /// </summary>
         /// <param name="data">Data in serialized form.</param>
         /// <returns>Deserialized data in serialization object form.</returns>
-        RootObject Deserialize(dynamic data);
+        JObject Deserialize(dynamic data);
     }
 }

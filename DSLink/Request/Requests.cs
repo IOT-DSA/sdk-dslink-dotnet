@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
@@ -35,17 +37,17 @@ namespace DSLink.Request
         /// <summary>
         /// Request method.
         /// </summary>
-        public abstract string Method();
+        public virtual string Method => "";
 
         /// <summary>
         /// Serialize the request.
         /// </summary>
-        public virtual RequestObject Serialize()
+        public virtual JObject Serialize()
         {
-            return new RequestObject()
+            return new JObject
             {
-                RequestId = RequestID,
-                Method = Method()
+                new JProperty("rid", RequestID),
+                new JProperty("method", Method)
             };
         }
     }
@@ -88,15 +90,15 @@ namespace DSLink.Request
         /// <summary>
         /// Request method.
         /// </summary>
-        public override string Method() => "list";
+        public override string Method => "list";
 
         /// <summary>
         /// Serialize the request.
         /// </summary>
-        public override RequestObject Serialize()
+        public override JObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.Path = Path;
+            baseSerialized["path"] = Path;
             return baseSerialized;
         }
     }
@@ -139,17 +141,17 @@ namespace DSLink.Request
         /// <summary>
         /// Method of this request.
         /// </summary>
-        public override string Method() => "set";
+        public string Method => "set";
 
         /// <summary>
         /// Serialize the request.
         /// </summary>
-        public override RequestObject Serialize()
+        public override JObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.Path = Path;
-            baseSerialized.Permit = Permission.ToString();
-            baseSerialized.Value = Value.Get();
+            baseSerialized["path"] = Path;
+            baseSerialized["permit"] = Permission.ToString();
+            baseSerialized["value"] = Value.JToken;
             return baseSerialized;
         }
     }
@@ -181,15 +183,15 @@ namespace DSLink.Request
         /// <summary>
         /// Method of the request.
         /// </summary>
-        public override string Method() => "remove";
+        public override string Method => "remove";
 
         /// <summary>
         /// Serialize the request.
         /// </summary>
-        public override RequestObject Serialize()
+        public override JObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.Path = Path;
+            baseSerialized["path"] = Path;
             return baseSerialized;
         }
     }
@@ -212,7 +214,7 @@ namespace DSLink.Request
         /// <summary>
         /// Parameters of the request.
         /// </summary>
-        public readonly Dictionary<string, JToken> Parameters;
+        public readonly JObject Parameters;
 
         /// <summary>
         /// Callback of the request.
@@ -245,7 +247,7 @@ namespace DSLink.Request
         /// <param name="callback">Callback</param>
         /// <param name="link">Link</param>
         /// <param name="columns">Columns</param>
-        public InvokeRequest(int requestID, string path, Permission permission, Dictionary<string, JToken> parameters,
+        public InvokeRequest(int requestID, string path, Permission permission, JObject parameters,
                              Action<InvokeResponse> callback = null, AbstractContainer link = null, JArray columns = null) : base(requestID)
         {
             Path = path;
@@ -259,20 +261,20 @@ namespace DSLink.Request
         /// <summary>
         /// Method of the request.
         /// </summary>
-        public override string Method() => "invoke";
+        public override string Method => "invoke";
 
         /// <summary>
         /// Serialize the request.
         /// </summary>
-        public override RequestObject Serialize()
+        public override JObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.Path = Path;
-            if (baseSerialized.Permit != null)
+            baseSerialized["path"] = Path;
+            if (baseSerialized["permit"] != null)
             {
-                baseSerialized.Permit = Permission.ToString();
+                baseSerialized["permit"] = Permission.ToString();
             }
-            baseSerialized.Parameters = Parameters;
+            baseSerialized["params"] = Parameters;
             return baseSerialized;
         }
 
@@ -280,57 +282,61 @@ namespace DSLink.Request
         /// Sends an update to the requester.
         /// </summary>
         /// <param name="updates">Updates</param>
-        /// <param name="close">Whether to close the stream</param>
-        public void SendUpdates(JArray updates, bool close = false)
+        public async Task SendUpdates(params dynamic[] updates)
         {
             if (_link == null || _columns == null)
             {
                 throw new NotSupportedException("Link and columns are null, cannot send updates");
             }
-            var updateRootObject = new RootObject
+            var updateRootObject = new JObject
             {
-                Responses = new List<ResponseObject>
+                new JProperty("responses", new JArray
                 {
-                    new ResponseObject
+                    new JObject
                     {
-                        RequestId = RequestID,
-                        Stream = (close ? "close" : "open"),
-                        Updates = updates
+                        new JProperty("rid", RequestID),
+                        new JProperty("stream", "open"),
+                        new JProperty("updates", updates.Select(update =>
+                        {
+                            return new JArray
+                            {
+                                update
+                            };
+                        }))
                     }
-                }
+                })
             };
             if (_firstUpdate)
             {
                 _firstUpdate = false;
-                updateRootObject.Responses[0].Meta = new Dictionary<string, dynamic>
+                updateRootObject["responses"].First["meta"] = new JObject
                 {
-                    {"mode", "append"},
-                    {"meta", new Dictionary<string, dynamic>()}
+                    new JProperty("meta", new JObject())
                 };
-                updateRootObject.Responses[0].Columns = _columns;
+                updateRootObject["responses"].First["columns"] = _columns;
             }
-            _link.Connector.Write(updateRootObject);
+            await _link.Connector.Write(updateRootObject);
         }
 
         /// <summary>
         /// Close the request.
         /// </summary>
-        public void Close()
+        public async Task Close()
         {
             if (_link == null)
             {
                 throw new NotSupportedException("Link is null, cannot send updates");
             }
-            _link.Connector.Write(new RootObject
+            await _link.Connector.Write(new JObject
             {
-                Responses = new List<ResponseObject>
+                new JProperty("responses", new JArray
                 {
-                    new ResponseObject
+                    new JObject
                     {
-                        RequestId = RequestID,
-                        Stream = "closed"
+                        new JProperty("rid", RequestID),
+                        new JProperty("stream", "closed")
                     }
-                }
+                })
             });
         }
     }
@@ -343,7 +349,7 @@ namespace DSLink.Request
         /// <summary>
         /// List of subscriptions paths.
         /// </summary>
-        public readonly List<AddSubscriptionObject> Paths;
+        public readonly JArray Paths;
 
         /// <summary>
         /// Callback for value updates.
@@ -357,7 +363,7 @@ namespace DSLink.Request
         /// <param name="requestID">Request identifier</param>
         /// <param name="paths">Paths</param>
         /// <param name="callback">Callback</param>
-        public SubscribeRequest(int requestID, List<AddSubscriptionObject> paths, Action<SubscriptionUpdate> callback) : base(requestID)
+        public SubscribeRequest(int requestID, JArray paths, Action<SubscriptionUpdate> callback) : base(requestID)
         {
             Paths = paths;
             Callback = callback;
@@ -366,15 +372,15 @@ namespace DSLink.Request
         /// <summary>
         /// Method of this request.
         /// </summary>
-        public override string Method() => "subscribe";
+        public override string Method => "subscribe";
 
         /// <summary>
         /// Serialize the request.
         /// </summary>
-        public override RequestObject Serialize()
+        public override JObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.Paths = Paths;
+            baseSerialized["paths"] = Paths;
             return baseSerialized;
         }
     }
@@ -387,7 +393,7 @@ namespace DSLink.Request
         /// <summary>
         /// Subscription IDs.
         /// </summary>
-        public readonly List<int> Sids;
+        public readonly JArray Sids;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -395,7 +401,7 @@ namespace DSLink.Request
         /// </summary>
         /// <param name="requestID">Request identifier</param>
         /// <param name="sids">Subscription IDs</param>
-        public UnsubscribeRequest(int requestID, List<int> sids) : base(requestID)
+        public UnsubscribeRequest(int requestID, JArray sids) : base(requestID)
         {
             Sids = sids;
         }
@@ -403,15 +409,15 @@ namespace DSLink.Request
         /// <summary>
         /// Method of this request.
         /// </summary>
-        public override string Method() => "unsubscribe";
+        public override string Method => "unsubscribe";
 
         /// <summary>
         /// Serialize the request.
         /// </summary>
-        public override RequestObject Serialize()
+        public override JObject Serialize()
         {
             var baseSerialized = base.Serialize();
-            baseSerialized.SubscriptionIds = Sids;
+            baseSerialized["sids"] = Sids;
             return baseSerialized;
         }
     }

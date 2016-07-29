@@ -127,13 +127,13 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// Sets whether the node is transient.
+        /// Sets whether the node is serializable.
         /// </summary>
-        /// <param name="transient">Transient</param>
+        /// <param name="serializable">Serializable</param>
         /// <returns>Node</returns>
-        public NodeFactory SetTransient(bool transient)
+        public NodeFactory SetSerializable(bool serializable)
         {
-            _node.Transient = true;
+            _node.Serializable = true;
             return this;
         }
 
@@ -163,12 +163,12 @@ namespace DSLink.Nodes
         /// <summary>
         /// Sets the action.
         /// </summary>
-        /// <param name="action">Action</param>
+        /// <param name="actionHandler">Action</param>
         /// <returns>Node</returns>
-        public NodeFactory SetAction(Action action)
+        public NodeFactory SetAction(ActionHandler actionHandler)
         {
-            _node.Invokable = action.Permission;
-            _node.Action = action;
+            _node.Invokable = actionHandler.Permission;
+            _node.ActionHandler = actionHandler;
             return this;
         }
 

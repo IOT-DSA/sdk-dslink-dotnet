@@ -20,12 +20,12 @@ namespace DSLink.Crypto
         /// <summary>
         /// Key size.
         /// </summary>
-        private const int KEY_SIZE = 256;
+        public const int KeySize = 256;
 
         /// <summary>
         /// Curve type, prime256v1.
         /// </summary>
-        private const string CURVE = "SECP256R1";
+        public const string Curve = "SECP256R1";
 
         /// <summary>
         /// Location of key file to load from and save to.
@@ -59,7 +59,7 @@ namespace DSLink.Crypto
         {
             var generator = new ECKeyPairGenerator();
             var secureRandom = new SecureRandom();
-            var keyGenParams = new KeyGenerationParameters(secureRandom, KEY_SIZE);
+            var keyGenParams = new KeyGenerationParameters(secureRandom, KeySize);
             generator.Init(keyGenParams);
             return generator.GenerateKeyPair();
         }
@@ -71,7 +71,7 @@ namespace DSLink.Crypto
         {
             IFileSystem fileSystem = FileSystem.Current;
             IFile file = await fileSystem.GetFileFromPathAsync(_location);
-            
+
             if (file != null)
             {
                 var reader = new StreamReader(await file.OpenAsync(FileAccess.Read));
@@ -97,10 +97,12 @@ namespace DSLink.Crypto
                     BcKeyPair = new AsymmetricCipherKeyPair(pubParams, privParams);
                 }
             }
-
-            var key = Generate();
-            await Save(key);
-            BcKeyPair = key;
+            else
+            {
+                var key = Generate();
+                await Save(key);
+                BcKeyPair = key;
+            }
         }
 
         /// <summary>
@@ -147,7 +149,7 @@ namespace DSLink.Crypto
         /// <returns>The parameters.</returns>
         private static ECDomainParameters GetParams()
         {
-            var ecp = SecNamedCurves.GetByName(CURVE);
+            var ecp = SecNamedCurves.GetByName(Curve);
             return new ECDomainParameters(ecp.Curve, ecp.G, ecp.N, ecp.H, ecp.GetSeed());
         }
 

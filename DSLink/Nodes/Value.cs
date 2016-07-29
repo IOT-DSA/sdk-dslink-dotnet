@@ -11,7 +11,7 @@ namespace DSLink.Nodes
     public class Value
     {
         /// <summary>
-        /// Value.
+        /// Represents the value that this class is containing.
         /// </summary>
         private JToken _val;
 
@@ -26,9 +26,8 @@ namespace DSLink.Nodes
         public event Action<Value> OnSet;
 
         /// <summary>
-        /// Gets last updated time in ISO 8601 format.
+        /// Gets last updated time in the ISO 8601 format that DSA uses.
         /// </summary>
-        /// <value>The last updated.</value>
         public string LastUpdated => TimeUtil.ToIso8601(_lastUpdated);
 
         public Value()
@@ -66,14 +65,9 @@ namespace DSLink.Nodes
 			Set(val);
 		}
 
-        public Value(JToken jtoken)
+        public Value(JToken val)
         {
-            Set(jtoken);
-        }
-
-        public JToken Get()
-        {
-            return _val;
+            Set(val);
         }
 
         public void Set(string val)
@@ -127,22 +121,29 @@ namespace DSLink.Nodes
             SetValue();
         }
 
+        public JToken JToken => _val;
+        public dynamic Dynamic => _val.Value<dynamic>();
+        public bool Boolean => _val.Value<bool>();
+        public string String => _val.Value<string>();
+        public int Int => _val.Value<int>();
+        public float Float => _val.Value<float>();
+        public double Double => _val.Value<double>();
+        public byte[] ByteArray => _val.Value<byte[]>();
+        public JArray JArray => _val.Value<JArray>();
+
         /// <summary>
-        /// Low level set method.
+        /// Determines whether the value is null
         /// </summary>
-        /// <param name="val">Value.</param>
+        /// <value>True if the value is null</value>
+        public bool IsNull => _val == null;
+
+        /// <summary>
+        /// Function to set updated time to now, and fire OnSet event.
+        /// </summary>
         private void SetValue()
         {
             _lastUpdated = DateTime.Now;
             OnSet?.Invoke(this);
-        }
-
-        /// <summary>
-        /// Clone this instance.
-        /// </summary>
-        public object Clone()
-        {
-            return new Value(_val.DeepClone());
         }
     }
 }

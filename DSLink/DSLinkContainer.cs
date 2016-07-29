@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink
 {
@@ -178,31 +180,32 @@ namespace DSLink
         /// Called when a message is received from the server, and is passed in deserialized data.
         /// </summary>
         /// <param name="message">Deserialized data</param>
-        private async Task OnMessage(RootObject message)
+        private async Task OnMessage(JObject message)
         {
-            var response = new RootObject
+            var response = new JObject();
+            if (message["msg"] != null)
             {
-                Ack = message.Msg
-            };
+                response["ack"] = message["msg"].Value<int>();
+            }
 
             bool write = false;
 
-            if (message.Requests != null)
+            if (message["requests"] != null)
             {
-                var responses = await Responder.ProcessRequests(message.Requests);
+                JArray responses = await Responder.ProcessRequests(message["requests"].Value<JArray>());
                 if (responses.Count > 0)
                 {
-                    response.Responses = responses;
+                    response["responses"] = responses;
                 }
                 write = true;
             }
 
-            if (message.Responses != null)
+            if (message["responses"] != null)
             {
-                var requests = await Requester.ProcessResponses(message.Responses);
+                JArray requests = await Requester.ProcessResponses(message["responses"].Value<JArray>());
                 if (requests.Count > 0)
                 {
-                    response.Requests = requests;
+                    response["requests"] = requests;
                 }
                 write = true;
             }
@@ -249,7 +252,7 @@ namespace DSLink
                 {
                     // Write a blank message containing no responses/requests.
                     Logger.Debug("Sent ping");
-                    await Connector.Write(new RootObject());
+                    await Connector.Write(new JObject());
                 }
                 // TODO: Extract the amount of time to the configuration object.
                 await Task.Delay(30000);

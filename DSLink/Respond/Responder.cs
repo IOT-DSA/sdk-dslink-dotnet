@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
-using DSLink.Nodes.Actions;
 using DSLink.Request;
 using Newtonsoft.Json.Linq;
 
@@ -53,40 +51,40 @@ namespace DSLink.Respond
         /// </summary>
         /// <param name="requests">List of requests</param>
         /// <returns>List of responses</returns>
-        internal async Task<List<ResponseObject>> ProcessRequests(List<RequestObject> requests)
+        internal async Task<JArray> ProcessRequests(JArray requests)
         {
-            var responses = new List<ResponseObject>();
-            foreach (var request in requests)
+            var responses = new JArray();
+            foreach (JObject request in requests)
             {
-                switch (request.Method)
+                switch (request["method"].Value<string>())
                 {
                     case "list":
                         {
-                            var node = SuperRoot.Get(request.Path);
+                            var node = SuperRoot.Get(request["path"].Value<string>());
                             if (node != null)
                             {
-                                StreamManager.Open(request.RequestId.Value, node);
-                                responses.Add(new ResponseObject
+                                StreamManager.Open(request["rid"].Value<int>(), node);
+                                responses.Add(new JObject
                                 {
-                                    RequestId = request.RequestId,
-                                    Stream = "open",
-                                    Updates = SuperRoot.Get(request.Path).Serialize()
+                                    new JProperty("rid", request["rid"].Value<int>()),
+                                    new JProperty("stream", "open"),
+                                    new JProperty("updates", SuperRoot.Get(request["path"].Value<string>()).Serialize())
                                 });
                             }
                         }
                         break;
                     case "set":
                         {
-                            var node = SuperRoot.Get(request.Path);
+                            var node = SuperRoot.Get(request["path"].Value<string>());
                             if (node != null)
                             {
-                                if (request.Permit == null || request.Permit.Equals(node.GetConfig("writable").Get()))
+                                if (request["permit"] == null || request["permit"].Value<string>().Equals(node.GetConfig("writable").String))
                                 {
-                                    node.Value.Set(request.Value);
-                                    responses.Add(new ResponseObject
+                                    node.Value.Set(request["value"]);
+                                    responses.Add(new JObject
                                     {
-                                        RequestId = request.RequestId,
-                                        Stream = "closed"
+                                        new JProperty("rid", request["rid"].Value<int>()),
+                                        new JProperty("stream", "closed")
                                     });
                                 }
                             }
@@ -94,92 +92,84 @@ namespace DSLink.Respond
                         break;
                     case "remove":
                         {
-                            SuperRoot.RemoveConfigAttribute(request.Path);
-                            responses.Add(new ResponseObject
+                            SuperRoot.RemoveConfigAttribute(request["path"].Value<string>());
+                            responses.Add(new JObject
                             {
-                                RequestId = request.RequestId,
-                                Stream = "closed"
+                                new JProperty("rid", request["rid"].Value<int>()),
+                                new JProperty("stream", "closed")
                             });
                         }
                         break;
                     case "invoke":
                         {
-                            var node = SuperRoot.Get(request.Path);
-                            if (node?.Action != null)
+                            var node = SuperRoot.Get(request["path"].Value<string>());
+                            if (node?.ActionHandler != null)
                             {
-                                if (request.Permit == null || request.Permit.Equals(node.Action.Permission.ToString()))
+                                if (request["permit"] == null || request["permit"].Value<string>().Equals(node.ActionHandler.Permission.ToString()))
                                 {
-                                    JArray columns = null;
-                                    if (node.Columns != null)
-                                    {
-                                        columns = node.Columns;
-                                    }
-                                    else
-                                    {
-                                        columns = new JArray();
-                                    }
-                                    var permit = (request.Permit != null) ? Permission._permMap[request.Permit.ToLower()] : null;
-                                    var invokeRequest = new InvokeRequest(request.RequestId.Value, request.Path,
-                                                                          permit, request.Parameters, link: _link,
+                                    JArray columns = node.Columns ?? new JArray();
+                                    var permit = (request["permit"] != null) ? Permission._permMap[request["permit"].Value<string>().ToLower()] : null;
+                                    var invokeRequest = new InvokeRequest(request["rid"].Value<int>(), request["path"].Value<string>(),
+                                                                          permit, request["params"].Value<JObject>(), link: _link,
                                                                           columns: columns);
-                                    await Task.Run(() => node.Action.Function.Invoke(request.Parameters, invokeRequest));
+                                    await Task.Run(() => node.ActionHandler.Function.Invoke(invokeRequest));
                                 }
                             }
                         }
                         break;
                     case "subscribe":
                         {
-                            foreach (var pair in request.Paths)
+                            foreach (var pair in request["paths"].Value<JArray>())
                             {
                                 var node = SuperRoot.Get(pair.Path);
-                                if (node != null && pair.SubscriptionId != null)
+                                if (node != null && pair["sid"].Type == JTokenType.Integer)
                                 {
-                                    SubscriptionManager.Subscribe(pair.SubscriptionId.Value, SuperRoot.Get(pair.Path));
-                                    responses.Add(new ResponseObject
+                                    SubscriptionManager.Subscribe(pair["sid"].Value<int>(), SuperRoot.Get(pair.Path));
+                                    responses.Add(new JObject
                                     {
-                                        RequestId = 0,
-                                        Updates = new JArray
+                                        new JProperty("rid", 0),
+                                        new JProperty("updates", new JArray
                                         {
-                                            new List<dynamic>
+                                            new JArray
                                             {
-                                                pair.SubscriptionId.Value,
-                                                node.Value.Get(),
+                                                pair["sid"].Value<int>(),
+                                                node.Value.JToken,
                                                 node.Value.LastUpdated
                                             }
-                                        }
+                                        })
                                     });
                                 }
                             }
-                            responses.Add(new ResponseObject
+                            responses.Add(new JObject
                             {
-                                RequestId = request.RequestId,
-                                Stream = "closed"
+                                new JProperty("rid", request["rid"].Value<int>()),
+                                new JProperty("stream", "closed")
                             });
                         }
                         break;
                     case "unsubscribe":
                         {
-                            foreach (var sid in request.SubscriptionIds)
+                            foreach (var sid in request["sids"].Value<JArray>())
                             {
-                                SubscriptionManager.Unsubscribe(sid);
+                                SubscriptionManager.Unsubscribe(sid.Value<int>());
                             }
-                            responses.Add(new ResponseObject
+                            responses.Add(new JObject
                             {
-                                RequestId = request.RequestId,
-                                Stream = "closed"
+                                new JProperty("rid", request["rid"].Value<int>()),
+                                new JProperty("stream", "closed")
                             });
                         }
                         break;
                     case "close":
                         {
-                            if (request.RequestId != null)
+                            if (request["rid"] != null)
                             {
-                                StreamManager.Close(request.RequestId.Value);
+                                StreamManager.Close(request["rid"].Value<int>());
                             }
                         }
                         break;
                     default:
-                        throw new ArgumentException(string.Format("Method {0} not implemented", request.Method));
+                        throw new ArgumentException(string.Format("Method {0} not implemented", request["method"].Value<string>()));
                 }
             }
             return responses;

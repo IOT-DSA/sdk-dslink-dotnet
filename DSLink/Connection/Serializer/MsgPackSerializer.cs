@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Msgpack;
 using JSONSerializer = Newtonsoft.Json.JsonSerializer;
 
@@ -35,7 +36,7 @@ namespace DSLink.Connection.Serializer
         /// <summary>
         /// <see cref="ISerializer.Serialize(RootObject)"/>
         /// </summary>
-        public dynamic Serialize(RootObject data)
+        public dynamic Serialize(JObject data)
         {
             var stream = new MemoryStream();
             var writer = new MessagePackWriter(stream);
@@ -46,11 +47,11 @@ namespace DSLink.Connection.Serializer
         /// <summary>
         /// <see cref="ISerializer.Deserialize(dynamic)"/>
         /// </summary>
-        public RootObject Deserialize(dynamic data)
+        public JObject Deserialize(dynamic data)
         {
             var stream = new MemoryStream(data);
             var reader = new MessagePackReader(stream);
-            return _serializer.Deserialize<RootObject>(reader);
+            return _serializer.Deserialize<JObject>(reader);
         }
     }
 }
