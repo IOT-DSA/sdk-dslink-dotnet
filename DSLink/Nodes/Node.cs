@@ -308,6 +308,10 @@ namespace DSLink.Nodes
             }
         }
 
+        /// <summary>
+        /// Gets or sets the value type.
+        /// </summary>
+        /// <value>Value type</value>
         public ValueType ValueType
         {
             get
@@ -325,6 +329,30 @@ namespace DSLink.Nodes
             set
             {
                 SetConfig("type", value.TypeValue);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the result type.
+        /// </summary>
+        /// <value>Result type</value>
+        public ResultType Result
+        {
+            get
+            {
+                var config = GetConfig("result");
+                if (config != null)
+                {
+                    return ResultType.FromString(config.String);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                SetConfig("result", value.Value);
             }
         }
 
@@ -535,7 +563,7 @@ namespace DSLink.Nodes
             foreach (var sid in Subscribers)
             {
                 hasUpdates = true;
-                rootObject["response"].First["updates"].Value<JArray>().Add(new JArray
+                rootObject["responses"].First["updates"].Value<JArray>().Add(new JArray
                 {
                     sid,
                     value.JToken,
@@ -578,25 +606,28 @@ namespace DSLink.Nodes
             {
                 foreach (var child in _children)
                 {
-                    var value = new JObject();
-                    foreach (var config in child.Value._configs)
+                    if (!child.Value.Building)
                     {
-                        value[config.Key] = config.Value.JToken;
+                        var value = new JObject();
+                        foreach (var config in child.Value._configs)
+                        {
+                            value[config.Key] = config.Value.JToken;
+                        }
+                        foreach (var attr in child.Value._attributes)
+                        {
+                            value[attr.Key] = attr.Value.JToken;
+                        }
+                        if (child.Value.HasValue())
+                        {
+                            value["value"] = child.Value.Value.JToken;
+                            value["ts"] = child.Value.Value.LastUpdated;
+                        }
+                        val.Add(new JArray
+                        {
+                            child.Key,
+                            value
+                        });
                     }
-                    foreach (var attr in child.Value._attributes)
-                    {
-                        value[attr.Key] = attr.Value.JToken;
-                    }
-                    if (child.Value.HasValue())
-                    {
-                        value["value"] = child.Value.Value.JToken;
-                        value["ts"] = child.Value.Value.LastUpdated;
-                    }
-                    val.Add(new JArray
-                    {
-                        child.Key,
-                        value
-                    });
                 }
             }
 

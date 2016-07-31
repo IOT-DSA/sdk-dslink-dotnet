@@ -26,37 +26,37 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// Builds the Node
+        /// Builds the Node.
         /// </summary>
         /// <returns>Node</returns>
         public Node BuildNode()
         {
-            _node.Parent.UpdateSubscribers();
             _node.Building = false;
+            _node.Parent.UpdateSubscribers();
             return _node;
         }
 
         /// <summary>
         /// Set a config.
         /// </summary>
-        /// <param name="key">Key</param>
+        /// <param name="name">Name</param>
         /// <param name="value">Value</param>
-        /// <returns>Node</returns>
-        public NodeFactory SetConfig(string key, Value value)
+        /// <returns>NodeFactory</returns>
+        public NodeFactory SetConfig(string name, Value value)
         {
-            _node.SetConfig(key, value);
+            _node.SetConfig(name, value);
             return this;
         }
 
         /// <summary>
         /// Set an attribute.
         /// </summary>
-        /// <param name="key">Key.</param>
-        /// <param name="value">Value.</param>
-        /// <returns>Node</returns>
-        public NodeFactory SetAttribute(string key, Value value)
+        /// <param name="name">Attribute name</param>
+        /// <param name="value">Attribute value</param>
+        /// <returns>NodeFactory</returns>
+        public NodeFactory SetAttribute(string name, Value value)
         {
-            _node.SetAttribute(key, value);
+            _node.SetAttribute(name, value);
             return this;
         }
 
@@ -64,7 +64,7 @@ namespace DSLink.Nodes
         /// Sets the display name.
         /// </summary>
         /// <param name="displayName">Display name</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetDisplayName(string displayName)
         {
             _node.DisplayName = displayName;
@@ -75,7 +75,7 @@ namespace DSLink.Nodes
         /// Sets the profile.
         /// </summary>
         /// <param name="profile">Profile</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetProfile(string profile)
         {
             _node.Profile = profile;
@@ -86,7 +86,7 @@ namespace DSLink.Nodes
         /// Sets the writable permission.
         /// </summary>
         /// <param name="writable">Writable permission</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetWritable(Permission writable)
         {
             _node.Writable = writable;
@@ -97,7 +97,7 @@ namespace DSLink.Nodes
         /// Sets the invokable permission.
         /// </summary>
         /// <param name="invokable">Invokable permission</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetInvokable(Permission invokable)
         {
             _node.Invokable = invokable;
@@ -108,7 +108,7 @@ namespace DSLink.Nodes
         /// Sets the action group.
         /// </summary>
         /// <param name="actionGroup">Action group</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetActionGroup(string actionGroup)
         {
             _node.ActionGroup = actionGroup;
@@ -119,7 +119,7 @@ namespace DSLink.Nodes
         /// Sets the action group subtitle.
         /// </summary>
         /// <param name="actionGroupSubtitle">Action group subtitle</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetActionGroupSubtitle(string actionGroupSubtitle)
         {
             _node.ActionGroupSubtitle = actionGroupSubtitle;
@@ -130,7 +130,7 @@ namespace DSLink.Nodes
         /// Sets whether the node is serializable.
         /// </summary>
         /// <param name="serializable">Serializable</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetSerializable(bool serializable)
         {
             _node.Serializable = true;
@@ -149,10 +149,21 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
+        /// Sets the result.
+        /// </summary>
+        /// <param name="resultType">Result type.</param>
+        /// <returns>NodeFactory</returns>
+        public NodeFactory SetResult(ResultType resultType)
+        {
+            _node.Result = resultType;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the value.
         /// </summary>
         /// <param name="value">Value</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetValue(dynamic value)
         {
             _node.Value.Set(value);
@@ -163,7 +174,7 @@ namespace DSLink.Nodes
         /// Sets the action.
         /// </summary>
         /// <param name="actionHandler">Action</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetAction(ActionHandler actionHandler)
         {
             _node.Invokable = actionHandler.Permission;
@@ -175,7 +186,7 @@ namespace DSLink.Nodes
         /// Adds a parameter.
         /// </summary>
         /// <param name="parameter">Parameter</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory AddParameter(Parameter parameter)
         {
             if (_node.Parameters == null)
@@ -190,7 +201,7 @@ namespace DSLink.Nodes
         /// Adds a column.
         /// </summary>
         /// <param name="column">Column</param>
-        /// <returns>Node</returns>
+        /// <returns>NodeFactory</returns>
         public NodeFactory AddColumn(Column column)
         {
             if (_node.Columns == null)

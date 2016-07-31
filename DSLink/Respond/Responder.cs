@@ -121,23 +121,31 @@ namespace DSLink.Respond
                         {
                             foreach (var pair in request["paths"].Value<JArray>())
                             {
-                                var node = SuperRoot.Get(pair.Path);
-                                if (node != null && pair["sid"].Type == JTokenType.Integer)
+                                var pathToken = pair["path"];
+                                var sidToken = pair["sid"];
+                                if (pathToken != null && sidToken != null &&
+                                    pair["path"].Type == JTokenType.String &&
+                                    pair["sid"].Type == JTokenType.Integer)
                                 {
-                                    SubscriptionManager.Subscribe(pair["sid"].Value<int>(), SuperRoot.Get(pair.Path));
-                                    responses.Add(new JObject
+                                    var node = SuperRoot.Get(pathToken.Value<string>());
+                                    if (node != null)
                                     {
-                                        new JProperty("rid", 0),
-                                        new JProperty("updates", new JArray
+                                        var sid = sidToken.Value<int>();
+                                        SubscriptionManager.Subscribe(sid, node);
+                                        responses.Add(new JObject
                                         {
-                                            new JArray
+                                            new JProperty("rid", 0),
+                                            new JProperty("updates", new JArray
                                             {
-                                                pair["sid"].Value<int>(),
-                                                node.Value.JToken,
-                                                node.Value.LastUpdated
-                                            }
-                                        })
-                                    });
+                                                new JArray
+                                                {
+                                                    pair["sid"].Value<int>(),
+                                                    node.Value.JToken,
+                                                    node.Value.LastUpdated
+                                                }
+                                            })
+                                        });
+                                    }
                                 }
                             }
                             responses.Add(new JObject

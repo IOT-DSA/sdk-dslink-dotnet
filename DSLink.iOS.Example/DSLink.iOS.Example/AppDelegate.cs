@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using DSLink.Request;
@@ -35,6 +36,7 @@ namespace DSLink.iOS.Example
                                                     responder: true,
                                                     requester: true,
                                                     logLevel: LogLevel.Debug,
+                                                    communicationFormat: "json",
                                                     keysLocation: Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/dsa_mobile.keys",
                                                     connectionAttemptLimit: -1));
             
@@ -81,8 +83,9 @@ namespace DSLink.iOS.Example
         public ExampleDSLink(Configuration config) : base(config)
         {
             var testAction = Responder.SuperRoot.CreateChild("Test")
-                                      .AddParameter(new Parameter("parameter", "string"))
-                                      .AddColumn(new Column("success", "bool"))
+                                      .AddColumn(new Column("Column", "number"))
+                                      .AddColumn(new Column("Column2", "string"))
+                                      .SetResult(ResultType.Stream)
                                       .SetAction(new ActionHandler(Permission.Write, Test))
                                       .SetInvokable(Permission.Read)
                                       .BuildNode();
@@ -90,11 +93,20 @@ namespace DSLink.iOS.Example
 
         public async void Test(InvokeRequest request)
         {
-            await Requester.List("/", async (listResponse) =>
+            //request.Mode = Table.Mode.Append;
+            for (int i = 0; i < 999; i++)
             {
-                await request.SendUpdates(true);
-                await request.Close();
-            });
+                await request.UpdateTable(new Table
+                {
+                    new Row
+                    {
+                        true,
+                        "test" + i,
+                    }
+                });
+                await Task.Delay(1000);
+            }
+            await request.Close();
         }
 
         public async void Subscribe()

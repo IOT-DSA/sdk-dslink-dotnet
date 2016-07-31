@@ -237,6 +237,11 @@ namespace DSLink.Request
         private bool _firstUpdate = true;
 
         /// <summary>
+        /// Mode of the table.
+        /// </summary>
+        public Table.Mode Mode;
+
+        /// <summary>
         /// Initializes a new instance of the
         /// <see cref="T:DSLink.Request.InvokeRequest"/> class.
         /// </summary>
@@ -279,10 +284,10 @@ namespace DSLink.Request
         }
 
         /// <summary>
-        /// Sends an update to the requester.
+        /// Sends a table to the requester.
         /// </summary>
-        /// <param name="updates">Updates</param>
-        public async Task SendUpdates(params dynamic[] updates)
+        /// <param name="table">Table</param>
+        public async Task UpdateTable(Table table)
         {
             if (_link == null || _columns == null)
             {
@@ -296,23 +301,21 @@ namespace DSLink.Request
                     {
                         new JProperty("rid", RequestID),
                         new JProperty("stream", "open"),
-                        new JProperty("updates", updates.Select(update =>
-                        {
-                            return new JArray
-                            {
-                                update
-                            };
-                        }))
+                        new JProperty("updates", new JArray(table))
                     }
                 })
             };
             if (_firstUpdate)
             {
                 _firstUpdate = false;
-                updateRootObject["responses"].First["meta"] = new JObject
+                if (Mode != null)
                 {
-                    new JProperty("meta", new JObject())
-                };
+                    updateRootObject["responses"].First["meta"] = new JObject
+                    {
+                        new JProperty("mode", Mode.String)
+                    };
+                }
+
                 updateRootObject["responses"].First["columns"] = _columns;
             }
             await _link.Connector.Write(updateRootObject);

@@ -9,7 +9,7 @@ namespace Benchmarks.NET
     {
         private JsonSerializer _json;
         private MsgPackSerializer _msgpack;
-        private RootObject _serializeObject;
+        private JObject _serializeObject;
 
         public Serialization()
         {
@@ -18,21 +18,21 @@ namespace Benchmarks.NET
             var random = new Random();
             var byteBuffer = new byte[50000000];
             random.NextBytes(byteBuffer);
-            _serializeObject = new RootObject
+            _serializeObject = new JObject
             {
-                Responses = new List<ResponseObject>
+                new JProperty("responses", new JArray
                 {
-                    new ResponseObject
+                    new JObject
                     {
-                        Updates = new JArray
+                        new JProperty("updates", new JArray
                         {
                             new JArray
                             {
                                 byteBuffer
                             }
-                        }
+                        })
                     }
-                }
+                })
             };
         }
 
@@ -47,4 +47,3 @@ namespace Benchmarks.NET
         }
     }
 }
-
