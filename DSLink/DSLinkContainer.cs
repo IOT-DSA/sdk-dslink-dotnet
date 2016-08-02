@@ -230,7 +230,10 @@ namespace DSLink
         /// <param name="messageEvent">Text message event</param>
         private void OnWrite(MessageEvent messageEvent)
         {
-            Logger.Debug("Text Sent: " + messageEvent.Message);
+            if (Logger.ToPrint.DoesPrint(LogLevel.Debug)
+            {
+                Logger.Debug("Text Sent: " + messageEvent.Message);
+            }
         }
 
         /// <summary>
@@ -239,13 +242,16 @@ namespace DSLink
         /// <param name="messageEvent">Binary message event</param>
         private void OnBinaryWrite(BinaryMessageEvent messageEvent)
         {
-            if (messageEvent.Message.Length < 5000)
+            if (Logger.ToPrint.DoesPrint(LogLevel.Debug)
             {
-                Logger.Debug("Binary Sent: " + BitConverter.ToString(messageEvent.Message));
-            }
-            else
-            {
-                Logger.Debug("Binary Sent: (over 5000 bytes)");
+                if (messageEvent.Message.Length < 5000)
+                {
+                    Logger.Debug("Binary Sent: " + BitConverter.ToString(messageEvent.Message));
+                }
+                else
+                {
+                    Logger.Debug("Binary Sent: (over 5000 bytes)");
+                }
             }
         }
 
