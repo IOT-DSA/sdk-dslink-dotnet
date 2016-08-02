@@ -1,5 +1,0 @@
-language: csharp
-solution: DSLink.sln
-after_script:
-  - chmod +x .ci/nunit.sh
-  - .ci/nunit.sh
