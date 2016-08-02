@@ -10,24 +10,12 @@ namespace DSLink.Nodes.Actions
         /// <summary>
         /// Name of the column.
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return this["name"].Value<string>();
-            }
-        }
+        public string Name => this["name"].Value<string>();
 
         /// <summary>
         /// Type of the column.
         /// </summary>
-        public string ValueType
-        {
-            get
-            {
-                return this["type"].Value<string>();
-            }
-        }
+        public string ValueType => this["type"].Value<string>();
 
         /// <summary>
         /// Initializes a new instance of the

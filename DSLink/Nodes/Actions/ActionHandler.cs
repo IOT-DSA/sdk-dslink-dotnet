@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using DSLink.Request;
-using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes.Actions
 {

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes.Actions;
 using DSLink.Util;
@@ -98,7 +97,7 @@ namespace DSLink.Nodes
             }
             internal set
             {
-                _path = value.TrimEnd(new char[] { '/' });
+                _path = value.TrimEnd('/');
             }
         }
 
@@ -283,7 +282,7 @@ namespace DSLink.Nodes
             get
             {
                 var config = GetConfig("name");
-                return config != null ? config.String : null;
+                return config?.String;
             }
             set
             {
@@ -300,7 +299,7 @@ namespace DSLink.Nodes
             get
             {
                 var config = GetConfig("is");
-                return config != null ? config.String : null;
+                return config?.String;
             }
             set
             {
@@ -317,14 +316,7 @@ namespace DSLink.Nodes
             get
             {
                 var config = GetConfig("type");
-                if (config != null)
-                {
-                    return ValueType.FromString(config.String);
-                }
-                else
-                {
-                    return null;
-                }
+                return config != null ? ValueType.FromString(config.String) : null;
             }
             set
             {
@@ -341,14 +333,7 @@ namespace DSLink.Nodes
             get
             {
                 var config = GetConfig("result");
-                if (config != null)
-                {
-                    return ResultType.FromString(config.String);
-                }
-                else
-                {
-                    return null;
-                }
+                return config != null ? ResultType.FromString(config.String) : null;
             }
             set
             {
@@ -399,7 +384,7 @@ namespace DSLink.Nodes
             get
             {
                 var config = GetConfig("params");
-                return config != null ? config.JArray : null;
+                return config?.JArray;
             }
             set
             {
@@ -416,7 +401,7 @@ namespace DSLink.Nodes
             get
             {
                 var columns = GetConfig("columns");
-                return columns != null ? columns.JArray : null;
+                return columns?.JArray;
             }
             set
             {
@@ -433,7 +418,7 @@ namespace DSLink.Nodes
             get
             {
                 var actionGroup = GetConfig("actionGroupSubTitle");
-                return actionGroup != null ? actionGroup.String : null;
+                return actionGroup?.String;
             }
             set
             {
@@ -450,7 +435,7 @@ namespace DSLink.Nodes
             get
             {
                 var actionGroupSubtitle = GetConfig("actionGroupSubTitle");
-                return actionGroupSubtitle != null ? actionGroupSubtitle.String : null;
+                return actionGroupSubtitle?.String;
             }
             set
             {
@@ -500,14 +485,12 @@ namespace DSLink.Nodes
         {
             lock (_childrenLock)
             {
-                if (_children.ContainsKey(name))
+                if (!_children.ContainsKey(name)) return;
+                lock (_removedChildrenLock)
                 {
-                    lock (_removedChildrenLock)
-                    {
-                        _removedChildren.Add(_children[name]);
-                    }
-                    _children.Remove(name);
+                    _removedChildren.Add(_children[name]);
                 }
+                _children.Remove(name);
             }
         }
 
@@ -516,10 +499,7 @@ namespace DSLink.Nodes
         /// </summary>
         public void RemoveFromParent()
         {
-            if (Parent != null)
-            {
-                Parent.RemoveChild(Name);
-            }
+            Parent?.RemoveChild(Name);
         }
 
         /// <summary>
@@ -546,7 +526,7 @@ namespace DSLink.Nodes
         /// Event fired when the value is set.
         /// </summary>
         /// <param name="value"></param>
-        protected async virtual void ValueSet(Value value)
+        protected virtual async void ValueSet(Value value)
         {
             var rootObject = new JObject
             {
@@ -559,7 +539,7 @@ namespace DSLink.Nodes
                     }
                 })
             };
-            bool hasUpdates = false;
+            var hasUpdates = false;
             foreach (var sid in Subscribers)
             {
                 hasUpdates = true;
@@ -606,28 +586,26 @@ namespace DSLink.Nodes
             {
                 foreach (var child in _children)
                 {
-                    if (!child.Value.Building)
+                    if (child.Value.Building) continue;
+                    var value = new JObject();
+                    foreach (var config in child.Value._configs)
                     {
-                        var value = new JObject();
-                        foreach (var config in child.Value._configs)
-                        {
-                            value[config.Key] = config.Value.JToken;
-                        }
-                        foreach (var attr in child.Value._attributes)
-                        {
-                            value[attr.Key] = attr.Value.JToken;
-                        }
-                        if (child.Value.HasValue())
-                        {
-                            value["value"] = child.Value.Value.JToken;
-                            value["ts"] = child.Value.Value.LastUpdated;
-                        }
-                        val.Add(new JArray
-                        {
-                            child.Key,
-                            value
-                        });
+                        value[config.Key] = config.Value.JToken;
                     }
+                    foreach (var attr in child.Value._attributes)
+                    {
+                        value[attr.Key] = attr.Value.JToken;
+                    }
+                    if (child.Value.HasValue())
+                    {
+                        value["value"] = child.Value.Value.JToken;
+                        value["ts"] = child.Value.Value.LastUpdated;
+                    }
+                    val.Add(new JArray
+                    {
+                        child.Key,
+                        value
+                    });
                 }
             }
 
@@ -638,7 +616,7 @@ namespace DSLink.Nodes
                     {"name", child.Name},
                     {"change", "remove"}
                 });
-                foreach (dynamic node in i)
+                foreach (var node in i)
                 {
                     _removedChildren.Add(node);
                 }
@@ -669,7 +647,7 @@ namespace DSLink.Nodes
             }
             catch (KeyNotFoundException)
             {
-                _link?.Logger.Warning(string.Format("Non-existant Node({0}) requested", path));
+                _link?.Logger.Warning($"Non-existant Node({path}) requested");
                 return null;
             }
         }
@@ -677,7 +655,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Update all subscribers of this Node.
         /// </summary>
-        internal async virtual void UpdateSubscribers()
+        internal virtual async void UpdateSubscribers()
         {
             if (Building)
             {

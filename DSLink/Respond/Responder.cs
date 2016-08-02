@@ -108,7 +108,7 @@ namespace DSLink.Respond
                                 if (request["permit"] == null || request["permit"].Value<string>().Equals(node.ActionHandler.Permission.ToString()))
                                 {
                                     JArray columns = node.Columns ?? new JArray();
-                                    var permit = (request["permit"] != null) ? Permission._permMap[request["permit"].Value<string>().ToLower()] : null;
+                                    var permit = (request["permit"] != null) ? Permission.PermissionMap[request["permit"].Value<string>().ToLower()] : null;
                                     var invokeRequest = new InvokeRequest(request["rid"].Value<int>(), request["path"].Value<string>(),
                                                                           permit, request["params"].Value<JObject>(), link: _link,
                                                                           columns: columns);

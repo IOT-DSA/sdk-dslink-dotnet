@@ -15,7 +15,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Dictionary mapping strings to permissions.
         /// </summary>
-        internal static Dictionary<string, Permission> _permMap = new Dictionary<string, Permission>
+        internal static Dictionary<string, Permission> PermissionMap = new Dictionary<string, Permission>
         {
             {"read", Read},
             {"write", Write},
@@ -58,7 +58,7 @@ namespace DSLink.Nodes
                 return null;
             }
             permit = permit.ToLower();
-            return _permMap.ContainsKey(permit) ? _permMap[permit] : null;
+            return PermissionMap.ContainsKey(permit) ? PermissionMap[permit] : null;
         }
     }
 }

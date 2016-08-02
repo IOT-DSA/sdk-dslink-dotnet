@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DSLink.Util;
 using Newtonsoft.Json.Linq;
 

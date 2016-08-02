@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DSLink.Nodes.Actions;
 using Newtonsoft.Json.Linq;
@@ -16,6 +16,7 @@ namespace DSLink.Nodes
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="parent">Parent</param>
+        /// <param name="path">Path of Node</param>
         public RemoteNode(string name, Node parent, string path) : base(name, parent, null)
         {
             Path = path;
@@ -50,8 +51,9 @@ namespace DSLink.Nodes
         /// <param name="serialized">Serialized</param>
         public void FromSerialized(JArray serialized)
         {
-            foreach (JArray a in serialized)
+            foreach (var jToken in serialized)
             {
+                var a = (JArray) jToken;
                 var key = a[0].ToString();
                 var value = a[1];
                 if (key.StartsWith("$"))
@@ -88,15 +90,19 @@ namespace DSLink.Nodes
                 else
                 {
                     var child = new RemoteNode(key, this, Path + "/" + key);
-                    foreach (KeyValuePair<string, JToken> kp in value as JObject)
+                    var jObject = value as JObject;
+                    if (jObject != null)
                     {
-                        if (kp.Key.StartsWith("$"))
+                        foreach (var kp in jObject)
                         {
-                            child.SetConfig(kp.Key.Substring(1), new Value(kp.Value.ToString()));
-                        }
-                        else if (kp.Key.StartsWith("@"))
-                        {
-                            child.SetAttribute(kp.Key.Substring(1), new Value(kp.Value.ToString()));
+                            if (kp.Key.StartsWith("$"))
+                            {
+                                child.SetConfig(kp.Key.Substring(1), new Value(kp.Value.ToString()));
+                            }
+                            else if (kp.Key.StartsWith("@"))
+                            {
+                                child.SetAttribute(kp.Key.Substring(1), new Value(kp.Value.ToString()));
+                            }
                         }
                     }
                     AddChild(child);
@@ -105,4 +111,3 @@ namespace DSLink.Nodes
         }
     }
 }
-
