@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Connection.Serializer;
 using DSLink.Container;
+using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink
@@ -153,7 +154,11 @@ namespace DSLink
         /// <param name="messageEvent">Text message event</param>
         private async void OnTextMessage(MessageEvent messageEvent)
         {
-            Logger.Debug("Text Received: " + messageEvent.Message);
+            if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
+            {
+                Logger.Debug("Text Received: " + messageEvent.Message);
+            }
+
             await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
         }
 
@@ -164,13 +169,16 @@ namespace DSLink
         /// <param name="messageEvent">Binary message event</param>
         private async void OnBinaryMessage(BinaryMessageEvent messageEvent)
         {
-            if (messageEvent.Message.Length < 5000)
+            if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
             {
-                Logger.Debug("Binary Received: " + BitConverter.ToString(messageEvent.Message));
-            }
-            else
-            {
-                Logger.Debug("Binary Received: (over 5000 bytes)");
+                if (messageEvent.Message.Length < 5000)
+                {
+                    Logger.Debug("Binary Received: " + BitConverter.ToString(messageEvent.Message));
+                }
+                else
+                {
+                    Logger.Debug("Binary Received: (over 5000 bytes)");
+                }
             }
 
             await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
