@@ -380,7 +380,11 @@ namespace DSLink.Request
             {
                 if (_subscriptions.ContainsKey(subID))
                 {
-                    throw new Exception("Subscription ID is already used");
+                    throw new Exception("Subscription ID is already used.");
+                }
+                if (string.IsNullOrEmpty(path))
+                {
+                    throw new Exception("Path can not be null or empty.");
                 }
                 _subscriptions.Add(subID, new Subscription
                 {
@@ -405,14 +409,14 @@ namespace DSLink.Request
             /// <returns>Subscription ID</returns>
             public int? GetSubByPath(string path)
             {
-                foreach (KeyValuePair<int, Subscription> kp in _subscriptions)
+                foreach (var kp in _subscriptions)
                 {
                     if (kp.Value.Path == path)
                     {
                         return kp.Key;
                     }
                 }
-                return null;
+                return new int?();
             }
 
             /// <summary>
