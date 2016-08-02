@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,7 +8,7 @@ namespace DSLink.Nodes
     {
         public static readonly ValueType String = new ValueType("string");
         public static readonly ValueType Number = new ValueType("number");
-        public static readonly ValueType Boolean = new ValueType("boolean");
+        public static readonly ValueType Boolean = new ValueType("bool");
         public static readonly ValueType Map = new ValueType("map");
         public static readonly ValueType Array = new ValueType("array");
         public static readonly ValueType Dynamic = new ValueType("dynamic");
