@@ -6,5 +6,6 @@ reviewers:
   members:
   - logangorence
   - kaendfinger
+  - pacane
   name: pullapprove
   required: 1
