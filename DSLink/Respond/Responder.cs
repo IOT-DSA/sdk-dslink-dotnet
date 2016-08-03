@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
+using System.IO;
 using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Request;
+using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
+using PCLStorage;
 
 namespace DSLink.Respond
 {
@@ -34,6 +37,8 @@ namespace DSLink.Respond
         /// </summary>
         internal StreamManager StreamManager;
 
+        internal IDictionary<string, Action<Node>> NodeClasses;
+
         /// <summary>
         /// Responder constructor
         /// </summary>
@@ -44,6 +49,81 @@ namespace DSLink.Respond
             SuperRoot = new Node("", null, _link);
             SubscriptionManager = new SubscriptionManager(_link);
             StreamManager = new StreamManager(_link);
+            NodeClasses = new Dictionary<string, Action<Node>>();
+        }
+
+        /// <summary>
+        /// Serialize the node structure.
+        /// </summary>
+        public async Task Serialize()
+        {
+            JObject obj = SuperRoot.Serialize();
+
+            IFileSystem fileSystem = FileSystem.Current;
+            IFile file;
+
+            try
+            {
+                file = await fileSystem.LocalStorage.GetFileAsync("nodes.json");
+            }
+            catch
+            {
+                file = await fileSystem.LocalStorage.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
+            }
+
+            if (file != null)
+            {
+                string data = obj.ToString();
+                await file.WriteAllTextAsync(data);
+                string path = file.Path;
+                if (_link.Config.LogLevel.DoesPrint(LogLevel.Debug))
+                {
+                    _link.Logger.Debug($"Wrote {data} to {path}");
+
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds a new node class to the responder.
+        /// </summary>
+        /// <param name="name">Name of the class.</param>
+        /// <param name="factory">Factory function for the class. First parameter is the node.</param>
+        public void AddNodeClass(string name, Action<Node> factory)
+        {
+            lock (NodeClasses)
+            {
+                NodeClasses[name] = factory;
+            }
+        }
+
+        /// <summary>
+        /// Deserialize the node structure.
+        /// </summary>
+        public async Task<bool> Deserialize()
+        {
+            IFileSystem fileSystem = FileSystem.Current;
+
+            try
+            {
+                IFile file = await fileSystem.LocalStorage.GetFileAsync("nodes.json");
+
+                if (file != null)
+                {
+                    var data = await file.ReadAllTextAsync();
+
+                    if (data != null)
+                    {
+                        JObject obj = JObject.Parse(data);
+                        SuperRoot.Deserialize(obj);
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+            }
+            return false;
         }
 
         /// <summary>
@@ -68,7 +148,7 @@ namespace DSLink.Respond
                                 {
                                     new JProperty("rid", request["rid"].Value<int>()),
                                     new JProperty("stream", "open"),
-                                    new JProperty("updates", SuperRoot.Get(request["path"].Value<string>()).Serialize())
+                                    new JProperty("updates", SuperRoot.Get(request["path"].Value<string>()).SerializeUpdates())
                                 });
                             }
                         }
@@ -240,7 +320,7 @@ namespace DSLink.Respond
             }
             catch (KeyNotFoundException)
             {
-                _link.Logger.Info("Unknown rid");
+                _link.Logger.Debug($"Failed to Unsubscribe: unknown subscription id {sid}");
             }
         }
 
@@ -308,7 +388,7 @@ namespace DSLink.Respond
             }
             catch (KeyNotFoundException)
             {
-                _link.Logger.Info("Unknown rid");
+                _link.Logger.Debug($"Failed to Close: unknown request id {requestId}");
             }
         }
                  

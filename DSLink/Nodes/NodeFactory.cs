@@ -31,6 +31,7 @@ namespace DSLink.Nodes
         public Node BuildNode()
         {
             _node.Building = false;
+            _node.InitializeClass();
             _node.Parent.UpdateSubscribers();
             return _node;
         }
@@ -176,8 +177,7 @@ namespace DSLink.Nodes
         /// <returns>NodeFactory</returns>
         public NodeFactory SetAction(ActionHandler actionHandler)
         {
-            _node.Invokable = actionHandler.Permission;
-            _node.ActionHandler = actionHandler;
+            _node.SetAction(actionHandler);
             return this;
         }
 
@@ -188,12 +188,17 @@ namespace DSLink.Nodes
         /// <returns>NodeFactory</returns>
         public NodeFactory AddParameter(Parameter parameter)
         {
-            if (_node.Parameters == null)
-            {
-                _node.Parameters = new JArray();
-            }
-            _node.Parameters.Add(parameter);
+            _node.AddParameter(parameter);
             return this;
+        }
+
+        /// <summary>
+        /// Deserialize the node with the given JSON object.
+        /// </summary>
+        /// <param name="obj">JSON object.</param>
+        public void Deserialize(JObject obj)
+        {
+            _node.Deserialize(obj);
         }
 
         /// <summary>
@@ -203,11 +208,7 @@ namespace DSLink.Nodes
         /// <returns>NodeFactory</returns>
         public NodeFactory AddColumn(Column column)
         {
-            if (_node.Columns == null)
-            {
-                _node.Columns = new JArray();
-            }
-            _node.Columns.Add(column);
+            _node.AddColumn(column);
             return this;
         }
     }
