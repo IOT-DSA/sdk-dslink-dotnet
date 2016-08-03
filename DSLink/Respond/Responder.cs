@@ -230,7 +230,11 @@ namespace DSLink.Respond
         {
             try
             {
-                _subscriptions[sid].Subscribers.Remove(sid);
+                Node node = _subscriptions[sid];
+                lock (node.Subscribers)
+                {
+                    _subscriptions[sid].Subscribers.Remove(sid);
+                }
                 _subscriptions[sid].OnUnsubscribed?.Invoke(sid);
                 _subscriptions.Remove(sid);
             }
@@ -282,7 +286,10 @@ namespace DSLink.Respond
         public void Open(int requestId, Node node)
         {
             _streams.Add(requestId, node);
-            node.Streams.Add(requestId);
+            lock (node.Streams)
+            {
+                node.Streams.Add(requestId);
+            }
         }
 
         /// <summary>
@@ -293,7 +300,10 @@ namespace DSLink.Respond
         {
             try
             {
-                _streams[requestId].Streams.Remove(requestId);
+                lock (_streams[requestId].Streams)
+                {
+                    _streams[requestId].Streams.Remove(requestId);
+                }
                 _streams.Remove(requestId);
             }
             catch (KeyNotFoundException)

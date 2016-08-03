@@ -20,7 +20,7 @@ namespace DSLink.Util.Logger
         /// <summary>
         /// LogLevel to actually print for.
         /// </summary>
-        protected readonly LogLevel ToPrint;
+        public readonly LogLevel ToPrint;
 
         /// <summary>
         /// Initializes a new instance of the

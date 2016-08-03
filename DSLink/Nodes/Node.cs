@@ -540,15 +540,18 @@ namespace DSLink.Nodes
                 })
             };
             var hasUpdates = false;
-            foreach (var sid in Subscribers)
+            lock (Subscribers)
             {
-                hasUpdates = true;
-                rootObject["responses"].First["updates"].Value<JArray>().Add(new JArray
+                foreach (var sid in Subscribers)
                 {
-                    sid,
-                    value.JToken,
-                    value.LastUpdated
-                });
+                    hasUpdates = true;
+                    rootObject["responses"].First["updates"].Value<JArray>().Add(new JArray
+                    {
+                        sid,
+                        value.JToken,
+                        value.LastUpdated
+                    });
+                }
             }
             if (hasUpdates)
             {
@@ -664,14 +667,22 @@ namespace DSLink.Nodes
 
             if (Streams.Count > 0)
             {
+                var responses = new JArray();
+                lock (Streams)
+                {
+                    foreach (var stream in Streams)
+                    {
+                        responses.Add(new JObject
+                        {
+                            new JProperty("rid", stream),
+                            new JProperty("stream", "open"),
+                            new JProperty("updates", Serialize())
+                        });
+                    }
+                }
                 await _link.Connector.Write(new JObject
                 {
-                    new JProperty("responses", Streams.Select(stream => new JObject
-                    {
-                        new JProperty("rid", stream),
-                        new JProperty("stream", "open"),
-                        new JProperty("updates", Serialize())
-                    }))
+                    new JProperty("responses", responses)
                 });
             }
         }
