@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Linq;
 using DSLink.Container;
 using DSLink.Nodes.Actions;
@@ -125,7 +126,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Node is serializable
         /// </summary>
-        public bool Serializable = false;
+        public bool Serializable = true;
 
         /// <summary>
         /// Node is still being created via NodeFactory
@@ -136,6 +137,17 @@ namespace DSLink.Nodes
         /// Node is subscribed to
         /// </summary>
         public bool Subscribed => Subscribers.Count != 0;
+
+        /// <summary>
+        /// Class name of the node.
+        /// </summary>
+        public readonly string ClassName;
+
+        /// <summary>
+        /// Flag for when the Node Class is initialized.
+        /// Used to prevent duplicate initializations.
+        /// </summary>
+        private bool _initializedClass = false;
 
         /// <summary>
         /// Public-facing dictionary of children.
@@ -176,7 +188,8 @@ namespace DSLink.Nodes
         /// <param name="name">Name of Node</param>
         /// <param name="parent">Parent of Node</param>
         /// <param name="link">DSLink container of Node</param>
-        public Node(string name, Node parent, AbstractContainer link)
+        /// <param name="profile">Profile</param>
+        public Node(string name, Node parent, AbstractContainer link, string className = "node")
         {
             if (name == null)
             {
@@ -186,6 +199,7 @@ namespace DSLink.Nodes
             {
                 throw new ArgumentException("Invalid character(s) in Node name.");
             }
+            ClassName = className;
             Parent = parent;
             _children = new Dictionary<string, Node>();
             _configs = new Dictionary<string, Value>
@@ -214,6 +228,22 @@ namespace DSLink.Nodes
             {
                 Name = name;
                 Path = "/" + name;
+            }
+        }
+
+        /// <summary>
+        /// Initializes the Node Class.
+        /// </summary>
+        public void InitializeClass()
+        {
+            if (_initializedClass)
+            {
+                return;
+            }
+            _initializedClass = true;
+            if (_link.Responder.NodeClasses.ContainsKey(ClassName))
+            {
+                _link.Responder.NodeClasses[ClassName](this);
             }
         }
 
@@ -456,12 +486,23 @@ namespace DSLink.Nodes
         /// Create a child via the NodeFactory.
         /// </summary>
         /// <param name="name">Node's name</param>
+        /// <param name="className">Node's class</param>
+        /// <returns>NodeFactory of new child</returns>
+        public virtual NodeFactory CreateChild(string name, string className)
+        {
+            Node child = new Node(name, this, _link, className);
+            AddChild(child);
+            return new NodeFactory(child);
+        }
+
+        /// <summary>
+        /// Create a child via the NodeFactory.
+        /// </summary>
+        /// <param name="name">Node's name</param>
         /// <returns>NodeFactory of new child</returns>
         public virtual NodeFactory CreateChild(string name)
         {
-            Node child = new Node(name, this, _link);
-            AddChild(child);
-            return new NodeFactory(child);
+            return CreateChild(name, "node");
         }
 
         /// <summary>
@@ -475,6 +516,42 @@ namespace DSLink.Nodes
                 _children.Add(child.Name, child);
             }
             UpdateSubscribers();
+        }
+
+        /// <summary>
+        /// Adds a parameter.
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        public void AddParameter(Parameter parameter)
+        {
+            if (Parameters == null)
+            {
+                Parameters = new JArray();
+            }
+            Parameters.Add(parameter);
+        }
+
+        /// <summary>
+        /// Adds a column.
+        /// </summary>
+        /// <param name="column">Column</param>
+        public void AddColumn(Column column)
+        {
+            if (Columns == null)
+            {
+                Columns = new JArray();
+            }
+            Columns.Add(column);
+        }
+
+        /// <summary>
+        /// Sets the action.
+        /// </summary>
+        /// <param name="actionHandler">Action</param>
+        public void SetAction(ActionHandler actionHandler)
+        {
+            Invokable = actionHandler.Permission;
+            ActionHandler = actionHandler;
         }
 
         /// <summary>
@@ -560,10 +637,10 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// Serialize the Node.
+        /// Serialize the Node updates to an array.
         /// </summary>
         /// <returns>Serialized data</returns>
-        public JArray Serialize()
+        public JArray SerializeUpdates()
         {
             var val = new JArray();
 
@@ -630,6 +707,99 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
+        /// Trigger node serialization.
+        /// </summary>
+        public async Task TriggerSerialize()
+        {
+            await _link.Responder.Serialize();
+        }
+
+        /// <summary>
+        /// Save the Node to a JSON object.
+        /// </summary>
+        /// <returns>Serialized data</returns>
+        public JObject Serialize()
+        {
+            var obj = new JObject();
+
+            foreach (var entry in Configurations)
+            {
+                obj.Add(new JProperty(entry.Key, entry.Value.JToken));
+            }
+
+            foreach (var entry in Attributes)
+            {
+                obj.Add(new JProperty(entry.Key, entry.Value.JToken));
+            }
+
+            foreach (var entry in Children)
+            {
+                if (entry.Value.Serializable)
+                {
+                    obj.Add(new JProperty(entry.Key, entry.Value.Serialize()));
+                }
+            }
+
+            if (HasValue())
+            {
+                obj.Add(new JProperty("?value", Value.JToken));
+            }
+
+            if (ClassName != "node")
+            {
+                obj.Add(new JProperty("?class", ClassName));
+            }
+
+            return obj;
+        }
+
+        // <summary>
+        // Deserialize the node from the given object.
+        // </summary>
+        public void Deserialize(JObject obj)
+        {
+            foreach (var prop in obj)
+            {
+                if (prop.Key == "?value")
+                {
+                    Value.Set(prop.Value);
+                }
+                else if (prop.Key.StartsWith("$"))
+                {
+                    SetConfig(prop.Key.Substring(1), new Value(prop.Value));
+                }
+                else if (prop.Key.StartsWith("@"))
+                {
+                    SetAttribute(prop.Key.Substring(1), new Value(prop.Value));
+                }
+                else if (prop.Value is JObject)
+                {
+                    string name = prop.Key;
+                    var child = Children[name];
+                    if (child == null)
+                    {
+                        string className;
+                        if (prop.Value["?class"] is JToken)
+                        {
+                            className = prop.Value["?class"].Value<string>();
+                        }
+                        else
+                        {
+                            className = "node";
+                        }
+                        var builder = CreateChild(name, className);
+                        builder.Deserialize(prop.Value as JObject);
+                        child = builder.BuildNode();
+                    }
+                    else
+                    {
+                        child.Deserialize(prop.Value as JObject);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Get a Node in the Node structure from here.
         /// </summary>
         /// <param name="path">Node path</param>
@@ -656,6 +826,17 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
+        /// Clones this node.
+        /// </summary>
+        /// <returns>>A new Node instance that is exactly the same as this node.</returns>
+        public Node Clone()
+        {
+            var node = new Node(Name, Parent, _link, Profile);
+            node.Deserialize(node.Serialize());
+            return node;
+        }
+
+        /// <summary>
         /// Update all subscribers of this Node.
         /// </summary>
         internal virtual async void UpdateSubscribers()
@@ -676,7 +857,7 @@ namespace DSLink.Nodes
                         {
                             new JProperty("rid", stream),
                             new JProperty("stream", "open"),
-                            new JProperty("updates", Serialize())
+                            new JProperty("updates", SerializeUpdates())
                         });
                     }
                 }

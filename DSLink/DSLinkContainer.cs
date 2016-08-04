@@ -36,6 +36,12 @@ namespace DSLink
         internal bool Reconnect = true;
 
         /// <summary>
+        /// Flag for when this DSLink Container is initialized.
+        /// Used to prevent duplicate initializations.
+        /// </summary>
+        private bool _isInitialized = false;
+
+        /// <summary>
         /// DSLinkContainer constructor.
         /// </summary>
         /// <param name="config">Configuration for the DSLink</param>
@@ -62,10 +68,39 @@ namespace DSLink
         }
 
         /// <summary>
+        /// Initializes the DSLink.
+        /// </summary>
+        public async Task Initialize()
+        {
+            if (_isInitialized)
+            {
+                return;
+            }
+            _isInitialized = true;
+
+            if (Config.Responder)
+            {
+                bool loaded = await LoadNodes();
+                if (!loaded)
+                {
+                    InitializeDefaultNodes();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when loading a the nodes.json is not successful.
+        /// </summary>
+        public virtual void InitializeDefaultNodes()
+        {}
+
+        /// <summary>
         /// Connect to the broker.
         /// </summary>
         public async Task Connect()
         {
+            await Initialize();
+
             Reconnect = true;
             Handshake = new Handshake(this);
             var attemptsLeft = Config.ConnectionAttemptLimit;
@@ -97,6 +132,23 @@ namespace DSLink
             }
             Logger.Warning("Failed to connect within the allotted connection attempt limit.");
             OnConnectionFailed();
+        }
+
+        /// <summary>
+        /// Loads the saves nodes from the filesystem.
+        /// </summary>
+        public async Task<bool> LoadNodes()
+        {
+            return await Responder.Deserialize();
+        }
+
+        /// <summary>
+        /// Saves the nodes to the filesystem.
+        /// </summary>
+        /// <returns>A loading task.</returns>
+        public async Task SaveNodes()
+        {
+            await Responder.Serialize();
         }
 
         /// <summary>

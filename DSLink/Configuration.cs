@@ -37,6 +37,11 @@ namespace DSLink
         public readonly bool Responder;
 
         /// <summary>
+        /// True when nodes.json loading is enabled.
+        /// </summary>
+        public bool LoadNodesJson;
+
+        /// <summary>
         /// Full URL to the Broker.
         /// </summary>
         public string BrokerUrl;
@@ -127,7 +132,8 @@ namespace DSLink
         public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false,
                              string keysLocation = ".keys", string communicationFormat = "",
                              string brokerUrl = "http://localhost:8080/conn", LogLevel logLevel = null,
-                             int connectionAttemptLimit = -1, int maxConnectionCooldown = 60)
+                             int connectionAttemptLimit = -1, int maxConnectionCooldown = 60,
+                             bool loadNodesJson = false)
         {
             if (logLevel == null)
             {
@@ -140,6 +146,7 @@ namespace DSLink
             Requester = requester;
             Responder = responder;
             KeysLocation = keysLocation;
+            LoadNodesJson = loadNodesJson;
             _communicationFormat = communicationFormat;
 
             var options = new OptionSet
