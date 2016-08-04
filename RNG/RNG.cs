@@ -22,16 +22,16 @@ namespace RNG
                 node.AddColumn(new Column("success", "bool"));
 
                 ActionHandler handler = new ActionHandler(Permission.Write, async (request) =>
+                {
+                    await request.UpdateTable(new Table
                     {
-                        await request.UpdateTable(new Table
-                            {
-                                new Row
-                                {
-                                    true
-                                }
-                            });
-                        await request.Close();
+                        new Row
+                        {
+                            true
+                        }
                     });
+                    await request.Close();
+                });
 
                 node.SetAction(handler);
             });
@@ -39,7 +39,7 @@ namespace RNG
             List<Value> rngs = new List<Value>();
 
             Responder.AddNodeClass("rng", delegate (Node node)
-                {
+            {
                 node.Writable = Permission.Read;
                 node.ValueType = ValueType.Number;
                 node.Value.Set(0.1);
@@ -47,18 +47,18 @@ namespace RNG
             });
 
             Task.Run(async () =>
-                {
-                    await Task.Delay(5000);
-                    int num = 0;
+            {
+                await Task.Delay(5000);
+                int num = 0;
 
-                    while (true)
+                while (true)
+                {
+                    foreach (var rng in rngs)
                     {
-                        foreach (var rng in rngs)
-                        {
-                            rng.Set(num++);
-                        }
+                        rng.Set(num++);
                     }
-                });
+                }
+            });
         }
 
         public override void InitializeDefaultNodes()

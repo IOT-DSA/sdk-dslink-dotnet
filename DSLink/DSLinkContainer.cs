@@ -36,6 +36,12 @@ namespace DSLink
         internal bool Reconnect = true;
 
         /// <summary>
+        /// Flag for when this DSLink Container is initialized.
+        /// Used to prevent duplicate initializations.
+        /// </summary>
+        private bool _isInitialized = false;
+
+        /// <summary>
         /// DSLinkContainer constructor.
         /// </summary>
         /// <param name="config">Configuration for the DSLink</param>
@@ -60,8 +66,6 @@ namespace DSLink
 
             _pingTask = Task.Factory.StartNew(OnPingElapsed);
         }
-
-        private bool _isInitialized = false;
 
         /// <summary>
         /// Initializes the DSLink.

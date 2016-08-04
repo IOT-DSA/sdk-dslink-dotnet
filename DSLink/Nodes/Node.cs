@@ -144,6 +144,12 @@ namespace DSLink.Nodes
         public readonly string ClassName;
 
         /// <summary>
+        /// Flag for when the Node Class is initialized.
+        /// Used to prevent duplicate initializations.
+        /// </summary>
+        private bool _initializedClass = false;
+
+        /// <summary>
         /// Public-facing dictionary of children.
         /// </summary>
         public ReadOnlyDictionary<string, Node> Children => new ReadOnlyDictionary<string, Node>(_children);
@@ -224,8 +230,6 @@ namespace DSLink.Nodes
                 Path = "/" + name;
             }
         }
-
-        private bool _initializedClass = false;
 
         /// <summary>
         /// Initializes the Node Class.
@@ -824,6 +828,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Clones this node.
         /// </summary>
+        /// <returns>>A new Node instance that is exactly the same as this node.</returns>
         public Node Clone()
         {
             var node = new Node(Name, Parent, _link, Profile);

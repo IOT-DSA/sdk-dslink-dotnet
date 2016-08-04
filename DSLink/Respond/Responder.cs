@@ -37,6 +37,9 @@ namespace DSLink.Respond
         /// </summary>
         internal StreamManager StreamManager;
 
+        /// <summary>
+        /// Dictionary of Node Classes.
+        /// </summary>
         internal IDictionary<string, Action<Node>> NodeClasses;
 
         /// <summary>
@@ -79,7 +82,6 @@ namespace DSLink.Respond
                 if (_link.Config.LogLevel.DoesPrint(LogLevel.Debug))
                 {
                     _link.Logger.Debug($"Wrote {data} to {path}");
-
                 }
             }
         }
