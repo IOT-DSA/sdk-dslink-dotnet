@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>DSLink</id>
-    <version>0.2.9-alpha</version>
+    <version>0.2.10-alpha</version>
     <title>DSLink SDK</title>
     <authors>Logan Gorence</authors>
     <owners>Logan Gorence</owners>
@@ -15,14 +15,14 @@
     <copyright>Copyright 2016 DGLogik</copyright>
     <tags>iot dslink dsa</tags>
     <dependencies>
-      <group>
+      <!--<group>
         <dependency id="Mono.Options-PCL" version="2.0.40" />
         <dependency id="MsgPack.Cli" version="0.6.8" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
         <dependency id="PCLStorage" version="1.0.2" />
         <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
         <dependency id="Websockets.Pcl" version="1.1.9" />
-      </group>
+      </group>-->
       <group targetFramework="MonoAndroid60">
         <!-- PCL dependencies -->
         <dependency id="Mono.Options-PCL" version="2.0.40" />
