@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DSLink.Connection.Serializer;
-using System.IO;
 using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Request;
@@ -25,7 +23,7 @@ namespace DSLink.Respond
         /// <summary>
         /// Super root node
         /// </summary>
-        public Node SuperRoot { get; }
+        public readonly Node SuperRoot;
 
         /// <summary>
         /// Subscription manager
@@ -60,25 +58,24 @@ namespace DSLink.Respond
         /// </summary>
         public async Task Serialize()
         {
-            JObject obj = SuperRoot.Serialize();
-
-            IFileSystem fileSystem = FileSystem.Current;
+            var obj = SuperRoot.Serialize();
+            var fileSystem = FileSystem.Current;
             IFile file;
 
             try
             {
-                file = await fileSystem.LocalStorage.GetFileAsync("nodes.json");
+                file = await fileSystem.LocalStorage.GetFileAsync(_link.Config.NodesLocation);
             }
             catch
             {
-                file = await fileSystem.LocalStorage.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
+                file = await fileSystem.LocalStorage.CreateFileAsync(_link.Config.NodesLocation, CreationCollisionOption.ReplaceExisting);
             }
 
             if (file != null)
             {
-                string data = obj.ToString();
+                var data = obj.ToString();
                 await file.WriteAllTextAsync(data);
-                string path = file.Path;
+                var path = file.Path;
                 if (_link.Config.LogLevel.DoesPrint(LogLevel.Debug))
                 {
                     _link.Logger.Debug($"Wrote {data} to {path}");
@@ -104,11 +101,9 @@ namespace DSLink.Respond
         /// </summary>
         public async Task<bool> Deserialize()
         {
-            IFileSystem fileSystem = FileSystem.Current;
-
             try
             {
-                IFile file = await fileSystem.LocalStorage.GetFileAsync("nodes.json");
+                var file = await FileSystem.Current.LocalStorage.GetFileAsync(_link.Config.NodesLocation);
 
                 if (file != null)
                 {
@@ -116,8 +111,7 @@ namespace DSLink.Respond
 
                     if (data != null)
                     {
-                        JObject obj = JObject.Parse(data);
-                        SuperRoot.Deserialize(obj);
+                        SuperRoot.Deserialize(JObject.Parse(data));
                         return true;
                     }
                 }
@@ -125,6 +119,7 @@ namespace DSLink.Respond
             catch
             {
             }
+
             return false;
         }
 
@@ -136,8 +131,9 @@ namespace DSLink.Respond
         internal async Task<JArray> ProcessRequests(JArray requests)
         {
             var responses = new JArray();
-            foreach (JObject request in requests)
+            foreach (var jToken in requests)
             {
+                var request = (JObject) jToken;
                 switch (request["method"].Value<string>())
                 {
                     case "list":
@@ -312,7 +308,7 @@ namespace DSLink.Respond
         {
             try
             {
-                Node node = _subscriptions[sid];
+                var node = _subscriptions[sid];
                 lock (node.Subscribers)
                 {
                     _subscriptions[sid].Subscribers.Remove(sid);

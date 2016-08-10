@@ -88,6 +88,10 @@
     <CodesignProvision>874a3c48-37f0-4977-af7a-ba023d73edbf</CodesignProvision>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -100,9 +104,6 @@
     </Reference>
     <Reference Include="Mono.Dynamic.Interpreter" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="MsgPack">
       <HintPath>..\..\packages\MsgPack.Cli.0.6.8\lib\Xamarin.iOS10\MsgPack.dll</HintPath>
     </Reference>

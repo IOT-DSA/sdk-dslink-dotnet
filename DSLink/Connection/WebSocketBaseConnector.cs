@@ -19,7 +19,7 @@ namespace DSLink.Connection
         /// <summary>
         /// Connect to the WebSocket.
         /// </summary>
-        public async override Task Connect()
+        public override async Task Connect()
         {
             await base.Connect();
 
@@ -27,7 +27,7 @@ namespace DSLink.Connection
 
             _webSocket.OnOpened += EmitOpen;
             _webSocket.OnClosed += EmitClose;
-            _webSocket.OnError += (string error) =>
+            _webSocket.OnError += error =>
             {
                 _link.Logger.Error("WebSocket error: " + error);
             };

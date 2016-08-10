@@ -1,19 +1,19 @@
 using System.Collections.Generic;
-using System.Threading;
-using DSLink;
-using DSLink.NET;
+using System.Diagnostics;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using System.Threading.Tasks;
+using Windows.Storage;
+using ValueType = DSLink.Nodes.ValueType;
 
-namespace RNG
+namespace DSLink.UWP.Example
 {
     public class ExampleDSLink : DSLinkContainer
     {
         public ExampleDSLink(Configuration config) : base(config)
         {
             Responder.AddNodeClass("testAction", delegate (Node node)
-                {
+            {
                 node.AddParameter(new Parameter("string", "string"));
                 node.AddParameter(new Parameter("int", "int"));
                 node.AddParameter(new Parameter("number", "number"));
@@ -69,23 +69,17 @@ namespace RNG
             }
         }
 
-        private static void Main(string[] args)
-        {
-            InitializeLink().Wait();
-
-            while (true)
-            {
-                Thread.Sleep(1000);
-            }
-        }
-
         public static async Task InitializeLink()
         {
-            NETPlatform.Initialize();
+            var keysLocation = ApplicationData.Current.LocalFolder.Path + "\\dslink.keys";
+            Debug.WriteLine(keysLocation);
             var dslink =
                 new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet",
                                                     responder: true, requester: true,
-                                                    communicationFormat: "msgpack"));
+                                                    brokerUrl: "http://octocat.local:8080/conn",
+                                                    keysLocation: keysLocation,
+                                                    loadNodesJson: false,
+                                                    communicationFormat: "json"));
 
             await dslink.Connect();
         }
