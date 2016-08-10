@@ -62,9 +62,14 @@ namespace DSLink
         public string BrokerUrl;
 
         /// <summary>
-        /// Location to store generated keypair
+        /// Location to store generated keypair.
         /// </summary>
         public readonly string KeysLocation;
+
+        /// <summary>
+        /// Location to store nodes.json.
+        /// </summary>
+        public readonly string NodesLocation;
 
         /// <summary>
         /// Communication format(internal use only)
@@ -148,7 +153,7 @@ namespace DSLink
                              string keysLocation = ".keys", string communicationFormat = "",
                              string brokerUrl = "http://localhost:8080/conn", LogLevel logLevel = null,
                              int connectionAttemptLimit = -1, int maxConnectionCooldown = 60,
-                             bool loadNodesJson = false)
+                             bool loadNodesJson = false, string nodesLocation = "nodes.json")
         {
             if (logLevel == null)
             {
@@ -161,6 +166,7 @@ namespace DSLink
             Requester = requester;
             Responder = responder;
             KeysLocation = keysLocation;
+            NodesLocation = nodesLocation;
             LoadNodesJson = loadNodesJson;
             _communicationFormat = communicationFormat;
 

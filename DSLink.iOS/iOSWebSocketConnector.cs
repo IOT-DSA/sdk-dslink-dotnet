@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Container;
@@ -14,6 +14,8 @@ namespace DSLink.iOS
         /// </summary>
         private WebSocket _webSocket;
 
+        public override bool SupportsBinary => true;
+
         public iOSWebSocketConnector(AbstractContainer link) : base(link)
         {
         }
@@ -21,40 +23,34 @@ namespace DSLink.iOS
         /// <summary>
         /// Connect to the WebSocket.
         /// </summary>
-        public async override Task Connect()
+        public override async Task Connect()
         {
             await base.Connect();
 
             _webSocket = new WebSocket(new NSUrl(WsUrl));
 
-            _webSocket.WebSocketOpened += (object sender, EventArgs e) =>
+            _webSocket.WebSocketOpened += (sender, e) => EmitOpen();
+
+            _webSocket.WebSocketClosed += (sender, e) =>
             {
-                EmitOpen();
-            };
-            _webSocket.WebSocketClosed += (object sender, WebSocketClosedEventArgs e) =>
-            {
-                if (e.WasClean)
-                {
-                    _link.Logger.Info(string.Format("WebSocket was closed cleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
-                }
-                else
-                {
-                    _link.Logger.Info(string.Format("WebSocket was closed uncleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
-                }
+                _link.Logger.Info(e.WasClean
+                    ? $"WebSocket was closed cleanly with code {e.Code}, and reason \"{e.Reason}\""
+                    : $"WebSocket was closed uncleanly with code {e.Code}, and reason \"{e.Reason}\"");
 
                 EmitClose();
             };
 
-            _webSocket.WebSocketFailed += (object sender, WebSocketFailedEventArgs e) =>
+            _webSocket.WebSocketFailed += (sender, e) =>
             {
-                _link.Logger.Error(string.Format("WebSocket error: {0}", e.Error));
+                _link.Logger.Error($"WebSocket error: {e.Error}");
             };
 
-            _webSocket.ReceivedMessage += (object sender, WebSocketReceivedMessageEventArgs e) =>
+            _webSocket.ReceivedMessage += (sender, e) =>
             {
-                if (e.Message is NSData)
+                var data = e.Message as NSData;
+                if (data != null)
                 {
-                    EmitBinaryMessage(new BinaryMessageEvent(((NSData)e.Message).ToArray()));
+                    EmitBinaryMessage(new BinaryMessageEvent(data.ToArray()));
                 }
                 else
                 {

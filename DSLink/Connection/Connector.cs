@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
@@ -44,7 +43,7 @@ namespace DSLink.Connection
         /// <summary>
         /// Queue lock object.
         /// </summary>
-        private object _queueLock = new object();
+        private readonly object _queueLock = new object();
 
         /// <summary>
         /// Whether we should enable the queueing of messages.
@@ -69,6 +68,11 @@ namespace DSLink.Connection
                 return _enableQueue;
             }
         }
+
+        /// <summary>
+        /// True if the WebSocket implementation supports binary.
+        /// </summary>
+        public virtual bool SupportsBinary => false;
 
         /// <summary>
         /// True if the WebSocket implementation supports compression.
@@ -106,9 +110,10 @@ namespace DSLink.Connection
         public event Action<BinaryMessageEvent> OnBinaryMessage;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:DSLink.Connection.Connector"/> class.
+        /// Base constructor for connectors, registers default events for
+        /// setting the connection state.
         /// </summary>
-        /// <param name="link">Link.</param>
+        /// <param name="link">Link</param>
         protected Connector(AbstractContainer link)
         {
             _link = link;
@@ -128,7 +133,7 @@ namespace DSLink.Connection
         }
 
         /// <summary>
-        /// Builds the WebSocket URL.
+        /// Rewrites the broker endpoint into the websocket connection endpoint.
         /// </summary>
         protected string WsUrl
         {
