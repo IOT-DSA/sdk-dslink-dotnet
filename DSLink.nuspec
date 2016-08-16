@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>DSLink</id>
-    <version>0.2.10-alpha</version>
+    <version>0.3.1-alpha</version>
     <title>DSLink SDK</title>
     <authors>Logan Gorence</authors>
     <owners>Logan Gorence</owners>
@@ -23,27 +23,6 @@
         <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
         <dependency id="Websockets.Pcl" version="1.1.9" />
       </group>-->
-      <group targetFramework="MonoAndroid60">
-        <!-- PCL dependencies -->
-        <dependency id="Mono.Options-PCL" version="2.0.40" />
-        <dependency id="MsgPack.Cli" version="0.6.8" />
-        <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="PCLStorage" version="1.0.2" />
-        <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
-        <dependency id="Websockets.Pcl" version="1.1.9" />
-      </group>
-      <group targetFramework="Xamarin.iOS10">
-        <!-- PCL dependencies -->
-        <dependency id="Mono.Options-PCL" version="2.0.40" />
-        <dependency id="MsgPack.Cli" version="0.6.8" />
-        <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="PCLStorage" version="1.0.2" />
-        <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
-        <dependency id="Websockets.Pcl" version="1.1.9" />
-
-        <!-- Platform dependencies -->
-        <dependency id="Square.SocketRocket" version="0.5.0.0" />
-      </group>
       <group targetFramework="net45">
         <!-- PCL dependencies -->
         <dependency id="Mono.Options-PCL" version="2.0.40" />
@@ -56,6 +35,27 @@
         <!-- Platform dependencies -->
         <dependency id="WebSocketSharp" version="1.0.3-rc11" />
       </group>
+      <group targetFramework="MonoAndroid60">
+        <!-- PCL dependencies -->
+        <dependency id="Mono.Options-PCL" version="2.0.40" />
+        <dependency id="MsgPack.Cli" version="0.6.8" />
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="PCLStorage" version="1.0.2" />
+        <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
+        <dependency id="Websockets.Pcl" version="1.1.9" />
+      </group>
+      <group targetFramework="Xamarin.iOS">
+        <!-- PCL dependencies -->
+        <dependency id="Mono.Options-PCL" version="2.0.40" />
+        <dependency id="MsgPack.Cli" version="0.6.8" />
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="PCLStorage" version="1.0.2" />
+        <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
+        <dependency id="Websockets.Pcl" version="1.1.9" />
+
+        <!-- Platform dependencies -->
+        <dependency id="Square.SocketRocket" version="0.5.0.0" />
+      </group>
     </dependencies>
   </metadata>
   <files>
@@ -67,8 +67,8 @@
     <file src="DSLink.NET/bin/Release/DSLink.NET.dll" target="lib/net45" />
 
     <!-- iOS -->
-    <file src="DSLink/bin/Release/DSLink.dll" target="lib/Xamarin.iOS10" />
-    <file src="DSLink.iOS/bin/Release/DSLink.iOS.dll" target="lib/Xamarin.iOS10" />
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib/Xamarin.iOS" />
+    <file src="DSLink.iOS/bin/Release/DSLink.iOS.dll" target="lib/Xamarin.iOS" />
 
     <!-- Android -->
     <file src="DSLink/bin/Release/DSLink.dll" target="lib/MonoAndroid10" />
