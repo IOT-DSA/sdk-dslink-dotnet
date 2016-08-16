@@ -188,7 +188,7 @@ namespace DSLink.Nodes
         /// <param name="name">Name of Node</param>
         /// <param name="parent">Parent of Node</param>
         /// <param name="link">DSLink container of Node</param>
-        /// <param name="profile">Profile</param>
+        /// <param name="className">Node class name</param>
         public Node(string name, Node parent, AbstractContainer link, string className = "node")
         {
             if (name == null)
@@ -254,8 +254,8 @@ namespace DSLink.Nodes
         /// <param name="value">Configuration value</param>
         public void SetConfig(string key, Value value)
         {
-            UpdateSubscribers();
             _configs["$" + key] = value;
+            UpdateSubscribers();
         }
 
         /// <summary>
@@ -569,6 +569,7 @@ namespace DSLink.Nodes
                 }
                 _children.Remove(name);
             }
+            UpdateSubscribers();
         }
 
         /// <summary>
@@ -597,6 +598,7 @@ namespace DSLink.Nodes
             {
                 Get(path).RemoveConfigAttribute(path);
             }
+            UpdateSubscribers();
         }
 
         /// <summary>
