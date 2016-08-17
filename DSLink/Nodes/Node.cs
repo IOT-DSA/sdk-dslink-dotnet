@@ -693,14 +693,13 @@ namespace DSLink.Nodes
 
             lock (_removedChildrenLock)
             {
-                dynamic i = _removedChildren.Select(child => new Dictionary<string, dynamic>
+                foreach (Node node in _removedChildren)
                 {
-                    {"name", child.Name},
-                    {"change", "remove"}
-                });
-                foreach (var node in i)
-                {
-                    _removedChildren.Add(node);
+                    val.Add(new JObject
+                    {
+                        new JProperty("name", node.Name),
+                        new JProperty("change", "remove")
+                    });
                 }
                 _removedChildren.Clear();
             }
