@@ -282,8 +282,8 @@ namespace DSLink.Nodes
         /// <param name="value">Attribute value</param>
         public void SetAttribute(string key, Value value)
         {
-            UpdateSubscribers();
             _attributes["@" + key] = value;
+            UpdateSubscribers();
         }
 
         /// <summary>
