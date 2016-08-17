@@ -72,14 +72,9 @@ namespace DSLink
         internal string _communicationFormat;
 
         /// <summary>
-        /// Stores the internal key pair.
-        /// </summary>
-        private KeyPair _keyPair;
-
-        /// <summary>
         /// Bouncy Castle KeyPair abstraction
         /// </summary>
-        public KeyPair KeyPair { get { return _keyPair; } }
+        public KeyPair KeyPair { get; private set; }
 
         /// <summary>
         /// Authentication string
@@ -191,8 +186,8 @@ namespace DSLink
 
             Task.Run(async () =>
             {
-                _keyPair = new KeyPair(await GetStorageFolder(), KeysLocation);
-                _keyPair.Load().Wait();
+                KeyPair = new KeyPair(await GetStorageFolder(), KeysLocation);
+                await KeyPair.Load();
             }).Wait();
         }
     }
