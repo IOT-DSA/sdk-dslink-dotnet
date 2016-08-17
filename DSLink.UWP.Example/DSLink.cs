@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using System.Threading.Tasks;
-using Windows.Storage;
 using ValueType = DSLink.Nodes.ValueType;
 
 namespace DSLink.UWP.Example
@@ -71,13 +69,10 @@ namespace DSLink.UWP.Example
 
         public static async Task InitializeLink()
         {
-            var keysLocation = ApplicationData.Current.LocalFolder.Path + "\\dslink.keys";
-            Debug.WriteLine(keysLocation);
             var dslink =
                 new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet",
                                                     responder: true, requester: true,
                                                     brokerUrl: "http://octocat.local:8080/conn",
-                                                    keysLocation: keysLocation,
                                                     loadNodesJson: false,
                                                     communicationFormat: "json"));
 

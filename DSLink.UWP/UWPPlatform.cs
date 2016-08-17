@@ -1,4 +1,5 @@
 using DSLink.Connection;
+using PCLStorage;
 
 namespace DSLink.UWP
 {
@@ -6,6 +7,7 @@ namespace DSLink.UWP
     {
         public static void Initialize()
         {
+            Configuration.StorageBaseFolder = FileSystem.Current.LocalStorage;
             Websockets.Universal.WebsocketConnection.Link();
             ConnectorManager.SetConnector(typeof(WebSocketBaseConnector));
         }
