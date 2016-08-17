@@ -1,5 +1,4 @@
 ﻿using DSLink.Connection;
-using DSLink.Respond;
 using DSLink.Util.Logger;
 using PCLStorage;
 
@@ -9,7 +8,7 @@ namespace DSLink.iOS
     {
         public static void Initialize()
         {
-            Responder.StorageFolder = FileSystem.Current.LocalStorage;
+            Configuration.StorageBaseFolder = FileSystem.Current.LocalStorage;
             ConnectorManager.SetConnector(typeof(iOSWebSocketConnector));
             BaseLogger.Logger = typeof(iOSLogger);
         }

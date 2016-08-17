@@ -8,6 +8,7 @@ using DSLink.Crypto;
 using DSLink.Util;
 using DSLink.Util.Logger;
 using Mono.Options;
+using PCLStorage;
 
 namespace DSLink
 {
@@ -16,6 +17,20 @@ namespace DSLink
     /// </summary>
     public class Configuration
     {
+        public static IFolder StorageBaseFolder;
+
+        /// <summary>
+        /// Gets the Storage Folder.
+        /// </summary>
+        public static async Task<IFolder> GetStorageFolder()
+        {
+            if (StorageBaseFolder == null)
+            {
+                StorageBaseFolder = await FileSystem.Current.GetFolderFromPathAsync(".");
+            }
+            return StorageBaseFolder;
+        }
+
         /// <summary>
         /// SHA256 cryptography instance
         /// </summary>
@@ -57,9 +72,14 @@ namespace DSLink
         internal string _communicationFormat;
 
         /// <summary>
+        /// Stores the internal key pair.
+        /// </summary>
+        private KeyPair _keyPair;
+
+        /// <summary>
         /// Bouncy Castle KeyPair abstraction
         /// </summary>
-        public KeyPair KeyPair { get; }
+        public KeyPair KeyPair { get { return _keyPair; } }
 
         /// <summary>
         /// Authentication string
@@ -169,8 +189,11 @@ namespace DSLink
             }
             MaxConnectionCooldown = maxConnectionCooldown;
 
-            KeyPair = new KeyPair(KeysLocation);
-            Task.Run(async () => await KeyPair.Load()).Wait();
+            Task.Run(async () =>
+            {
+                _keyPair = new KeyPair(await GetStorageFolder(), KeysLocation);
+                _keyPair.Load().Wait();
+            }).Wait();
         }
     }
 }

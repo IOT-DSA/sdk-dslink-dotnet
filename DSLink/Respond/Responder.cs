@@ -18,11 +18,6 @@ namespace DSLink.Respond
     public sealed class Responder
     {
         /// <summary>
-        /// The folder for storing data in.
-        /// </summary>
-        public static IFolder StorageFolder;
-
-        /// <summary>
         /// DSLink container
         /// </summary>
         private readonly AbstractContainer _link;
@@ -65,20 +60,18 @@ namespace DSLink.Respond
         /// </summary>
         public async Task Serialize()
         {
-            await EnsureStorageFolder();
-
             JObject obj = SuperRoot.Serialize();
 
-            IFileSystem fileSystem = FileSystem.Current;
+            IFolder folder = await Configuration.GetStorageFolder();
             IFile file;
 
             try
             {
-                file = await StorageFolder.GetFileAsync("nodes.json");
+                file = await folder.GetFileAsync("nodes.json");
             }
             catch
             {
-                file = await StorageFolder.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
+                file = await folder.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
             }
 
             if (file != null)
@@ -90,17 +83,6 @@ namespace DSLink.Respond
                 {
                     _link.Logger.Debug($"Wrote {data} to {path}");
                 }
-            }
-        }
-
-        /// <summary>
-        /// Ensures the storage folder is initialized. 
-        /// </summary>
-        private async Task EnsureStorageFolder()
-        {
-            if (StorageFolder == null)
-            {
-                StorageFolder = await FileSystem.Current.GetFolderFromPathAsync(".");
             }
         }
 
@@ -122,11 +104,11 @@ namespace DSLink.Respond
         /// </summary>
         public async Task<bool> Deserialize()
         {
-            await EnsureStorageFolder();
+            IFolder folder = await Configuration.GetStorageFolder();
 
             try
             {
-                IFile file = await StorageFolder.GetFileAsync("nodes.json");
+                IFile file = await folder.GetFileAsync("nodes.json");
 
                 if (file != null)
                 {
