@@ -62,16 +62,16 @@ namespace DSLink.Respond
         {
             JObject obj = SuperRoot.Serialize();
 
-            IFileSystem fileSystem = FileSystem.Current;
+            IFolder folder = await Configuration.GetStorageFolder();
             IFile file;
 
             try
             {
-                file = await fileSystem.LocalStorage.GetFileAsync("nodes.json");
+                file = await folder.GetFileAsync("nodes.json");
             }
             catch
             {
-                file = await fileSystem.LocalStorage.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
+                file = await folder.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
             }
 
             if (file != null)
@@ -104,11 +104,11 @@ namespace DSLink.Respond
         /// </summary>
         public async Task<bool> Deserialize()
         {
-            IFileSystem fileSystem = FileSystem.Current;
+            IFolder folder = await Configuration.GetStorageFolder();
 
             try
             {
-                IFile file = await fileSystem.LocalStorage.GetFileAsync("nodes.json");
+                IFile file = await folder.GetFileAsync("nodes.json");
 
                 if (file != null)
                 {
@@ -124,6 +124,7 @@ namespace DSLink.Respond
             }
             catch
             {
+                _link.Logger.Debug("Failed to load the nodes.json");
             }
             return false;
         }

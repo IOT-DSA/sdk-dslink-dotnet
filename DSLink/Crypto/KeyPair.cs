@@ -33,6 +33,11 @@ namespace DSLink.Crypto
         private readonly string _location;
 
         /// <summary>
+        /// The storage folder for the key.
+        /// </summary>
+        private readonly IFolder _folder;
+
+        /// <summary>
         /// BouncyCastle KeyPair.
         /// </summary>
         public AsymmetricCipherKeyPair BcKeyPair;
@@ -46,9 +51,11 @@ namespace DSLink.Crypto
         /// Initializes a new instance of the
         /// <see cref="T:DSLink.Crypto.KeyPair"/> class.
         /// </summary>
-        /// <param name="location">Location </param>
-        public KeyPair(string location)
+        /// <param name="folder">Storage folder</param>
+        /// <param name="location">Location of the key file</param>
+        public KeyPair(IFolder folder, string location)
         {
+            _folder = folder;
             _location = location;
         }
 
@@ -69,8 +76,7 @@ namespace DSLink.Crypto
         /// </summary>
         public async Task Load()
         {
-            IFileSystem fileSystem = FileSystem.Current;
-            IFile file = await fileSystem.GetFileFromPathAsync(_location);
+            IFile file = await _folder.GetFileAsync(_location);
 
             if (file != null)
             {
@@ -116,9 +122,7 @@ namespace DSLink.Crypto
 
             string data = Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
 
-            IFileSystem fileSystem = FileSystem.Current;
-            IFolder folder = await fileSystem.GetFolderFromPathAsync(".");
-            IFile file = await folder.CreateFileAsync(_location, CreationCollisionOption.ReplaceExisting);
+            IFile file = await _folder.CreateFileAsync(_location, CreationCollisionOption.ReplaceExisting);
 
             using (StreamWriter writer = new StreamWriter(await file.OpenAsync(FileAccess.ReadAndWrite)))
             {
