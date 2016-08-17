@@ -18,6 +18,11 @@ namespace DSLink.Respond
     public sealed class Responder
     {
         /// <summary>
+        /// The folder for storing data in.
+        /// </summary>
+        public static IFolder StorageFolder;
+
+        /// <summary>
         /// DSLink container
         /// </summary>
         private readonly AbstractContainer _link;
@@ -60,6 +65,8 @@ namespace DSLink.Respond
         /// </summary>
         public async Task Serialize()
         {
+            await EnsureStorageFolder();
+
             JObject obj = SuperRoot.Serialize();
 
             IFileSystem fileSystem = FileSystem.Current;
@@ -67,11 +74,11 @@ namespace DSLink.Respond
 
             try
             {
-                file = await fileSystem.LocalStorage.GetFileAsync("nodes.json");
+                file = await StorageFolder.GetFileAsync("nodes.json");
             }
             catch
             {
-                file = await fileSystem.LocalStorage.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
+                file = await StorageFolder.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
             }
 
             if (file != null)
@@ -83,6 +90,17 @@ namespace DSLink.Respond
                 {
                     _link.Logger.Debug($"Wrote {data} to {path}");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Ensures the storage folder is initialized. 
+        /// </summary>
+        private async Task EnsureStorageFolder()
+        {
+            if (StorageFolder == null)
+            {
+                StorageFolder = await FileSystem.Current.GetFolderFromPathAsync(".");
             }
         }
 
@@ -104,11 +122,11 @@ namespace DSLink.Respond
         /// </summary>
         public async Task<bool> Deserialize()
         {
-            IFileSystem fileSystem = FileSystem.Current;
+            await EnsureStorageFolder();
 
             try
             {
-                IFile file = await fileSystem.LocalStorage.GetFileAsync("nodes.json");
+                IFile file = await StorageFolder.GetFileAsync("nodes.json");
 
                 if (file != null)
                 {
@@ -124,6 +142,7 @@ namespace DSLink.Respond
             }
             catch
             {
+                _link.Logger.Debug("Failed to load the nodes.json");
             }
             return false;
         }
