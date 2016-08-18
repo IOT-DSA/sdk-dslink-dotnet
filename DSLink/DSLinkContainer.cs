@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Connection.Serializer;
@@ -80,7 +79,7 @@ namespace DSLink
 
             if (Config.Responder)
             {
-                bool loaded = await LoadNodes();
+                var loaded = await LoadNodes();
                 if (!loaded)
                 {
                     InitializeDefaultNodes();
@@ -107,7 +106,7 @@ namespace DSLink
             var attempts = 1;
             while (attemptsLeft == -1 || attemptsLeft > 0)
             {
-                bool handshakeStatus = await Handshake.Shake();
+                var handshakeStatus = await Handshake.Shake();
                 if (handshakeStatus)
                 {
                     SerializationManager = new SerializationManager(Config.CommunicationFormat);
@@ -121,7 +120,7 @@ namespace DSLink
                 {
                     delay = Config.MaxConnectionCooldown;
                 }
-                Logger.Warning(string.Format("Failed to connect, delaying for {0} seconds", delay));
+                Logger.Warning($"Failed to connect, delaying for {delay} seconds");
                 await Task.Delay(TimeSpan.FromSeconds(delay));
 
                 if (attemptsLeft > 0)
@@ -135,7 +134,16 @@ namespace DSLink
         }
 
         /// <summary>
-        /// Loads the saves nodes from the filesystem.
+        /// Disconnect from the broker.
+        /// </summary>
+        public void Disconnect()
+        {
+            Reconnect = false;
+            Connector.Disconnect();
+        }
+
+        /// <summary>
+        /// Loads the saved nodes from the filesystem.
         /// </summary>
         public async Task<bool> LoadNodes()
         {
@@ -145,19 +153,10 @@ namespace DSLink
         /// <summary>
         /// Saves the nodes to the filesystem.
         /// </summary>
-        /// <returns>A loading task.</returns>
+        /// <returns>Loading task</returns>
         public async Task SaveNodes()
         {
             await Responder.Serialize();
-        }
-
-        /// <summary>
-        /// Disconnect from the broker.
-        /// </summary>
-        public void Disconnect()
-        {
-            Reconnect = false;
-            Connector.Disconnect();
         }
 
         /// <summary>

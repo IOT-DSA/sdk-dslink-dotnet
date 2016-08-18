@@ -62,7 +62,7 @@ namespace DSLink
         public string BrokerUrl;
 
         /// <summary>
-        /// Location to store generated keypair
+        /// Location to store generated keypair.
         /// </summary>
         public readonly string KeysLocation;
 
