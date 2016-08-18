@@ -31,9 +31,20 @@ namespace DSLink.Nodes
         public Node BuildNode()
         {
             _node.Building = false;
+            _node.Parent.AddChild(_node);
             _node.InitializeClass();
-            _node.Parent.UpdateSubscribers();
             return _node;
+        }
+
+        /// <summary>
+        /// Sets the node's class.
+        /// </summary>
+        /// <param name="className">Node class name.</param>
+        /// <returns>NodeFactory</returns>
+        public NodeFactory SetNodeClass(string className)
+        {
+            _node.ClassName = className;
+            return this;
         }
 
         /// <summary>
