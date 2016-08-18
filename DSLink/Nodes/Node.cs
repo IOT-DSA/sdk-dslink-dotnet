@@ -141,7 +141,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Class name of the node.
         /// </summary>
-        public readonly string ClassName;
+        public string ClassName { get; internal set; }
 
         /// <summary>
         /// Flag for when the Node Class is initialized.
@@ -484,6 +484,7 @@ namespace DSLink.Nodes
 
         /// <summary>
         /// Create a child via the NodeFactory.
+        /// The node will not be added to the parent until NodeFactory.BuildNode() is called.
         /// </summary>
         /// <param name="name">Node's name</param>
         /// <param name="className">Node's class</param>
@@ -491,12 +492,12 @@ namespace DSLink.Nodes
         public virtual NodeFactory CreateChild(string name, string className)
         {
             Node child = new Node(name, this, _link, className);
-            AddChild(child);
             return new NodeFactory(child);
         }
 
         /// <summary>
         /// Create a child via the NodeFactory.
+        /// The node will not be added to the parent until NodeFactory.BuildNode() is called.
         /// </summary>
         /// <param name="name">Node's name</param>
         /// <returns>NodeFactory of new child</returns>

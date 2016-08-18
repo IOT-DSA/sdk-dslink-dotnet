@@ -36,6 +36,11 @@ namespace DSLink.Nodes
             return _node;
         }
 
+        /// <summary>
+        /// Sets the node's class.
+        /// </summary>
+        /// <param name="className">Node class name.</param>
+        /// <returns>NodeFactory</returns>
         public NodeFactory SetNodeClass(string className)
         {
             _node.ClassName = className;
