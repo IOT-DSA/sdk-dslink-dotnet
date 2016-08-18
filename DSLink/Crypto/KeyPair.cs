@@ -76,38 +76,41 @@ namespace DSLink.Crypto
         /// </summary>
         public async Task Load()
         {
-            IFile file = await _folder.GetFileAsync(_location);
-
-            if (file != null)
+            var res = await _folder.CheckExistsAsync(_location);
+            switch (res)
             {
-                var reader = new StreamReader(await file.OpenAsync(FileAccess.Read));
-                string data = reader.ReadLine();
+                case ExistenceCheckResult.FileExists:
+                    var file = await _folder.GetFileAsync(_location);
+                    var reader = new StreamReader(await file.OpenAsync(FileAccess.Read));
+                    var data = reader.ReadLine();
 
-                if (data != null)
-                {
-                    var split = data.Split(' ');
-                    if (split.Length != 2)
+                    if (data != null)
                     {
-                        throw new FormatException("Keys file doesn't contain proper data.");
+                        var split = data.Split(' ');
+                        if (split.Length != 2)
+                        {
+                            throw new FormatException("Keys file doesn't contain proper data.");
+                        }
+
+                        var ecp = GetParams();
+
+                        var q = Convert.FromBase64String(split[1]);
+                        var point = ecp.Curve.DecodePoint(q);
+                        var pubParams = new ECPublicKeyParameters(point, ecp);
+
+                        var d = new BigInteger(Convert.FromBase64String(split[0]));
+                        var privParams = new ECPrivateKeyParameters(d, ecp);
+
+                        BcKeyPair = new AsymmetricCipherKeyPair(pubParams, privParams);
                     }
-
-                    var ecp = GetParams();
-
-                    var q = Convert.FromBase64String(split[1]);
-                    var point = ecp.Curve.DecodePoint(q);
-                    var pubParams = new ECPublicKeyParameters(point, ecp);
-
-                    var d = new BigInteger(Convert.FromBase64String(split[0]));
-                    var privParams = new ECPrivateKeyParameters(d, ecp);
-
-                    BcKeyPair = new AsymmetricCipherKeyPair(pubParams, privParams);
-                }
-            }
-            else
-            {
-                var key = Generate();
-                await Save(key);
-                BcKeyPair = key;
+                    break;
+                case ExistenceCheckResult.NotFound:
+                    var key = Generate();
+                    await Save(key);
+                    BcKeyPair = key;
+                    break;
+                default:
+                    throw new IOException("Unknown error occurred while trying to load/save crypto keypair.");
             }
         }
 
@@ -117,27 +120,25 @@ namespace DSLink.Crypto
         /// <param name="keyPair">BouncyCastle Asymmetric KeyPair</param>
         private async Task Save(AsymmetricCipherKeyPair keyPair)
         {
-            byte[] privateBytes = ((ECPrivateKeyParameters) keyPair.Private).D.ToByteArray();
-            byte[] publicBytes = ((ECPublicKeyParameters) keyPair.Public).Q.GetEncoded();
+            var privateBytes = ((ECPrivateKeyParameters) keyPair.Private).D.ToByteArray();
+            var publicBytes = ((ECPublicKeyParameters) keyPair.Public).Q.GetEncoded();
+            var data = Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
+            var file = await _folder.CreateFileAsync(_location, CreationCollisionOption.ReplaceExisting);
 
-            string data = Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
-
-            IFile file = await _folder.CreateFileAsync(_location, CreationCollisionOption.ReplaceExisting);
-
-            using (StreamWriter writer = new StreamWriter(await file.OpenAsync(FileAccess.ReadAndWrite)))
+            using (var writer = new StreamWriter(await file.OpenAsync(FileAccess.ReadAndWrite)))
             {
                 writer.WriteLine(data);
             }
         }
 
         /// <summary>
-        /// Generates the shared secret.
+        /// Generates the shared secret for connecting to the broker.
         /// </summary>
         /// <returns>Shared secret</returns>
         /// <param name="tempKey">Temporary key from server</param>
         public byte[] GenerateSharedSecret(string tempKey)
         {
-            byte[] decoded = UrlBase64.Decode(tempKey);
+            var decoded = UrlBase64.Decode(tempKey);
             var privateKey = ((ECPrivateKeyParameters) BcKeyPair.Private);
             var param = privateKey.Parameters;
             var point = param.Curve.DecodePoint(decoded);
@@ -150,7 +151,7 @@ namespace DSLink.Crypto
         /// <summary>
         /// Get the parameters for the curve.
         /// </summary>
-        /// <returns>The parameters.</returns>
+        /// <returns>Parameters for elliptic curve generation</returns>
         private static ECDomainParameters GetParams()
         {
             var ecp = SecNamedCurves.GetByName(Curve);
@@ -160,7 +161,7 @@ namespace DSLink.Crypto
         /// <summary>
         /// Normalize byte data to 32 bytes.
         /// </summary>
-        /// <param name="data">Data.</param>
+        /// <param name="data">Data</param>
         private static byte[] Normalize(byte[] data)
         {
             if (data.Length < 32)
@@ -172,7 +173,7 @@ namespace DSLink.Crypto
             }
             else if (data.Length > 32)
             {
-                byte[] normal = new byte[32];
+                var normal = new byte[32];
                 Array.Copy(data, data.Length - 32, normal, 0, normal.Length);
                 data = normal;
             }
