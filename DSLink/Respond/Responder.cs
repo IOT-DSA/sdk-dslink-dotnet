@@ -163,6 +163,7 @@ namespace DSLink.Respond
                                 if (request["permit"] == null || request["permit"].Value<string>().Equals(node.GetConfig("writable").String))
                                 {
                                     node.Value.Set(request["value"]);
+                                    node.Value.InvokeRemoteSet();
                                     responses.Add(new JObject
                                     {
                                         new JProperty("rid", request["rid"].Value<int>()),

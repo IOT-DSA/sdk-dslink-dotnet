@@ -25,6 +25,11 @@ namespace DSLink.Nodes
         public event Action<Value> OnSet;
 
         /// <summary>
+        /// Event occurs when value is set only from a requester.
+        /// </summary>
+        public event Action<Value> OnRemoteSet;
+
+        /// <summary>
         /// Gets last updated time in the ISO 8601 format that DSA uses.
         /// </summary>
         public string LastUpdated => TimeUtil.ToIso8601(_lastUpdated);
@@ -171,6 +176,15 @@ namespace DSLink.Nodes
         {
             _lastUpdated = DateTime.Now;
             OnSet?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Used to invoke the remote set action from the
+        /// Responder class.
+        /// </summary>
+        internal void InvokeRemoteSet()
+        {
+            OnRemoteSet?.Invoke(this);
         }
     }
 }
