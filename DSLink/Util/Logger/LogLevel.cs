@@ -62,7 +62,7 @@ namespace DSLink.Util.Logger
         /// </summary>
         /// <returns>The log level</returns>
         /// <param name="name">Name</param>
-        public LogLevel ParseLogLevel(string name)
+        public static LogLevel ParseLogLevel(string name)
         {
             return LogLevels[name.ToUpper()];
         }
