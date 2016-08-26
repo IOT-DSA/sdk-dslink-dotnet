@@ -777,8 +777,8 @@ namespace DSLink.Nodes
                 else if (prop.Value is JObject)
                 {
                     string name = prop.Key;
-                    var child = Children[name];
-                    if (child == null)
+                    
+                    if (!Children.ContainsKey(name))
                     {
                         string className;
                         if (prop.Value["?class"] is JToken)
@@ -791,11 +791,11 @@ namespace DSLink.Nodes
                         }
                         var builder = CreateChild(name, className);
                         builder.Deserialize(prop.Value as JObject);
-                        child = builder.BuildNode();
+                        builder.BuildNode();
                     }
                     else
                     {
-                        child.Deserialize(prop.Value as JObject);
+                        Children[name].Deserialize(prop.Value as JObject);
                     }
                 }
             }
