@@ -144,7 +144,7 @@ namespace DSLink.Nodes
         /// <returns>NodeFactory</returns>
         public NodeFactory SetSerializable(bool serializable)
         {
-            _node.Serializable = true;
+            _node.Serializable = serializable;
             return this;
         }
 
