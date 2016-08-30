@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
@@ -48,7 +49,17 @@ namespace DSLink.Connection
         /// <summary>
         /// Whether we should enable the queueing of messages.
         /// </summary>
-        private bool _enableQueue;
+        private bool _enableQueue = true;
+
+        /// <summary>
+        /// Do we have a queue flush event scheduled?
+        /// </summary>
+        private bool _hasQueueEvent;
+
+        /// <summary>
+        /// Subscription value queue.
+        /// </summary>
+        private JArray _subscriptionValueQueue = new JArray();
 
         /// <summary>
         /// Whether we should enable the queueing of messages.
@@ -181,14 +192,10 @@ namespace DSLink.Connection
         /// Write the specified data.
         /// </summary>
         /// <param name="data">RootObject to serialize and send</param>
-        public async Task Write(JObject data)
+        /// <param name="allowQueue">Whether to allow the data to be added to the queue</param>
+        public async Task Write(JObject data, bool allowQueue = true)
         {
-            if (data["msg"] == null)
-            {
-                data["msg"] = _link.MessageId;
-            }
-
-            /*if (!Connected() || EnableQueue)
+            if ((!Connected() || EnableQueue) && allowQueue)
             {
                 lock (_queueLock)
                 {
@@ -196,24 +203,81 @@ namespace DSLink.Connection
                     {
                         _queue = new JObject
                         {
-                            new JProperty("msg", data["msg"]),
+                            new JProperty("msg", _link.MessageId),
                             new JProperty("responses", new JArray()),
                             new JProperty("requests", new JArray())
                         };
                     }
+
                     if (data["responses"] != null)
                     {
-                        //_queue["responses"].AddRange(data.Responses);
+                        var responseQueue = _queue["responses"].Value<JArray>();
+                        foreach (var resp in data["responses"].Value<JArray>())
+                        {
+                            responseQueue.Add(resp);
+                        }
                     }
+
                     if (data["requests"] != null)
                     {
-                        _queue["responses"].Value<JArray>().(data.Requests);
+                        var requestQueue = _queue["requests"].Value<JArray>();
+                        foreach (var req in data["requests"].Value<JArray>())
+                        {
+                            requestQueue.Add(req);
+                        }
+                    }
+
+                    if (!_hasQueueEvent)
+                    {
+                        _hasQueueEvent = true;
+                        // Schedule event for queue flush.
+                        Task.Run((() => TriggerQueueFlush()));
                     }
                 }
                 return;
-            }*/
+            }
+
+            if (data["msg"] == null)
+            {
+                data["msg"] = _link.MessageId;
+            }
 
             WriteData(Serializer.Serialize(data));
+        }
+
+        /// <summary>
+        /// Called to add value updates.
+        /// </summary>
+        /// <param name="update">Value Update</param>
+        public async Task AddValueUpdateResponse(JToken update)
+        {
+            if (EnableQueue)
+            {
+                lock (_queueLock)
+                {
+                    _subscriptionValueQueue.Add(update);
+
+                    if (!_hasQueueEvent)
+                    {
+                        _hasQueueEvent = true;
+                        // Schedule event for queue flush.
+                        Task.Run((() => TriggerQueueFlush()));
+                    }
+                }
+            }
+            else
+            {
+                var response = new JObject
+                {
+                    {"rid", 0},
+                    {"updates", new JArray { update }}
+                };
+
+                await Write(new JObject
+                {
+                    {"responses", new JArray { response }}
+                });
+            }
         }
 
         /// <summary>
@@ -280,13 +344,46 @@ namespace DSLink.Connection
                 _link.Logger.Debug("Flushing the queue");
                 lock (_queueLock)
                 {
+                    if (_subscriptionValueQueue.Count != 0)
+                    {
+                        var response = new JObject
+                        {
+                            {"rid", 0},
+                            {"updates", _subscriptionValueQueue}
+                        };
+
+                        if (_queue == null)
+                        {
+                            _queue = new JObject
+                            {
+                                {"responses", new JArray()}
+                            };
+                        }
+
+                        _queue["responses"].Value<JArray>().Add(response);
+                    }
+
                     if (_queue != null)
                     {
-                        Write(_queue).Wait();
+                        Write(_queue, false).Wait();
                         _queue = null;
+                    }
+
+                    if (_subscriptionValueQueue.Count != 0)
+                    {
+                        _subscriptionValueQueue = new JArray();
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Flushes the queue for scheduled queue events.
+        /// </summary>
+        internal void TriggerQueueFlush()
+        {
+            _hasQueueEvent = false;
+            Flush();
         }
 
         /// <summary>

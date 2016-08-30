@@ -608,34 +608,17 @@ namespace DSLink.Nodes
         /// <param name="value"></param>
         protected virtual async void ValueSet(Value value)
         {
-            var rootObject = new JObject
-            {
-                new JProperty("responses", new JArray
-                {
-                    new JObject
-                    {
-                        new JProperty("rid", 0),
-                        new JProperty("updates", new JArray())
-                    }
-                })
-            };
-            var hasUpdates = false;
             lock (Subscribers)
             {
                 foreach (var sid in Subscribers)
                 {
-                    hasUpdates = true;
-                    rootObject["responses"].First["updates"].Value<JArray>().Add(new JArray
+                    _link.Connector.AddValueUpdateResponse(new JArray
                     {
                         sid,
                         value.JToken,
                         value.LastUpdated
                     });
                 }
-            }
-            if (hasUpdates)
-            {
-                await _link.Connector.Write(rootObject);
             }
         }
 
