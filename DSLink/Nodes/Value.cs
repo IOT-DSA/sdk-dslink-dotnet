@@ -69,47 +69,75 @@ namespace DSLink.Nodes
             Set(val);
         }
 
-        public void Set(string val)
+        public void Set(string val, bool force = false)
         {
             if (val.StartsWith("\x1B" + "bytes:") || val.StartsWith("\\u001bbytes:"))
             {
                 byte[] bytes = UrlBase64.Decode(val.Substring(val.IndexOf(":") + 1));
-                _val = bytes;
-                SetValue();
+                Set(bytes);
             }
             else
             {
+                if (!force && _val != null && _val.Value<string>() == val)
+                {
+                    return;
+                }
                 _val = val;
             }
             SetValue();
         }
 
-        public void Set(bool val)
+        public void Set(bool val, bool force = false)
         {
+            if (!force && _val != null && _val.Value<bool>() == val)
+            {
+                return;
+            }
+
             _val = val;
             SetValue();
         }
 
-        public void Set(int val)
+        public void Set(int val, bool force = false)
         {
+            if (!force && _val != null && _val.Value<int>() == val)
+            {
+                return;
+            }
+
             _val = val;
             SetValue();
         }
 
-        public void Set(double val)
+        public void Set(double val, bool force = false)
         {
+            if (!force && _val != null && _val.Value<double>() == val)
+            {
+                return;
+            }
+
             _val = val;
             SetValue();
         }
 
-        public void Set(float val)
+        public void Set(float val, bool force = false)
         {
+            if (!force && _val != null && _val.Value<float>() == val)
+            {
+                return;
+            }
+
             _val = val;
             SetValue();
         }
 
-		public void Set(byte[] val)
+		public void Set(byte[] val, bool force = false)
 		{
+            if (!force && _val != null && _val.Value<byte[]>() == val)
+            {
+                return;
+            }
+
             _val = val;
 			SetValue();
 		}
