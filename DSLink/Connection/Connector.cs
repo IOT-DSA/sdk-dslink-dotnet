@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using DSLink.Connection.Serializer;
@@ -339,45 +338,46 @@ namespace DSLink.Connection
         /// </summary>
         internal void Flush(bool fromEvent = false)
         {
-            if (Connected())
+            if (!Connected())
             {
-                _link.Logger.Debug("Flushing the queue");
-                lock (_queueLock)
+                return;
+            }
+            _link.Logger.Debug("Flushing the queue");
+            lock (_queueLock)
+            {
+                if (fromEvent)
                 {
-                    if (fromEvent)
-                    {
-                        _hasQueueEvent = false;
-                    }
+                    _hasQueueEvent = false;
+                }
 
-                    if (_subscriptionValueQueue.Count != 0)
+                if (_subscriptionValueQueue.Count != 0)
+                {
+                    var response = new JObject
                     {
-                        var response = new JObject
+                        {"rid", 0},
+                        {"updates", _subscriptionValueQueue}
+                    };
+
+                    if (_queue == null)
+                    {
+                        _queue = new JObject
                         {
-                            {"rid", 0},
-                            {"updates", _subscriptionValueQueue}
+                            {"responses", new JArray()}
                         };
-
-                        if (_queue == null)
-                        {
-                            _queue = new JObject
-                            {
-                                {"responses", new JArray()}
-                            };
-                        }
-
-                        _queue["responses"].Value<JArray>().Add(response);
                     }
 
-                    if (_queue != null)
-                    {
-                        Write(_queue, false).Wait();
-                        _queue = null;
-                    }
+                    _queue["responses"].Value<JArray>().Add(response);
+                }
 
-                    if (_subscriptionValueQueue.Count != 0)
-                    {
-                        _subscriptionValueQueue = new JArray();
-                    }
+                if (_queue != null)
+                {
+                    Write(_queue, false).Wait();
+                    _queue = null;
+                }
+
+                if (_subscriptionValueQueue.Count != 0)
+                {
+                    _subscriptionValueQueue = new JArray();
                 }
             }
         }
