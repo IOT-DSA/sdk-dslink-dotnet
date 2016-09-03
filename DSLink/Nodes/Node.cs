@@ -123,6 +123,11 @@ namespace DSLink.Nodes
         public ActionHandler ActionHandler;
 
         /// <summary>
+        /// Metadata object attached to a node.
+        /// </summary>
+        public object Metadata;
+
+        /// <summary>
         /// Node is serializable
         /// </summary>
         public bool Serializable = true;
