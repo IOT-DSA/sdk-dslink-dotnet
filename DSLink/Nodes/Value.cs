@@ -78,7 +78,7 @@ namespace DSLink.Nodes
         {
             if (val.StartsWith("\x1B" + "bytes:") || val.StartsWith("\\u001bbytes:"))
             {
-                byte[] bytes = UrlBase64.Decode(val.Substring(val.IndexOf(":") + 1));
+                var bytes = UrlBase64.Decode(val.Substring(val.IndexOf(":", StringComparison.Ordinal) + 1));
                 Set(bytes);
             }
             else
@@ -116,7 +116,7 @@ namespace DSLink.Nodes
 
         public void Set(double val, bool force = false)
         {
-            if (!force && _val != null && _val.Value<double>() == val)
+            if (!force && _val != null && _val.Value<double>().Equals(val))
             {
                 return;
             }
@@ -127,7 +127,7 @@ namespace DSLink.Nodes
 
         public void Set(float val, bool force = false)
         {
-            if (!force && _val != null && _val.Value<float>() == val)
+            if (!force && _val != null && _val.Value<float>().Equals(val))
             {
                 return;
             }

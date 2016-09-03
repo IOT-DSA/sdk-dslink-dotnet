@@ -142,8 +142,12 @@ namespace DSLink
         /// <param name="requester">Enable requester features</param>
         /// <param name="responder">Enable responder features</param>
         /// <param name="keysLocation">Location to store keys</param>
-        /// <param name="communicationFormat">Communication format(json, msgpack)</param>
+        /// <param name="communicationFormat">Communication format (json, msgpack)</param>
         /// <param name="brokerUrl">Full URL of broker to connect to</param>
+        /// <param name="logLevel">Log Level</param>
+        /// <param name="connectionAttemptLimit">Limit of connection attempts (-1 means unlimited)</param>
+        /// <param name="maxConnectionCooldown">Maximum Connection Cooldown</param>
+        /// <param name="loadNodesJson">Enable loading of the nodes.json</param>
         public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false,
                              string keysLocation = ".keys", string communicationFormat = "",
                              string brokerUrl = "http://localhost:8080/conn", LogLevel logLevel = null,
