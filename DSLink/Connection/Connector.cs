@@ -337,13 +337,18 @@ namespace DSLink.Connection
         /// <summary>
         /// Flush the queue.
         /// </summary>
-        internal void Flush()
+        internal void Flush(bool fromEvent = false)
         {
             if (Connected())
             {
                 _link.Logger.Debug("Flushing the queue");
                 lock (_queueLock)
                 {
+                    if (fromEvent)
+                    {
+                        _hasQueueEvent = false;
+                    }
+
                     if (_subscriptionValueQueue.Count != 0)
                     {
                         var response = new JObject
@@ -382,8 +387,7 @@ namespace DSLink.Connection
         /// </summary>
         internal void TriggerQueueFlush()
         {
-            _hasQueueEvent = false;
-            Flush();
+            Flush(true);
         }
 
         /// <summary>
