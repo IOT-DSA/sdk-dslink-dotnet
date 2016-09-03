@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
 using DSLink.Container;
 using DSLink.Nodes.Actions;
 using DSLink.Util;
@@ -10,7 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace DSLink.Nodes
 {
     /// <summary>
-    /// Node
+    /// A DSA Node
     /// </summary>
     public class Node
     {
@@ -147,7 +146,7 @@ namespace DSLink.Nodes
         /// Flag for when the Node Class is initialized.
         /// Used to prevent duplicate initializations.
         /// </summary>
-        private bool _initializedClass = false;
+        private bool _initializedClass;
 
         /// <summary>
         /// Public-facing dictionary of children.
@@ -781,7 +780,7 @@ namespace DSLink.Nodes
                     if (!Children.ContainsKey(name))
                     {
                         string className;
-                        if (prop.Value["?class"] is JToken)
+                        if (prop.Value["?class"] != null)
                         {
                             className = prop.Value["?class"].Value<string>();
                         }
@@ -790,12 +789,12 @@ namespace DSLink.Nodes
                             className = "node";
                         }
                         var builder = CreateChild(name, className);
-                        builder.Deserialize(prop.Value as JObject);
+                        builder.Deserialize((JObject) prop.Value);
                         builder.BuildNode();
                     }
                     else
                     {
-                        Children[name].Deserialize(prop.Value as JObject);
+                        Children[name].Deserialize((JObject) prop.Value);
                     }
                 }
             }

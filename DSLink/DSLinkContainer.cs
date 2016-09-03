@@ -32,13 +32,13 @@ namespace DSLink
         /// <summary>
         /// Whether to reconnect to the broker. 
         /// </summary>
-        internal bool Reconnect = true;
+        internal bool Reconnect;
 
         /// <summary>
         /// Flag for when this DSLink Container is initialized.
         /// Used to prevent duplicate initializations.
         /// </summary>
-        private bool _isInitialized = false;
+        private bool _isInitialized;
 
         /// <summary>
         /// DSLinkContainer constructor.
