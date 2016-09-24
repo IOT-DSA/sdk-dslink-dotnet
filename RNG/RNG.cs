@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -6,6 +7,7 @@ using DSLink.NET;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using System.Threading.Tasks;
+using ValueType = DSLink.Nodes.ValueType;
 
 namespace RNG
 {
@@ -43,7 +45,11 @@ namespace RNG
                 node.Writable = Permission.Read;
                 node.ValueType = ValueType.Number;
                 node.Value.Set(0.1);
-                _values.Add(node.Value);
+
+                lock (_values)
+                {
+                    _values.Add(node.Value);
+                }
             });
 
             Task.Run(async () =>
@@ -55,9 +61,12 @@ namespace RNG
 
         private void UpdateRandomNumbers()
         {
-            foreach (var value in _values)
+            lock (_values)
             {
-                value.Set(_num++);
+                foreach (var value in _values)
+                {
+                    value.Set(_num++);
+                }
             }
             Task.Run(() => UpdateRandomNumbers());
         }
@@ -66,10 +75,19 @@ namespace RNG
         {
             Responder.SuperRoot.CreateChild("Test", "testAction").BuildNode();
 
-            for (int i = 1; i <= 50; i++)
+            Task.Run(async () =>
             {
-                Responder.SuperRoot.CreateChild($"TestVal{i}", "rng").BuildNode();
-            }
+                await Task.Delay(5000);
+
+                for (var x = 1; x <= 5; x++)
+                {
+                    var node = Responder.SuperRoot.CreateChild($"Container{x}").BuildNode();
+                    for (var i = 1; i <= 50; i++)
+                    {
+                        node.CreateChild($"TestVal{i}", "rng").BuildNode();
+                    }
+                }
+            });
         }
 
         private static void Main(string[] args)
