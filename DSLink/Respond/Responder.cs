@@ -153,6 +153,10 @@ namespace DSLink.Respond
                                     new JProperty("updates", SuperRoot.Get(request["path"].Value<string>()).SerializeUpdates())
                                 });
                             }
+                            else
+                            {
+                                StreamManager.OpenLater(request["rid"].Value<int>(), request["path"].Value<string>());
+                            }
                         }
                         break;
                     case "set":
@@ -206,30 +210,25 @@ namespace DSLink.Respond
                             {
                                 var pathToken = pair["path"];
                                 var sidToken = pair["sid"];
-                                if (pathToken != null && sidToken != null &&
-                                    pair["path"].Type == JTokenType.String &&
-                                    pair["sid"].Type == JTokenType.Integer)
+                                if (pathToken == null || sidToken == null || pair["path"].Type != JTokenType.String ||
+                                    pair["sid"].Type != JTokenType.Integer) continue;
+                                var node = SuperRoot.Get(pathToken.Value<string>());
+                                if (node == null) continue;
+                                var sid = sidToken.Value<int>();
+                                SubscriptionManager.Subscribe(sid, node);
+                                responses.Add(new JObject
                                 {
-                                    var node = SuperRoot.Get(pathToken.Value<string>());
-                                    if (node != null)
+                                    new JProperty("rid", 0),
+                                    new JProperty("updates", new JArray
                                     {
-                                        var sid = sidToken.Value<int>();
-                                        SubscriptionManager.Subscribe(sid, node);
-                                        responses.Add(new JObject
+                                        new JArray
                                         {
-                                            new JProperty("rid", 0),
-                                            new JProperty("updates", new JArray
-                                            {
-                                                new JArray
-                                                {
-                                                    pair["sid"].Value<int>(),
-                                                    node.Value.JToken,
-                                                    node.Value.LastUpdated
-                                                }
-                                            })
-                                        });
-                                    }
-                                }
+                                            pair["sid"].Value<int>(),
+                                            node.Value.JToken,
+                                            node.Value.LastUpdated
+                                        }
+                                    })
+                                });
                             }
                             responses.Add(new JObject
                             {
@@ -260,7 +259,7 @@ namespace DSLink.Respond
                         }
                         break;
                     default:
-                        throw new ArgumentException(string.Format("Method {0} not implemented", request["method"].Value<string>()));
+                        throw new ArgumentException($"Method {request["method"].Value<string>()} not implemented");
                 }
             }
             return responses;
@@ -343,9 +342,9 @@ namespace DSLink.Respond
     internal class StreamManager
     {
         /// <summary>
-        /// Map of request IDs to a Node.
+        /// Map of request IDs to a node path.
         /// </summary>
-        private readonly Dictionary<int, Node> _streams = new Dictionary<int, Node>();
+        private readonly Dictionary<int, string> _streams = new Dictionary<int, string>();
 
         /// <summary>
         /// DSLink container instance.
@@ -368,11 +367,21 @@ namespace DSLink.Respond
         /// <param name="node">Node for stream</param>
         public void Open(int requestId, Node node)
         {
-            _streams.Add(requestId, node);
+            _streams.Add(requestId, node.Path);
             lock (node.Streams)
             {
                 node.Streams.Add(requestId);
             }
+        }
+
+        /// <summary>
+        /// Adds a node path to the stream queue for use on activation.
+        /// </summary>
+        /// <param name="requestId">Request ID</param>
+        /// <param name="path">Node Path</param>
+        public void OpenLater(int requestId, string path)
+        {
+            _streams.Add(requestId, path);
         }
 
         /// <summary>
@@ -383,15 +392,35 @@ namespace DSLink.Respond
         {
             try
             {
-                lock (_streams[requestId].Streams)
+                var node = _link.Responder.SuperRoot.Get(_streams[requestId]);
+                if (node != null)
                 {
-                    _streams[requestId].Streams.Remove(requestId);
+                    lock (node.Streams)
+                    {
+                        node.Streams.Remove(requestId);
+                    }
                 }
                 _streams.Remove(requestId);
             }
             catch (KeyNotFoundException)
             {
-                _link.Logger.Debug($"Failed to Close: unknown request id {requestId}");
+                _link.Logger.Debug($"Failed to Close: unknown request id or node for {requestId}");
+            }
+        }
+
+        /// <summary>
+        /// Called when the given node is activated (created).
+        /// </summary>
+        /// <param name="node">Node that was activated.</param>
+        public void OnActivateNode(Node node)
+        {
+            foreach (var id in _streams.Keys)
+            {
+                var path = _streams[id];
+                if (path == node.Path)
+                {
+                    node.Streams.Add(id);
+                }
             }
         }
                  

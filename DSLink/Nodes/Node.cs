@@ -233,6 +233,8 @@ namespace DSLink.Nodes
                 Name = name;
                 Path = "/" + name;
             }
+
+            link?.Responder?.StreamManager?.OnActivateNode(this);
         }
 
         /// <summary>
@@ -809,7 +811,7 @@ namespace DSLink.Nodes
             }
             catch (KeyNotFoundException)
             {
-                _link?.Logger.Warning($"Non-existant Node({path}) requested");
+                _link?.Logger.Debug($"Non-existant node {path} requested.");
                 return null;
             }
         }
