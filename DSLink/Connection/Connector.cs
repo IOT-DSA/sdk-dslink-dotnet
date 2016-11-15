@@ -226,6 +226,11 @@ namespace DSLink.Connection
                         }
                     }
 
+                    if (data["ack"] != null)
+                    {
+                        _queue["ack"] = data["ack"];
+                    }
+
                     if (!_hasQueueEvent)
                     {
                         _hasQueueEvent = true;
@@ -239,6 +244,16 @@ namespace DSLink.Connection
             if (data["msg"] == null)
             {
                 data["msg"] = _link.MessageId;
+            }
+
+            if (data["requests"] != null && data["requests"].Value<JArray>().Count == 0)
+            {
+                data.Remove("requests");
+            }
+
+            if (data["responses"] != null && data["responses"].Value<JArray>().Count == 0)
+            {
+                data.Remove("responses");
             }
 
             WriteData(Serializer.Serialize(data));
@@ -342,7 +357,7 @@ namespace DSLink.Connection
             {
                 return;
             }
-            _link.Logger.Debug("Flushing the queue");
+            _link.Logger.Debug("Flushing connection message queue");
             lock (_queueLock)
             {
                 if (fromEvent)

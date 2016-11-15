@@ -317,7 +317,7 @@ namespace DSLink
                 {
                     // Write a blank message containing no responses/requests.
                     Logger.Debug("Sent ping");
-                    await Connector.Write(new JObject());
+                    await Connector.Write(new JObject(), false);
                 }
                 // TODO: Extract the amount of time to the configuration object.
                 await Task.Delay(30000);
