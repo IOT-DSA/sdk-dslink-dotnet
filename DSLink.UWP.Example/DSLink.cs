@@ -3,6 +3,8 @@ using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using System.Threading.Tasks;
 using ValueType = DSLink.Nodes.ValueType;
+using System.Diagnostics;
+using DSLink.Util.Logger;
 
 namespace DSLink.UWP.Example
 {
@@ -10,6 +12,21 @@ namespace DSLink.UWP.Example
     {
         public ExampleDSLink(Configuration config) : base(config)
         {
+            Task.Run(async () =>
+            {
+                await Requester.Subscribe("/data/Test", (update) =>
+                {
+                    Debug.WriteLine("A: " + update.Value);
+                });
+
+                await Task.Delay(5000);
+
+                await Requester.Subscribe("/data/Test", (update) =>
+                {
+                    Debug.WriteLine("B: " + update.Value);
+                });
+            });
+
             Responder.AddNodeClass("testAction", delegate (Node node)
             {
                 node.AddParameter(new Parameter("string", "string"));
@@ -42,7 +59,7 @@ namespace DSLink.UWP.Example
                 rngs.Add(node.Value);
             });
 
-            Task.Run(async () =>
+            /*Task.Run(async () =>
             {
                 await Task.Delay(5000);
                 int num = 0;
@@ -54,7 +71,7 @@ namespace DSLink.UWP.Example
                         rng.Set(num++);
                     }
                 }
-            });
+            });*/
         }
 
         public override void InitializeDefaultNodes()
@@ -72,8 +89,8 @@ namespace DSLink.UWP.Example
             var dslink =
                 new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet",
                                                     responder: true, requester: true,
-                                                    brokerUrl: "http://octocat.local:8080/conn",
-                                                    loadNodesJson: false,
+                                                    brokerUrl: "http://192.168.1.90:8090/conn",
+                                                    loadNodesJson: false, logLevel: LogLevel.Debug,
                                                     communicationFormat: "json"));
 
             await dslink.Connect();
