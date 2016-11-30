@@ -14,17 +14,25 @@ namespace DSLink.UWP.Example
         {
             Task.Run(async () =>
             {
-                await Requester.Subscribe("/data/Test", (update) =>
+                var a = await Requester.Subscribe("/data/Test", (update) =>
                 {
                     Debug.WriteLine("A: " + update.Value);
                 });
 
                 await Task.Delay(5000);
 
-                await Requester.Subscribe("/data/Test", (update) =>
+                var b = await Requester.Subscribe("/data/Test", (update) =>
                 {
                     Debug.WriteLine("B: " + update.Value);
                 });
+
+                await Task.Delay(5000);
+
+                await Requester.Unsubscribe(a);
+
+                await Task.Delay(5000);
+
+                await Requester.Unsubscribe(b);
             });
 
             Responder.AddNodeClass("testAction", delegate (Node node)

@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Respond;
@@ -37,19 +35,9 @@ namespace DSLink.Request
         private int _rid = 1;
 
         /// <summary>
-        /// Current subscription ID.
-        /// </summary>
-        private int _sid = 0;
-
-        /// <summary>
         /// Gets the next request identifier.
         /// </summary>
         protected int NextRequestID => _rid++;
-
-        /// <summary>
-        /// Gets the next subscription identifier.
-        /// </summary>
-        protected int NextSubID => _sid++;
 
         internal Requester(AbstractContainer link)
         {
@@ -79,11 +67,7 @@ namespace DSLink.Request
                             int sid = arrayUpdate[0].Value<int>();
                             JToken value = arrayUpdate[1];
                             string dt = arrayUpdate[2].Value<string>();
-                            var sub = _subscriptionManager.GetSub(sid);
-                            if (sub != null)
-                            {
-                                await Task.Run(() => sub.Callback(new SubscriptionUpdate(sid, value, dt)));
-                            }
+                            _subscriptionManager.InvokeSubscriptionUpdate(sid, new SubscriptionUpdate(sid, value, dt));
                         }
                         else if (update is JObject)
                         {
@@ -95,11 +79,7 @@ namespace DSLink.Request
                             int sum = objectUpdate["sum"].Value<int>();
                             int min = objectUpdate["min"].Value<int>();
                             int max = objectUpdate["max"].Value<int>();
-                            var sub = _subscriptionManager.GetSub(sid);
-                            if (sub != null)
-                            {
-                                await Task.Run(() => sub.Callback(new SubscriptionUpdate(sid, value, ts, count, sum, min, max)));
-                            }
+                            _subscriptionManager.InvokeSubscriptionUpdate(sid, new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
                         }
                     }
                 }
@@ -224,69 +204,23 @@ namespace DSLink.Request
         /// <param name="path">Path</param>
         /// <param name="callback">Callback</param>
         /// <param name="qos">Quality of Service</param>
-        public async Task<SubscribeRequest> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos = 0)
+        public async Task<int> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos = 0)
         {
-            var sid = NextSubID;
-            var request = new SubscribeRequest(NextRequestID, new JArray
+            if (string.IsNullOrEmpty(path))
             {
-                new JObject
-                {
-                    new JProperty("path", path),
-                    new JProperty("sid", sid),
-                    new JProperty("qos", qos)
-                }
-            }, callback);
+                throw new Exception("Path can not be null or empty.");
+            }
 
-            _subscriptionManager.Subscribe(sid, path, callback);
-            await _link.Connector.Write(new JObject
-            {
-                new JProperty("requests", new JArray
-                {
-                    request.Serialize()
-                })
-            });
-
-            return request;
+            return await _subscriptionManager.Subscribe(path, callback, qos);
         }
 
         /// <summary>
-        /// Unsubscribe from the specified path.
+        /// Unsubscribe from a subscription ID.
         /// </summary>
-        /// <param name="path">Path</param>
-        public void Unsubscribe(string path)
+        /// <param name="path">Subscription ID</param>
+        public async Task Unsubscribe(int subId)
         {
-            Unsubscribe(new List<string>
-            {
-                path
-            });
-        }
-
-        /// <summary>
-        /// Unsubscribe from the specified paths.
-        /// </summary>
-        /// <param name="paths">List of paths</param>
-        public void Unsubscribe(List<string> paths)
-        {
-            var sids = new JArray();
-            foreach (string path in paths)
-            {
-                var sid = _subscriptionManager.GetSubByPath(path);
-                if (sid.HasValue)
-                {
-                    _subscriptionManager.Unsubscribe(sid.Value);
-                    sids.Add(sid.Value);
-                }
-            }
-            if (sids.Count > 0)
-            {
-                _link.Connector.Write(new JObject
-                {
-                    new JProperty("requests", new JArray
-                    {
-                        new UnsubscribeRequest(NextRequestID, sids).Serialize()
-                    })
-                });
-            }
+            await _subscriptionManager.Unsubscribe(subId);
         }
 
         /// <summary>
@@ -356,9 +290,25 @@ namespace DSLink.Request
             private readonly AbstractContainer _link;
 
             /// <summary>
-            /// Subscription IDs to Subscription objects.
+            /// Storage of subscription objects, by node path.
             /// </summary>
-            private readonly Dictionary<int, Subscription> _subscriptions;
+            private readonly Dictionary<string, Subscription> _subscriptions;
+
+            /// <summary>
+            /// Direct mapping of subscription ID(virtual) to 
+            /// node path.
+            /// </summary>
+            private readonly Dictionary<int, string> _subIdToPath;
+
+            /// <summary>
+            /// Real sub IDs to node paths.
+            /// </summary>
+            private readonly Dictionary<int, string> _realSubIdToPath;
+
+            /// <summary>
+            /// Current subscription ID.
+            /// </summary>
+            private int _sid = 0;
 
             /// <summary>
             /// Initializes a new instance of the
@@ -367,80 +317,118 @@ namespace DSLink.Request
             public RemoteSubscriptionManager(AbstractContainer link)
             {
                 _link = link;
-                _subscriptions = new Dictionary<int, Subscription>();
+                _subscriptions = new Dictionary<string, Subscription>();
+                _subIdToPath = new Dictionary<int, string>();
+                _realSubIdToPath = new Dictionary<int, string>();
             }
 
             /// <summary>
-            /// Subscribe to the specified subscription ID.
+            /// Subscribe to specified path.
             /// </summary>
-            /// <param name="subID">Subscription ID</param>
             /// <param name="path">Path</param>
             /// <param name="callback">Callback</param>
-            public void Subscribe(int subID, string path, Action<SubscriptionUpdate> callback)
+            public async Task<int> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos)
             {
-                if (_subscriptions.ContainsKey(subID))
+                var sid = _sid++;
+                var request = new SubscribeRequest(_link.Requester.NextRequestID, new JArray
                 {
-                    throw new Exception("Subscription ID is already used.");
+                    new JObject
+                    {
+                        new JProperty("path", path),
+                        new JProperty("sid", sid),
+                        new JProperty("qos", qos)
+                    }
+                }, callback);
+                if (!_subscriptions.ContainsKey(path))
+                {
+                    _subscriptions.Add(path, new Subscription(sid));
+                    await _link.Connector.Write(new JObject
+                    {
+                        new JProperty("requests", new JArray
+                        {
+                            request.Serialize()
+                        })
+                    });
+                    _realSubIdToPath[sid] = path;
                 }
-                if (string.IsNullOrEmpty(path))
-                {
-                    throw new Exception("Path can not be null or empty.");
-                }
-                _subscriptions.Add(subID, new Subscription
-                {
-                    Path = path,
-                    Callback = callback
-                });
+                _subscriptions[path].VirtualSubs[sid] = callback;
+                _subIdToPath[sid] = path;
+
+                return sid;
             }
 
             /// <summary>
             /// Unsubscribe from the specified subscription ID.
             /// </summary>
-            /// <param name="subID">Subscription ID</param>
-            public void Unsubscribe(int subID)
+            /// <param name="subId">Subscription ID</param>
+            public async Task Unsubscribe(int subId)
             {
-                _subscriptions.Remove(subID);
+                var path = _subIdToPath[subId];
+                var sub = _subscriptions[path];
+                sub.VirtualSubs.Remove(subId);
+                _subIdToPath.Remove(subId);
+                if (sub.VirtualSubs.Count == 0)
+                {
+                    await _link.Connector.Write(new JObject
+                    {
+                        new JProperty("requests", new JArray
+                        {
+                            new UnsubscribeRequest(_link.Requester.NextRequestID, new JArray { sub.RealSubID }).Serialize()
+                        })
+                    });
+                    _subscriptions.Remove(path);
+                    _subIdToPath.Remove(sub.RealSubID);
+                    _realSubIdToPath.Remove(sub.RealSubID);
+                }
             }
 
             /// <summary>
-            /// Get subscription ID from path.
+            /// Get subscription IDs from path.
             /// </summary>
             /// <param name="path">Path of node</param>
-            /// <returns>Subscription ID</returns>
-            public int? GetSubByPath(string path)
+            /// <returns>Subscription IDs in List</returns>
+            public List<int> GetSubsByPath(string path)
             {
-                foreach (var kp in _subscriptions)
+                var sids = new List<int>();
+
+                if (_subscriptions.ContainsKey(path))
                 {
-                    if (kp.Value.Path == path)
+                    foreach (var sid in _subscriptions[path].VirtualSubs)
                     {
-                        return kp.Key;
+                        sids.Add(sid.Key);
                     }
                 }
-                return new int?();
+
+                return sids;
             }
 
             /// <summary>
-            /// Get the subscription object from a subscription ID.
+            /// Invoke subscription update callbacks.
             /// </summary>
-            /// <param name="subID">Subscription ID</param>
-            /// <returns>Subscription object</returns>
-            public Subscription GetSub(int subID)
+            /// <param name="subId">Subscription ID</param>
+            /// <param name="update">Update to send</param>
+            public void InvokeSubscriptionUpdate(int subId, SubscriptionUpdate update)
             {
-                if (!_subscriptions.ContainsKey(subID))
+                if (!_realSubIdToPath.ContainsKey(subId))
                 {
-                    _link.Logger.Debug(string.Format("Remote sid {0} was not found in subscription manager", subID));
-                    return null;
+                    _link.Logger.Debug(string.Format("Remote sid {0} was not found in subscription manager", subId));
+                    return;
                 }
-                return _subscriptions[subID];
+                foreach (var i in _subscriptions[_realSubIdToPath[subId]].VirtualSubs)
+                {
+                    i.Value(update);
+                }
             }
 
-            /// <summary>
-            /// Subscription object that maps a path and callback to an ID.
-            /// </summary>
             public class Subscription
             {
-                public string Path;
-                public Action<SubscriptionUpdate> Callback;
+                public Subscription(int subId)
+                {
+                    RealSubID = subId;
+                }
+
+                public readonly int RealSubID;
+                public readonly Dictionary<int, Action<SubscriptionUpdate>> VirtualSubs = new Dictionary<int, Action<SubscriptionUpdate>>();
             }
         }
     }
