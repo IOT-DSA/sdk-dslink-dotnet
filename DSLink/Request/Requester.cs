@@ -206,6 +206,8 @@ namespace DSLink.Request
         /// <param name="qos">Quality of Service</param>
         public async Task<int> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos = 0)
         {
+            // TODO: Test for quality of service changes.
+
             if (string.IsNullOrEmpty(path))
             {
                 throw new Exception("Path can not be null or empty.");
