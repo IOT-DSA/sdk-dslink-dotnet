@@ -75,7 +75,8 @@ namespace DSLink.Connection
             }
             get
             {
-                return _enableQueue;
+                //return _enableQueue;
+                return false;
             }
         }
 
@@ -210,19 +211,17 @@ namespace DSLink.Connection
 
                     if (data["responses"] != null)
                     {
-                        var responseQueue = _queue["responses"].Value<JArray>();
                         foreach (var resp in data["responses"].Value<JArray>())
                         {
-                            responseQueue.Add(resp);
+                            ((JArray)_queue["responses"]).Add(resp);
                         }
                     }
 
                     if (data["requests"] != null)
                     {
-                        var requestQueue = _queue["requests"].Value<JArray>();
                         foreach (var req in data["requests"].Value<JArray>())
                         {
-                            requestQueue.Add(req);
+                            ((JArray)_queue["requests"]).Add(req);
                         }
                     }
 
