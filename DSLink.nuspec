@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>DSLink</id>
-    <version>0.3.8-alpha</version>
+    <version>0.3.9-alpha</version>
     <title>DSLink SDK</title>
     <authors>Logan Gorence</authors>
     <owners>Logan Gorence</owners>
@@ -35,8 +35,7 @@
         <!-- Platform dependencies -->
         <dependency id="WebSocketSharp" version="1.0.3-rc11" />
       </group>
-      <group targetFramework="MonoAndroid60">
-        <!-- PCL dependencies -->
+      <!--<group targetFramework="MonoAndroid60">
         <dependency id="Mono.Options-PCL" version="2.0.40" />
         <dependency id="MsgPack.Cli" version="0.6.8" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
@@ -45,7 +44,6 @@
         <dependency id="Websockets.Pcl" version="1.1.9" />
       </group>
       <group targetFramework="Xamarin.iOS">
-        <!-- PCL dependencies -->
         <dependency id="Mono.Options-PCL" version="2.0.40" />
         <dependency id="MsgPack.Cli" version="0.6.8" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
@@ -53,9 +51,8 @@
         <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
         <dependency id="Websockets.Pcl" version="1.1.9" />
 
-        <!-- Platform dependencies -->
         <dependency id="Square.SocketRocket" version="0.5.0.1" />
-      </group>
+      </group>-->
       <group targetFramework="uap10.0">
         <!-- PCL dependencies -->
         <dependency id="Mono.Options-PCL" version="2.0.40" />
@@ -73,19 +70,19 @@
     -->
 
     <!-- .NET -->
-    <file src="DSLink/bin/Release/DSLink.dll" target="lib/net45" />
-    <file src="DSLink.NET/bin/Release/DSLink.NET.dll" target="lib/net45" />
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib\net45" />
+    <file src="DSLink.NET/bin/Release/DSLink.NET.dll" target="lib\net45" />
 
-    <!-- iOS -->
-    <file src="DSLink/bin/Release/DSLink.dll" target="lib/Xamarin.iOS" />
-    <file src="DSLink.iOS/bin/Release/DSLink.iOS.dll" target="lib/Xamarin.iOS" />
+    <!--~1~ iOS @1@
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib\Xamarin.iOS" />
+    <file src="DSLink.iOS/bin/Release/DSLink.iOS.dll" target="lib\Xamarin.iOS" />
 
-    <!-- Android -->
-    <file src="DSLink/bin/Release/DSLink.dll" target="lib/MonoAndroid10" />
-    <file src="DSLink.Android/bin/Release/DSLink.Android.dll" target="lib/MonoAndroid10" />
+    ~1~ Android @1@
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib\MonoAndroid10" />
+    <file src="DSLink.Android/bin/Release/DSLink.Android.dll" target="lib\MonoAndroid10" />-->
   
     <!-- UWP/Windows 10 -->
-    <file src="DSLink/bin/Release/DSLink.dll" target="lib/uap10.0" />
-    <file src="DSLink.UWP/bin/Release/DSLink.UWP.dll" target="lib/uap10.0" />
+    <file src="DSLink/bin/Release/DSLink.dll" target="lib\uap10.0" />
+    <file src="DSLink.UWP/bin/Release/DSLink.UWP.dll" target="lib\uap10.0" />
   </files>
 </package>
