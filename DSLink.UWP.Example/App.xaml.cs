@@ -24,24 +24,6 @@ namespace DSLink.UWP.Example
         {
             // Initialize the DSLink platform-specific library.
             UWPPlatform.Initialize();
-            //Task.Run(ExampleDSLink.InitializeLink);
-            try
-            {
-                ExampleDSLink.InitializeLink().Wait();
-            }
-            catch (AggregateException e)
-            {
-                foreach (Exception i in e.InnerExceptions)
-                {
-                    Debug.WriteLine(i.InnerException.GetType().FullName);
-                    Debug.WriteLine(i.InnerException.Message);
-                    Debug.WriteLine(i.InnerException.StackTrace);
-                }
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.WriteLine(e.StackTrace);
-            }
 
             InitializeComponent();
             Suspending += OnSuspending;

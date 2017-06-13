@@ -8,6 +8,9 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <StackPanel>
+            <TextBox Header="Broker URL" Width="500" Name="BrokerURLText" />
+            <Button Content="Start/Stop" Click="StartStopButton_OnClick" />
+        </StackPanel>
     </Grid>
 </Page>

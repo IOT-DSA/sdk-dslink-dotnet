@@ -1,30 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+﻿using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace DSLink.UWP.Example
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class MainPage : Page
     {
+        private readonly UniversalWindowsDSLink _link;
+
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+
+            _link = new UniversalWindowsDSLink(new Configuration(new List<string>(), "UWP-DSLink", true, true, brokerUrl: "http://master:7080/conn"));
+        }
+
+        private void StartStopButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_link.Connector.Connected())
+            {
+                _link.Disconnect();
+            }
+            else
+            {
+                _link.Config.BrokerUrl = BrokerURLText.Text;
+                _link.Connect();
+            }
         }
     }
 }
