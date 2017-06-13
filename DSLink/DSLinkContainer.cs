@@ -5,6 +5,7 @@ using DSLink.Connection.Serializer;
 using DSLink.Container;
 using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
+using DSLink.Platform;
 
 namespace DSLink
 {
@@ -46,10 +47,10 @@ namespace DSLink
         /// <param name="config">Configuration for the DSLink</param>
         public DSLinkContainer(Configuration config) : base(config)
         {
-            CreateLogger("DSLink");
+            Logger = CreateLogger("DSLink");
 
             Reconnect = true;
-            Connector = ConnectorManager.Create(this);
+            Connector = BasePlatform.Current.CreateConnector(this);
 
             // Events
             Connector.OnMessage += OnTextMessage;

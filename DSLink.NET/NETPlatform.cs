@@ -1,14 +1,24 @@
-﻿using DSLink.Connection;
-using DSLink.Util.Logger;
+﻿using System;
+using DSLink.Connection;
+using DSLink.Platform;
 
 namespace DSLink.NET
 {
-    public static class NETPlatform
+    public class NETPlatform : BasePlatform
     {
         public static void Initialize()
         {
-            ConnectorManager.SetConnector(typeof(WebSocketSharpConnector));
-            BaseLogger.Logger = typeof(NETLogger);
+            SetPlatform(new NETPlatform());
+        }
+
+        public override Connector CreateConnector(DSLinkContainer container)
+        {
+            return new WebSocketSharpConnector(container);
+        }
+
+        protected override Type GetLoggerType()
+        {
+            return typeof(NETLogger);
         }
     }
 }

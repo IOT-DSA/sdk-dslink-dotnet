@@ -7,6 +7,7 @@ using DSLink.Request;
 using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
 using PCLStorage;
+using DSLink.Platform;
 
 namespace DSLink.Respond
 {
@@ -60,7 +61,7 @@ namespace DSLink.Respond
         {
             JObject obj = SuperRoot.Serialize();
 
-            IFolder folder = await Configuration.GetStorageFolder();
+            IFolder folder = await BasePlatform.Current.GetStorageFolder();
             IFile file;
 
             try
@@ -102,7 +103,7 @@ namespace DSLink.Respond
         /// </summary>
         public async Task<bool> Deserialize()
         {
-            IFolder folder = await Configuration.GetStorageFolder();
+            IFolder folder = await BasePlatform.Current.GetStorageFolder();
 
             try
             {

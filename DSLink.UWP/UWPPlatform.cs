@@ -1,15 +1,34 @@
 using DSLink.Connection;
+using DSLink.Platform;
 using PCLStorage;
 
 namespace DSLink.UWP
 {
-    public class UWPPlatform
+    public class UWPPlatform : BasePlatform
     {
         public static void Initialize()
         {
-            Configuration.StorageBaseFolder = FileSystem.Current.LocalStorage;
+            SetPlatform(new UWPPlatform());
+        }
+
+        public override void Init()
+        {
             Websockets.Universal.WebsocketConnection.Link();
-            ConnectorManager.SetConnector(typeof(WebSocketBaseConnector));
+        }
+
+        public override Connector CreateConnector(DSLinkContainer container)
+        {
+            return new WebSocketBaseConnector(container);
+        }
+
+        public override IFolder GetPlatformStorageFolder()
+        {
+            return FileSystem.Current.LocalStorage;
+        }
+
+        public override string GetCommunicationFormat()
+        {
+            return "json";
         }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -105,8 +104,7 @@ namespace RNG
             NETPlatform.Initialize();
             var dslink =
                 new ExampleDSLink(new Configuration(args.ToList(), "sdk-dotnet-rng",
-                                                    responder: true, requester: true,
-                                                    communicationFormat: "msgpack"));
+                                                    true, true));
 
             await dslink.Connect();
         }

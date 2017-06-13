@@ -11,8 +11,8 @@ namespace DSLink.UWP.Example
         public MainPage()
         {
             InitializeComponent();
-
-            _link = new UniversalWindowsDSLink(new Configuration(new List<string>(), "UWP-DSLink", true, true, brokerUrl: "http://master:7080/conn"));
+            
+            _link = new UniversalWindowsDSLink(new Configuration(new List<string>(), "UWP-DSLink", true, true));
         }
 
         private void StartStopButton_OnClick(object sender, RoutedEventArgs e)

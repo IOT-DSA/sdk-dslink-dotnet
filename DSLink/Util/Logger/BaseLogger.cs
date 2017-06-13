@@ -8,11 +8,6 @@ namespace DSLink.Util.Logger
     public abstract class BaseLogger
     {
         /// <summary>
-        /// Logger type, default is diagnostics logger for PCL library.
-        /// </summary>
-        public static Type Logger = typeof(DiagnosticsLogger);
-
-        /// <summary>
         /// Name of the logger.
         /// </summary>
         protected readonly string Name;

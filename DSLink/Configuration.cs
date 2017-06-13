@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Crypto;
+using DSLink.Platform;
 using DSLink.Util;
 using DSLink.Util.Logger;
 using Mono.Options;
-using PCLStorage;
 
 namespace DSLink
 {
@@ -17,20 +17,6 @@ namespace DSLink
     /// </summary>
     public class Configuration
     {
-        public static IFolder StorageBaseFolder;
-
-        /// <summary>
-        /// Gets the Storage Folder.
-        /// </summary>
-        public static async Task<IFolder> GetStorageFolder()
-        {
-            if (StorageBaseFolder == null)
-            {
-                StorageBaseFolder = await FileSystem.Current.GetFolderFromPathAsync(".");
-            }
-            return StorageBaseFolder;
-        }
-
         /// <summary>
         /// SHA256 cryptography instance
         /// </summary>
@@ -154,6 +140,11 @@ namespace DSLink
                              int connectionAttemptLimit = -1, int maxConnectionCooldown = 60,
                              bool loadNodesJson = false)
         {
+            if (BasePlatform.Current == null)
+            {
+                throw new PlatformNotSupportedException("Platform specific code was not initialized.");
+            }
+
             if (logLevel == null)
             {
                 logLevel = LogLevel.Info;
@@ -166,7 +157,15 @@ namespace DSLink
             Responder = responder;
             KeysLocation = keysLocation;
             LoadNodesJson = loadNodesJson;
-            _communicationFormat = communicationFormat;
+            if (!string.IsNullOrEmpty(BasePlatform.Current.GetCommunicationFormat()))
+            {
+                _communicationFormat = BasePlatform.Current.GetCommunicationFormat();
+            }
+
+            if (!string.IsNullOrEmpty(communicationFormat))
+            {
+                _communicationFormat = communicationFormat;
+            }
 
             var options = new OptionSet
             {
@@ -188,9 +187,9 @@ namespace DSLink
             }
             MaxConnectionCooldown = maxConnectionCooldown;
 
-            Task.Run(async () =>
+            BasePlatform.Current.GetStorageFolder().ContinueWith(async folder =>
             {
-                KeyPair = new KeyPair(await GetStorageFolder(), KeysLocation);
+                KeyPair = new KeyPair(await folder, KeysLocation);
                 await KeyPair.Load();
             }).Wait();
         }

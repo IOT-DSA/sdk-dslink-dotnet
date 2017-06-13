@@ -3,6 +3,7 @@ using DSLink.Connection;
 using DSLink.Request;
 using DSLink.Respond;
 using DSLink.Util.Logger;
+using DSLink.Platform;
 
 namespace DSLink.Container
 {
@@ -16,7 +17,7 @@ namespace DSLink.Container
         /// <summary>
         /// Logger for DSLink.
         /// </summary>
-        public BaseLogger Logger { get; private set; }
+        public BaseLogger Logger { get; internal set; }
 
         /// <summary>
         /// Gets or sets the connector.
@@ -109,9 +110,9 @@ namespace DSLink.Container
         /// Create a logger for the DSLink.
         /// </summary>
         /// <param name="loggerName">Logger name.</param>
-        protected void CreateLogger(string loggerName)
+        protected BaseLogger CreateLogger(string loggerName)
         {
-            Logger = (Activator.CreateInstance(BaseLogger.Logger, loggerName, Config.LogLevel) as BaseLogger);
+            return BasePlatform.Current.CreateLogger(loggerName, Config.LogLevel);
         }
     }
 }
