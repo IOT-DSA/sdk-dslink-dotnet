@@ -22,23 +22,29 @@ namespace DSLink.Nodes.Actions
             }
         }
 
-        public string ValueType
+        /// <summary>
+        /// Type of the parameter.
+        /// </summary>
+        public ValueType ValueType
         {
             get
             {
-                return this["type"].Value<string>();
+                return ValueType.FromString(this["type"].Value<string>());
             }
             set
             {
-                this["type"] = value;
+                this["type"] = value.Type;
             }
         }
 
-        public string DefaultValue
+        /// <summary>
+        /// Default value of the parameter.
+        /// </summary>
+        public dynamic DefaultValue
         {
             get
             {
-                return this["default"].Value<string>();
+                return this["default"].Value<dynamic>();
             }
             set
             {
@@ -46,15 +52,18 @@ namespace DSLink.Nodes.Actions
             }
         }
 
-        public string Editor
+        /// <summary>
+        /// Editor config of the parameter.
+        /// </summary>
+        public EditorType Editor
         {
             get
             {
-                return this["editor"].Value<string>();
+                return EditorType.FromString(this["editor"].Value<string>());
             }
             set
             {
-                this["editor"] = value;
+                this["editor"] = value.Type;
             }
         }
         
@@ -70,13 +79,13 @@ namespace DSLink.Nodes.Actions
         /// <param name="name">Parameter name</param>
         /// <param name="type">Parameter type</param>
         /// <param name="def">Default value</param>
-        public Parameter(string name, string type, dynamic defaultValue = null, string editor = null)
+        public Parameter(string name, ValueType type, dynamic defaultValue = null, EditorType editor = null)
         {
             Name = name;
             ValueType = type;
             if (defaultValue != null)
                 DefaultValue = defaultValue;
-            if (!string.IsNullOrEmpty(editor))
+            if (editor != null)
                 Editor = editor;
         }
     }

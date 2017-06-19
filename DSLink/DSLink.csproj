@@ -47,6 +47,7 @@
     <Compile Include="Mono.Options-PCL.cs" />
     <Compile Include="Nodes\Actions\ActionHandler.cs" />
     <Compile Include="Nodes\Actions\Column.cs" />
+    <Compile Include="Nodes\Actions\EditorType.cs" />
     <Compile Include="Nodes\Actions\Parameter.cs" />
     <Compile Include="Nodes\NodeFactory.cs" />
     <Compile Include="Nodes\Permission.cs" />

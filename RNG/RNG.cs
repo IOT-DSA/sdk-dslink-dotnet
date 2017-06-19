@@ -19,9 +19,9 @@ namespace RNG
         {
             Responder.AddNodeClass("testAction", delegate (Node node)
                 {
-                node.AddParameter(new Parameter("string", "string"));
-                node.AddParameter(new Parameter("int", "int"));
-                node.AddParameter(new Parameter("number", "number"));
+                node.AddParameter(new Parameter("string", ValueType.String));
+                node.AddParameter(new Parameter("int", ValueType.Number));
+                node.AddParameter(new Parameter("number", ValueType.Number));
                 node.AddColumn(new Column("success", "bool"));
 
                 var handler = new ActionHandler(Permission.Write, async (request) =>
