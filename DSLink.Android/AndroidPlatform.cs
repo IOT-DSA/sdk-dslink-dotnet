@@ -1,17 +1,25 @@
-using DSLink.Connection;
-using DSLink.Util.Logger;
+using System;
+using DSLink.Platform;
 using PCLStorage;
 
 namespace DSLink.Android
 {
-    public static class AndroidPlatform
+    public class AndroidPlatform : BasePlatform
     {
         public static void Initialize()
         {
-            Configuration.StorageBaseFolder = FileSystem.Current.LocalStorage;
+            SetPlatform(new AndroidPlatform());
             Websockets.Droid.WebsocketConnection.Link();
-            ConnectorManager.SetConnector(typeof(WebSocketBaseConnector));
-            BaseLogger.Logger = typeof(AndroidLogger);
+        }
+
+        public override IFolder GetPlatformStorageFolder()
+        {
+            return FileSystem.Current.LocalStorage;
+        }
+
+        protected override Type GetLoggerType()
+        {
+            return typeof(AndroidLogger);
         }
     }
 }
