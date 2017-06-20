@@ -187,9 +187,10 @@ namespace DSLink
             }
             MaxConnectionCooldown = maxConnectionCooldown;
 
-            BasePlatform.Current.GetStorageFolder().ContinueWith(async folder =>
+            Task.Run(async () =>
             {
-                KeyPair = new KeyPair(await folder, KeysLocation);
+                var storage = await BasePlatform.Current.GetStorageFolder();
+                KeyPair = new KeyPair(storage, KeysLocation);
                 await KeyPair.Load();
             }).Wait();
         }
