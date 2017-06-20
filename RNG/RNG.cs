@@ -102,9 +102,15 @@ namespace RNG
         public static async Task InitializeLink(string[] args)
         {
             NETPlatform.Initialize();
-            var dslink =
-                new ExampleDSLink(new Configuration(args.ToList(), "sdk-dotnet-rng",
-                                                    true, true));
+
+            var config = new ConfigurationBuilder(args.ToList())
+            {
+                Name = "sdk-dotnet-rng",
+                Requester = true,
+                Responder = true
+            }.Build();
+
+            var dslink = new ExampleDSLink(config);
 
             await dslink.Connect();
         }

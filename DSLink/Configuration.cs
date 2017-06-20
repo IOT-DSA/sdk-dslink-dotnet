@@ -142,7 +142,7 @@ namespace DSLink
         {
             if (BasePlatform.Current == null)
             {
-                throw new PlatformNotSupportedException("Platform specific code was not initialized.");
+                throw new Exception("Platform specific code was not initialized.");
             }
 
             if (logLevel == null)
@@ -157,15 +157,11 @@ namespace DSLink
             Responder = responder;
             KeysLocation = keysLocation;
             LoadNodesJson = loadNodesJson;
-            if (!string.IsNullOrEmpty(BasePlatform.Current.GetCommunicationFormat()))
-            {
-                _communicationFormat = BasePlatform.Current.GetCommunicationFormat();
-            }
 
+            if (!string.IsNullOrEmpty(BasePlatform.Current.GetCommunicationFormat()))
+                _communicationFormat = BasePlatform.Current.GetCommunicationFormat();
             if (!string.IsNullOrEmpty(communicationFormat))
-            {
                 _communicationFormat = communicationFormat;
-            }
 
             var options = new OptionSet
             {
@@ -187,12 +183,94 @@ namespace DSLink
             }
             MaxConnectionCooldown = maxConnectionCooldown;
 
-            Task.Run(async () =>
-            {
-                var storage = await BasePlatform.Current.GetStorageFolder();
-                KeyPair = new KeyPair(storage, KeysLocation);
-                await KeyPair.Load();
-            }).Wait();
+            _initKeyPair().Wait();
+        }
+
+        private async Task _initKeyPair()
+        {
+            var storage = await BasePlatform.Current.GetStorageFolder();
+            KeyPair = new KeyPair(storage, KeysLocation);
+            await KeyPair.Load();
+        }
+    }
+
+    public class ConfigurationBuilder
+    {
+        /// <summary>
+        /// Name of the DSLink.
+        /// </summary>
+        public string Name;
+
+        /// <summary>
+        /// Enables requester features for link.
+        /// </summary>
+        public bool Requester;
+
+        /// <summary>
+        /// Enables responder features for link.
+        /// </summary>
+        public bool Responder;
+
+        /// <summary>
+        /// Determines whether the link loads nodes.json data,
+        /// set to false to disable loading.
+        /// </summary>
+        public bool LoadNodesJson = true;
+
+        /// <summary>
+        /// Broker's handshake location, usually at the broker's
+        /// web address, at path "/conn".
+        /// </summary>
+        public string BrokerUrl = "http://localhost:8080/conn";
+
+        /// <summary>
+        /// Path in which the link's generated keypair is stored
+        /// for future use.
+        /// </summary>
+        public string KeysLocation = ".keys";
+
+        /// <summary>
+        /// Log output level for the primary link logger.
+        /// </summary>
+        public LogLevel LogLevel = LogLevel.Info;
+
+        /// <summary>
+        /// Overrides the default communications format,
+        /// currently "json" or "msgpack" are available.
+        /// </summary>
+        public string CommunicationFormat = "";
+
+        /// <summary>
+        /// Represents the amount of times the DSLink can attempt to connect
+        /// to the broker. -1 will allow infinite attempts.
+        /// </summary>
+        public int ConnectionAttemptLimit = -1;
+
+        /// <summary>
+        /// Represents the amount of time in seconds that the DSLink will
+        /// delay after a connection failure.
+        /// </summary>
+        public int MaxConnectionCooldown = 60;
+
+        /// <summary>
+        /// Arguments passed in via CLI.
+        /// </summary>
+        private readonly List<string> _args;
+
+        public ConfigurationBuilder() : this(new List<string>())
+        {}
+
+        public ConfigurationBuilder(List<string> args)
+        {
+            _args = args;
+        }
+
+        public Configuration Build()
+        {
+            return new Configuration(_args, Name, Requester, Responder, KeysLocation,
+                                     CommunicationFormat, BrokerUrl, LogLevel,
+                                     ConnectionAttemptLimit, MaxConnectionCooldown,
+                                     LoadNodesJson);
         }
     }
 }
