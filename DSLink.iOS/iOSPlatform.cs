@@ -1,16 +1,30 @@
 ﻿using DSLink.Connection;
-using DSLink.Util.Logger;
+using DSLink.Platform;
 using PCLStorage;
+using System;
 
 namespace DSLink.iOS
 {
-    public static class iOSPlatform
+    public class iOSPlatform : BasePlatform
     {
         public static void Initialize()
         {
-            Configuration.StorageBaseFolder = FileSystem.Current.LocalStorage;
-            ConnectorManager.SetConnector(typeof(iOSWebSocketConnector));
-            BaseLogger.Logger = typeof(iOSLogger);
+            SetPlatform(new iOSPlatform());
+        }
+
+        public override Connector CreateConnector(DSLinkContainer container)
+        {
+            return new iOSWebSocketConnector(container);
+        }
+
+        public override IFolder GetPlatformStorageFolder()
+        {
+            return FileSystem.Current.LocalStorage;
+        }
+
+        protected override Type GetLoggerType()
+        {
+            return typeof(iOSLogger);
         }
     }
 }
