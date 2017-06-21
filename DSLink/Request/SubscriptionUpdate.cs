@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using DSLink.Nodes;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink.Request

@@ -9,53 +9,25 @@ using DSLink.Platform;
 
 namespace DSLink
 {
-    /// <summary>
-    /// DSLink implementation of a container.
-    /// </summary>
-    // ReSharper disable once InconsistentNaming
     public class DSLinkContainer : AbstractContainer
     {
-        /// <summary>
-        /// Task used to send pings across the communication layer.
-        /// </summary>
         private readonly Task _pingTask;
-
-        /// <summary>
-        /// SerializationManager handles serialization for communications.
-        /// </summary>
         internal SerializationManager SerializationManager;
+        protected Handshake ProtocolHandshake;
+        internal bool ReconnectOnFailure;
+        private bool _isLinkInitialized;
 
-        /// <summary>
-        /// Handshake object, which contains data from the initial connection handshake.
-        /// </summary>
-        protected Handshake Handshake;
-
-        /// <summary>
-        /// Whether to reconnect to the broker. 
-        /// </summary>
-        internal bool Reconnect;
-
-        /// <summary>
-        /// Flag for when this DSLink Container is initialized.
-        /// Used to prevent duplicate initializations.
-        /// </summary>
-        private bool _isInitialized;
-
-        /// <summary>
-        /// DSLinkContainer constructor.
-        /// </summary>
-        /// <param name="config">Configuration for the DSLink</param>
         public DSLinkContainer(Configuration config) : base(config)
         {
             Logger = CreateLogger("DSLink");
 
-            Reconnect = true;
+            ReconnectOnFailure = true;
             Connector = BasePlatform.Current.CreateConnector(this);
 
             // Events
-            Connector.OnMessage += OnTextMessage;
-            Connector.OnBinaryMessage += OnBinaryMessage;
-            Connector.OnWrite += OnWrite;
+            Connector.OnMessage += OnStringRead;
+            Connector.OnBinaryMessage += OnBinaryRead;
+            Connector.OnWrite += OnStringWrite;
             Connector.OnBinaryWrite += OnBinaryWrite;
             Connector.OnOpen += OnOpen;
             Connector.OnClose += OnClose;
@@ -64,23 +36,27 @@ namespace DSLink
             Connector.OnOpen += OnConnectionOpen;
             Connector.OnClose += OnConnectionClosed;
 
-            _pingTask = Task.Factory.StartNew(OnPingElapsed);
+            _pingTask = Task.Factory.StartNew(OnPingTaskElapsed);
         }
 
+        public DSLinkContainer(ConfigurationBuilder configBuilder) : this(configBuilder.Build())
+        {}
+
         /// <summary>
-        /// Initializes the DSLink.
+        /// Initializes the DSLink's node structure by building, or
+        /// loading from disk when the link has been ran before.
         /// </summary>
         public async Task Initialize()
         {
-            if (_isInitialized)
+            if (_isLinkInitialized)
             {
                 return;
             }
-            _isInitialized = true;
+            _isLinkInitialized = true;
 
             if (Config.Responder)
             {
-                var loaded = await LoadNodes();
+                var loaded = await LoadSavedNodes();
                 if (!loaded)
                 {
                     InitializeDefaultNodes();
@@ -89,25 +65,23 @@ namespace DSLink
         }
 
         /// <summary>
-        /// Called when loading a the nodes.json is not successful.
+        /// Used to initialize the node structure when nodes.json does not
+        /// exist yet or failed to load.
         /// </summary>
         public virtual void InitializeDefaultNodes()
         {}
 
-        /// <summary>
-        /// Connect to the broker.
-        /// </summary>
         public async Task Connect()
         {
             await Initialize();
 
-            Reconnect = true;
-            Handshake = new Handshake(this);
+            ReconnectOnFailure = true;
+            ProtocolHandshake = new Handshake(this);
             var attemptsLeft = Config.ConnectionAttemptLimit;
             var attempts = 1;
             while (attemptsLeft == -1 || attemptsLeft > 0)
             {
-                var handshakeStatus = await Handshake.Shake();
+                var handshakeStatus = await ProtocolHandshake.Shake();
                 if (handshakeStatus)
                 {
                     SerializationManager = new SerializationManager(Config.CommunicationFormat);
@@ -134,48 +108,32 @@ namespace DSLink
             OnConnectionFailed();
         }
 
-        /// <summary>
-        /// Disconnect from the broker.
-        /// </summary>
         public void Disconnect()
         {
-            Reconnect = false;
+            ReconnectOnFailure = false;
             Connector.Disconnect();
         }
 
-        /// <summary>
-        /// Loads the saved nodes from the filesystem.
-        /// </summary>
-        public async Task<bool> LoadNodes()
+        public async Task<bool> LoadSavedNodes()
         {
             return await Responder.Deserialize();
         }
 
-        /// <summary>
-        /// Saves the nodes to the filesystem.
-        /// </summary>
-        /// <returns>Loading task</returns>
         public async Task SaveNodes()
         {
             await Responder.Serialize();
         }
 
-        /// <summary>
-        /// Event that fires when the connection to the broker is complete.
-        /// </summary>
         private void OnOpen()
         {
             Connector.Flush();
         }
 
-        /// <summary>
-        /// Event that fires when the connection is closed to the broker.
-        /// </summary>
         private async void OnClose()
         {
             Responder.SubscriptionManager.ClearAll();
             Responder.StreamManager.ClearAll();
-            if (Reconnect)
+            if (ReconnectOnFailure)
             {
                 await Connect();
             }
@@ -199,47 +157,6 @@ namespace DSLink
         /// </summary>
         protected virtual void OnConnectionFailed() {}
 
-        /// <summary>
-        /// Event that fires when a plain text message is received from the broker.
-        /// This deserializes the message and hands it off to OnMessage.
-        /// </summary>
-        /// <param name="messageEvent">Text message event</param>
-        private async void OnTextMessage(MessageEvent messageEvent)
-        {
-            if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
-            {
-                Logger.Debug("Text Received: " + messageEvent.Message);
-            }
-
-            await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
-        }
-
-        /// <summary>
-        /// Event that fires when a binary message is received from the broker.
-        /// This deserializes the message and hands it off to OnMessage.
-        /// </summary>
-        /// <param name="messageEvent">Binary message event</param>
-        private async void OnBinaryMessage(BinaryMessageEvent messageEvent)
-        {
-            if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
-            {
-                if (messageEvent.Message.Length < 5000)
-                {
-                    Logger.Debug("Binary Received: " + BitConverter.ToString(messageEvent.Message));
-                }
-                else
-                {
-                    Logger.Debug("Binary Received: (over 5000 bytes)");
-                }
-            }
-
-            await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
-        }
-
-        /// <summary>
-        /// Called when a message is received from the server, and is passed in deserialized data.
-        /// </summary>
-        /// <param name="message">Deserialized data</param>
         private async Task OnMessage(JObject message)
         {
             var response = new JObject();
@@ -252,7 +169,7 @@ namespace DSLink
 
             if (message["requests"] != null)
             {
-                JArray responses = await Responder.ProcessRequests(message["requests"].Value<JArray>());
+                var responses = await Responder.ProcessRequests(message["requests"].Value<JArray>());
                 if (responses.Count > 0)
                 {
                     response["responses"] = responses;
@@ -262,7 +179,7 @@ namespace DSLink
 
             if (message["responses"] != null)
             {
-                JArray requests = await Requester.ProcessResponses(message["responses"].Value<JArray>());
+                var requests = await Requester.ProcessResponses(message["responses"].Value<JArray>());
                 if (requests.Count > 0)
                 {
                     response["requests"] = requests;
@@ -276,41 +193,57 @@ namespace DSLink
             }
         }
 
-        /// <summary>
-        /// Event that is fired when a plain text message is sent to the broker.
-        /// </summary>
-        /// <param name="messageEvent">Text message event</param>
-        private void OnWrite(MessageEvent messageEvent)
+        private async void OnStringRead(MessageEvent messageEvent)
+        {
+            LogMessageString(false, messageEvent);
+            await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
+        }
+
+        private void OnStringWrite(MessageEvent messageEvent)
+        {
+            LogMessageString(true, messageEvent);
+        }
+
+        private async void OnBinaryRead(BinaryMessageEvent messageEvent)
+        {
+            LogMessageBytes(false, messageEvent);
+            await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
+        }
+
+        private void OnBinaryWrite(BinaryMessageEvent messageEvent)
+        {
+            LogMessageBytes(true, messageEvent);
+        }
+
+        private void LogMessageString(bool sent, MessageEvent messageEvent)
         {
             if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
             {
-                Logger.Debug("Text Sent: " + messageEvent.Message);
+                var verb = sent ? "Sent" : "Received";
+                var logString = $"Text {verb}: {messageEvent.Message}";
+                Logger.Debug(logString);
             }
         }
 
-        /// <summary>
-        /// Event that is fired when a binary message is sent to the broker.
-        /// </summary>
-        /// <param name="messageEvent">Binary message event</param>
-        private void OnBinaryWrite(BinaryMessageEvent messageEvent)
+        private void LogMessageBytes(bool sent, BinaryMessageEvent messageEvent)
         {
             if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
             {
+                var verb = sent ? "Sent" : "Received";
+                var logString = $"Binary {verb}: ";
                 if (messageEvent.Message.Length < 5000)
                 {
-                    Logger.Debug("Binary Sent: " + BitConverter.ToString(messageEvent.Message));
+                    logString += BitConverter.ToString(messageEvent.Message);
                 }
                 else
                 {
-                    Logger.Debug("Binary Sent: (over 5000 bytes)");
+                    logString += "(over 5000 bytes)";
                 }
+                Logger.Debug(logString);
             }
         }
 
-        /// <summary>
-        /// Task used to send pings occasionally to keep the connection alive.
-        /// </summary>
-        private async void OnPingElapsed()
+        private async void OnPingTaskElapsed()
         {
             while (_pingTask.Status != TaskStatus.Canceled)
             {

@@ -7,60 +7,18 @@ using DSLink.Platform;
 
 namespace DSLink.Container
 {
-    /// <summary>
-    /// Abstract container for DSLink.
-    /// </summary>
     public abstract class AbstractContainer
     {
         public Configuration Config { get; protected set; }
-
-        /// <summary>
-        /// Logger for DSLink.
-        /// </summary>
         public BaseLogger Logger { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets the connector.
-        /// </summary>
         public Connector Connector { get; protected set; }
-
-        /// <summary>
-        /// Responder.
-        /// </summary>
         private readonly Responder _responder;
-
-        /// <summary>
-        /// Requester.
-        /// </summary>
         private readonly Requester _requester;
-
-        /// <summary>
-        /// Next message identifier.
-        /// </summary>
         private int _msg;
-
-        /// <summary>
-        /// Next request identifier.
-        /// </summary>
-        private int _rid;
-
-        /// <summary>
-        /// Get the next message identifier.
-        /// </summary>
-        /// <value>The message identifier.</value>
+        private int _requestId;
         public int MessageId => _msg++;
+        public int NextRequestId => ++_requestId;
 
-        /// <summary>
-        /// Get the next request identifier.
-        /// </summary>
-        /// <value></value>
-        public int RequestId => ++_rid;
-
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Container.AbstractContainer"/> class.
-        /// </summary>
-        /// <param name="config">Link configuration</param>
         protected AbstractContainer(Configuration config)
         {
             Config = config;
@@ -75,10 +33,6 @@ namespace DSLink.Container
             }
         }
 
-        /// <summary>
-        /// Instance of the responder.
-        /// </summary>
-        /// <value>The responder.</value>
         public Responder Responder
         {
             get
@@ -91,9 +45,6 @@ namespace DSLink.Container
             }
         }
 
-        /// <summary>
-        /// Instance of the requester.
-        /// </summary>
         public Requester Requester
         {
             get
@@ -106,10 +57,6 @@ namespace DSLink.Container
             }
         }
 
-        /// <summary>
-        /// Create a logger for the DSLink.
-        /// </summary>
-        /// <param name="loggerName">Logger name.</param>
         protected BaseLogger CreateLogger(string loggerName)
         {
             return BasePlatform.Current.CreateLogger(loggerName, Config.LogLevel);
