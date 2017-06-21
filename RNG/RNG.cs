@@ -106,7 +106,7 @@ namespace RNG
             var config = new Configuration(args, "RNG", true, true);
             var dslink = new ExampleDSLink(config);
 
-            await dslink.Connect(3);
+            await dslink.Connect();
         }
     }
 }
