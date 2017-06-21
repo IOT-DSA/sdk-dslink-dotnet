@@ -6,6 +6,8 @@ using DSLink.Container;
 using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
 using DSLink.Platform;
+using DSLink.Request;
+using DSLink.Respond;
 
 namespace DSLink
 {
@@ -16,13 +18,33 @@ namespace DSLink
         protected Handshake ProtocolHandshake;
         internal bool ReconnectOnFailure;
         private bool _isLinkInitialized;
+        private readonly Configuration _config;
+        private readonly Responder _responder;
+        private readonly Requester _requester;
+        private readonly Connector _connector;
+        private readonly BaseLogger _logger;
 
-        public DSLinkContainer(Configuration config) : base(config)
+        public override Configuration Config => _config;
+        public override Responder Responder => _responder;
+        public override Requester Requester => _requester;
+        public override Connector Connector => _connector;
+        public override BaseLogger Logger => _logger;
+
+        public DSLinkContainer(Configuration config)
         {
-            Logger = CreateLogger("DSLink");
-
+            _config = config;
+            _logger = BasePlatform.Current.CreateLogger("DSLink", Config.LogLevel);
             ReconnectOnFailure = true;
-            Connector = BasePlatform.Current.CreateConnector(this);
+            _connector = BasePlatform.Current.CreateConnector(this);
+
+            if (Config.Responder)
+            {
+                _responder = new Responder(this);
+            }
+            if (Config.Requester)
+            {
+                _requester = new Requester(this);
+            }
 
             // Events
             Connector.OnMessage += OnStringRead;
@@ -71,13 +93,13 @@ namespace DSLink
         public virtual void InitializeDefaultNodes()
         {}
 
-        public async Task Connect()
+        public override async Task<ConnectionState> Connect(int maxAttempts = -1)
         {
             await Initialize();
 
             ReconnectOnFailure = true;
             ProtocolHandshake = new Handshake(this);
-            var attemptsLeft = Config.ConnectionAttemptLimit;
+            var attemptsLeft = maxAttempts;
             var attempts = 1;
             while (attemptsLeft == -1 || attemptsLeft > 0)
             {
@@ -85,9 +107,9 @@ namespace DSLink
                 if (handshakeStatus)
                 {
                     SerializationManager = new SerializationManager(Config.CommunicationFormat);
-                    Connector.Serializer = SerializationManager.Serializer;
+                    Connector.DataSerializer = SerializationManager.Serializer;
                     await Connector.Connect();
-                    return;
+                    return Connector.ConnectionState;
                 }
 
                 var delay = attempts;
@@ -106,9 +128,10 @@ namespace DSLink
             }
             Logger.Warning("Failed to connect within the allotted connection attempt limit.");
             OnConnectionFailed();
+            return ConnectionState.Disconnected;
         }
 
-        public void Disconnect()
+        public override void Disconnect()
         {
             ReconnectOnFailure = false;
             Connector.Disconnect();

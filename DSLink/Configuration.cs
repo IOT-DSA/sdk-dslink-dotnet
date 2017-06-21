@@ -12,9 +12,6 @@ using Mono.Options;
 
 namespace DSLink
 {
-    /// <summary>
-    /// Stores generic information about the DSLink.
-    /// </summary>
     public class Configuration
     {
         /// <summary>
@@ -101,16 +98,6 @@ namespace DSLink
         }
 
         /// <summary>
-        /// Represents the amount of times the DSLink can attempt to connect
-        /// to the broker. -1 will allow infinite attempts.
-        /// </summary>
-        public int ConnectionAttemptLimit
-        {
-            private set;
-            get;
-        }
-
-        /// <summary>
         /// Represents the amount of time in seconds that the DSLink will
         /// delay after a connection failure.
         /// </summary>
@@ -120,25 +107,10 @@ namespace DSLink
             get;
         }
 
-        /// <summary>
-        /// Configuration constructor
-        /// </summary>
-        /// <param name="args">Command line arguments</param>
-        /// <param name="name">DSLink Name</param>
-        /// <param name="requester">Enable requester features</param>
-        /// <param name="responder">Enable responder features</param>
-        /// <param name="keysLocation">Location to store keys</param>
-        /// <param name="communicationFormat">Communication format (json, msgpack)</param>
-        /// <param name="brokerUrl">Full URL of broker to connect to</param>
-        /// <param name="logLevel">Log Level</param>
-        /// <param name="connectionAttemptLimit">Limit of connection attempts (-1 means unlimited)</param>
-        /// <param name="maxConnectionCooldown">Maximum Connection Cooldown</param>
-        /// <param name="loadNodesJson">Enable loading of the nodes.json</param>
         public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false,
                              string keysLocation = ".keys", string communicationFormat = "",
                              string brokerUrl = "http://localhost:8080/conn", LogLevel logLevel = null,
-                             int connectionAttemptLimit = -1, int maxConnectionCooldown = 60,
-                             bool loadNodesJson = false)
+                             int maxConnectionCooldown = 60, bool loadNodesJson = false)
         {
             if (BasePlatform.Current == null)
             {
@@ -176,7 +148,6 @@ namespace DSLink
 
             BrokerUrl = brokerUrl;
             LogLevel = logLevel;
-            ConnectionAttemptLimit = connectionAttemptLimit;
             if (maxConnectionCooldown < 1)
             {
                 throw new InvalidOperationException("Cooldown must be greater than 0");
@@ -241,14 +212,9 @@ namespace DSLink
         public string CommunicationFormat = "";
 
         /// <summary>
-        /// Represents the amount of times the DSLink can attempt to connect
-        /// to the broker. -1 will allow infinite attempts.
-        /// </summary>
-        public int ConnectionAttemptLimit = -1;
-
-        /// <summary>
-        /// Represents the amount of time in seconds that the DSLink will
-        /// delay after a connection failure.
+        /// Maximum amount of seconds that the DSLink waits
+        /// between connections when the connection
+        /// continuously fails.
         /// </summary>
         public int MaxConnectionCooldown = 60;
 
@@ -269,8 +235,7 @@ namespace DSLink
         {
             return new Configuration(_args, Name, Requester, Responder, KeysLocation,
                                      CommunicationFormat, BrokerUrl, LogLevel,
-                                     ConnectionAttemptLimit, MaxConnectionCooldown,
-                                     LoadNodesJson);
+                                     MaxConnectionCooldown, LoadNodesJson);
         }
     }
 }

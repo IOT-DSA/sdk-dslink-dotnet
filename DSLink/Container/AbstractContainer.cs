@@ -4,62 +4,43 @@ using DSLink.Request;
 using DSLink.Respond;
 using DSLink.Util.Logger;
 using DSLink.Platform;
+using System.Threading.Tasks;
 
 namespace DSLink.Container
 {
     public abstract class AbstractContainer
     {
-        public Configuration Config { get; protected set; }
-        public BaseLogger Logger { get; internal set; }
-        public Connector Connector { get; protected set; }
-        private readonly Responder _responder;
-        private readonly Requester _requester;
         private int _msg;
         private int _requestId;
         public int MessageId => _msg++;
         public int NextRequestId => ++_requestId;
 
-        protected AbstractContainer(Configuration config)
+        public abstract Configuration Config
         {
-            Config = config;
-
-            if (Config.Responder)
-            {
-                _responder = new Responder(this);
-            }
-            if (Config.Requester)
-            {
-                _requester = new Requester(this);
-            }
+            get;
         }
 
-        public Responder Responder
+        public abstract BaseLogger Logger
         {
-            get
-            {
-                if (!Config.Responder)
-                {
-                    throw new ArgumentException("Responder is not enabled.");
-                }
-                return _responder;
-            }
+            get;
         }
 
-        public Requester Requester
+        public abstract Responder Responder
         {
-            get
-            {
-                if (!Config.Requester)
-                {
-                    throw new ArgumentException("Requester is not enabled.");
-                }
-                return _requester;
-            }
+            get;
         }
 
-        protected BaseLogger CreateLogger(string loggerName)
+        public abstract Requester Requester
         {
-            return BasePlatform.Current.CreateLogger(loggerName, Config.LogLevel);
+            get;
         }
+
+        public abstract Connector Connector
+        {
+            get;
+        }
+
+        public abstract Task<ConnectionState> Connect(int maxAttempts = -1);
+        public abstract void Disconnect();
     }
 }

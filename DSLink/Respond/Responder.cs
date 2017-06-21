@@ -45,7 +45,7 @@ namespace DSLink.Respond
         /// Responder constructor
         /// </summary>
         /// <param name="link"></param>
-        internal Responder(AbstractContainer link)
+        public Responder(AbstractContainer link)
         {
             _link = link;
             SuperRoot = new Node("", null, _link);
@@ -122,7 +122,7 @@ namespace DSLink.Respond
             }
             catch
             {
-                _link.Logger.Debug("Failed to load the nodes.json");
+                _link.Logger.Debug("Failed to load nodes.json");
             }
 
             return false;

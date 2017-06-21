@@ -21,7 +21,7 @@ namespace DSLink.Request
         private int _requestId = 1;
         private int NextRequestID => _requestId++;
 
-        internal Requester(AbstractContainer link)
+        public Requester(AbstractContainer link)
         {
             _link = link;
             _requestManager = new RequestManager();

@@ -9,25 +9,15 @@ namespace DSLink.Connection
 {
     public abstract class Connector
     {
-        /// <summary>
-        /// Instance of link container.
-        /// </summary>
         protected readonly AbstractContainer _link;
 
-        /// <summary>
-        /// Gets the state of the WebSocket connection.
-        /// </summary>
         public ConnectionState ConnectionState
         {
             private set;
             get;
         }
 
-        /// <summary>
-        /// Instance of serializer, used to serialize data going through the
-        /// connection.
-        /// </summary>
-        public ISerializer Serializer
+        public ISerializer DataSerializer
         {
             get;
             internal set;
@@ -255,7 +245,7 @@ namespace DSLink.Connection
                 data.Remove("responses");
             }
 
-            WriteData(Serializer.Serialize(data));
+            WriteData(DataSerializer.Serialize(data));
         }
 
         /// <summary>
