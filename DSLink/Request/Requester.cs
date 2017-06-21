@@ -10,121 +10,29 @@ using Newtonsoft.Json.Linq;
 namespace DSLink.Request
 {
     /// <summary>
-    /// Requester module.
+    /// The requester module of a DSLink gives the ability access to
+    /// outer data on the broker.
     /// </summary>
     public class Requester
     {
-        /// <summary>
-        /// Link container.
-        /// </summary>
         private readonly AbstractContainer _link;
-
-        /// <summary>
-        /// Request manager.
-        /// </summary>
         internal readonly RequestManager _requestManager;
-
-        /// <summary>
-        /// Remote subscription manager.
-        /// </summary>
-        internal readonly RemoteSubscriptionManager _subscriptionManager;
-
-        /// <summary>
-        /// Current request ID.
-        /// </summary>
-        private int _rid = 1;
-
-        /// <summary>
-        /// Gets the next request identifier.
-        /// </summary>
-        protected int NextRequestID => _rid++;
+        internal readonly RemoteSubscriptionManager _remoteSubscriptionManager;
+        private int _requestId = 1;
+        private int NextRequestID => _requestId++;
 
         internal Requester(AbstractContainer link)
         {
             _link = link;
             _requestManager = new RequestManager();
-            _subscriptionManager = new RemoteSubscriptionManager(_link);
+            _remoteSubscriptionManager = new RemoteSubscriptionManager(_link);
         }
 
         /// <summary>
-        /// Processes incoming responses.
+        /// Send request to list a path.
         /// </summary>
-        /// <param name="responses">Responses</param>
-        /// <returns>Requests</returns>
-        internal async Task<JArray> ProcessResponses(JArray responses)
-        {
-            var requests = new JArray();
-
-            foreach (JObject response in responses)
-            {
-                if (response["rid"].Type == JTokenType.Integer && response["rid"].Value<int>() == 0)
-                {
-                    foreach (dynamic update in response["updates"])
-                    {
-                        if (update is JArray)
-                        {
-                            JArray arrayUpdate = update;
-                            int sid = arrayUpdate[0].Value<int>();
-                            JToken value = arrayUpdate[1];
-                            string dt = arrayUpdate[2].Value<string>();
-                            _subscriptionManager.InvokeSubscriptionUpdate(sid, new SubscriptionUpdate(sid, value, dt));
-                        }
-                        else if (update is JObject)
-                        {
-                            JObject objectUpdate = update;
-                            int sid = objectUpdate["sid"].Value<int>();
-                            JToken value = objectUpdate["value"];
-                            string ts = objectUpdate["ts"].Value<string>();
-                            int count = objectUpdate["count"].Value<int>();
-                            int sum = objectUpdate["sum"].Value<int>();
-                            int min = objectUpdate["min"].Value<int>();
-                            int max = objectUpdate["max"].Value<int>();
-                            _subscriptionManager.InvokeSubscriptionUpdate(sid, new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
-                        }
-                    }
-                }
-                else if (response["rid"].Type == JTokenType.Integer && _requestManager.RequestPending(response["rid"].Value<int>()))
-                {
-                    var request = _requestManager.GetRequest(response["rid"].Value<int>());
-                    if (request is ListRequest)
-                    {
-                        var listRequest = request as ListRequest;
-                        string name = listRequest.Path.Split('/').Last();
-                        var node = new RemoteNode(name, null, listRequest.Path);
-                        node.FromSerialized(response["updates"].Value<JArray>());
-                        await Task.Run(() => listRequest.Callback(new ListResponse(_link, listRequest.RequestID,
-                                                                                   listRequest.Path, node)));
-                    }
-                    else if (request is SetRequest)
-                    {
-                        _requestManager.StopRequest(request.RequestID);
-                    }
-                    else if (request is RemoveRequest)
-                    {
-                        _requestManager.StopRequest(request.RequestID);
-                    }
-                    else if (request is InvokeRequest)
-                    {
-                        var invokeRequest = request as InvokeRequest;
-                        await Task.Run(() => invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID,
-                                                                                       invokeRequest.Path, response["columns"].Value<JArray>(),
-                                                                                       response["updates"].Value<JArray>())));
-                    }
-                }
-                else if (response["rid"].Type == JTokenType.Null)
-                {
-                    _link.Logger.Warning("Incoming request has null request ID.");
-                }
-            }
-
-            return requests;
-        }
-
-        /// <summary>
-        /// List the specified path.
-        /// </summary>
-        /// <param name="path">Path</param>
-        /// <param name="callback">Callback</param>
+        /// <param name="path">Remote path to list</param>
+        /// <param name="callback">Callback event</param>
         public async Task<ListRequest> List(string path, Action<ListResponse> callback)
         {
             var request = new ListRequest(NextRequestID, callback, path, _link);
@@ -140,7 +48,7 @@ namespace DSLink.Request
         }
 
         /// <summary>
-        /// Set the specified path value.
+        /// Set the specified path's value.
         /// </summary>
         /// <param name="path">Path</param>
         /// <param name="permission">Permission</param>
@@ -213,7 +121,7 @@ namespace DSLink.Request
                 throw new Exception("Path can not be null or empty.");
             }
 
-            return await _subscriptionManager.Subscribe(path, callback, qos);
+            return await _remoteSubscriptionManager.Subscribe(path, callback, qos);
         }
 
         /// <summary>
@@ -222,100 +130,145 @@ namespace DSLink.Request
         /// <param name="path">Subscription ID</param>
         public async Task Unsubscribe(int subId)
         {
-            await _subscriptionManager.Unsubscribe(subId);
+            await _remoteSubscriptionManager.Unsubscribe(subId);
         }
 
-        /// <summary>
-        /// Request manager handles outgoing requests.
-        /// </summary>
+        internal async Task<JArray> ProcessResponses(JArray responses)
+        {
+            var requests = new JArray();
+
+            foreach (JObject response in responses)
+            {
+                await ProcessResponse(response);
+            }
+
+            return requests;
+        }
+
+        private async Task ProcessResponse(JObject response)
+        {
+            if (response["rid"] == null || response["rid"].Type != JTokenType.Integer)
+            {
+                _link.Logger.Warning("Incoming request has invalid or null request ID.");
+                return;
+            }
+
+            int rid = response["rid"].Value<int>();
+
+            if (rid == 0)
+            {
+                ProcessValueUpdates(response);
+            }
+            else if (_requestManager.RequestPending(rid))
+            {
+                await ProcessRequestUpdates(response, rid);
+            }
+        }
+
+        private void ProcessValueUpdates(JObject response)
+        {
+            foreach (dynamic update in response["updates"])
+            {
+                if (update is JArray)
+                {
+                    ProcessUpdateArray(update);
+                }
+                else if (update is JObject)
+                {
+                    ProcessUpdateObject(update);
+                }
+            }
+        }
+
+        private void ProcessUpdateArray(dynamic update)
+        {
+            JArray arrayUpdate = update;
+            int sid = arrayUpdate[0].Value<int>();
+            JToken value = arrayUpdate[1];
+            string dt = arrayUpdate[2].Value<string>();
+            _remoteSubscriptionManager.InvokeSubscriptionUpdate(sid, new SubscriptionUpdate(sid, value, dt));
+        }
+
+        private void ProcessUpdateObject(dynamic update)
+        {
+            JObject objectUpdate = update;
+            int sid = objectUpdate["sid"].Value<int>();
+            JToken value = objectUpdate["value"];
+            string ts = objectUpdate["ts"].Value<string>();
+            int count = objectUpdate["count"].Value<int>();
+            int sum = objectUpdate["sum"].Value<int>();
+            int min = objectUpdate["min"].Value<int>();
+            int max = objectUpdate["max"].Value<int>();
+            _remoteSubscriptionManager.InvokeSubscriptionUpdate(sid, new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
+        }
+
+        private async Task ProcessRequestUpdates(JObject response, int rid)
+        {
+            var request = _requestManager.GetRequest(rid);
+            if (request is ListRequest)
+            {
+                var listRequest = request as ListRequest;
+                string name = listRequest.Path.Split('/').Last();
+                var node = new RemoteNode(name, null, listRequest.Path);
+                node.FromSerialized(response["updates"].Value<JArray>());
+                await Task.Run(() => listRequest.Callback(new ListResponse(_link, listRequest.RequestID,
+                                                                           listRequest.Path, node)));
+            }
+            else if (request is SetRequest)
+            {
+                _requestManager.StopRequest(request.RequestID);
+            }
+            else if (request is RemoveRequest)
+            {
+                _requestManager.StopRequest(request.RequestID);
+            }
+            else if (request is InvokeRequest)
+            {
+                var invokeRequest = request as InvokeRequest;
+                await Task.Run(() => invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID,
+                                                                               invokeRequest.Path, response["columns"].Value<JArray>(),
+                                                                               response["updates"].Value<JArray>())));
+            }
+        }
+
         internal class RequestManager
         {
-            /// <summary>
-            /// Dictionary of requests mapped to request IDs.
-            /// </summary>
-            private readonly Dictionary<int, BaseRequest> requests;
+            private readonly Dictionary<int, BaseRequest> _requests;
 
-            /// <summary>
-            /// Initializes a new instance of the
-            /// <see cref="T:DSLink.Request.Requester.RequestManager"/> class.
-            /// </summary>
             public RequestManager()
             {
-                requests = new Dictionary<int, BaseRequest>();
+                _requests = new Dictionary<int, BaseRequest>();
             }
 
-            /// <summary>
-            /// Starts a request.
-            /// </summary>
-            /// <param name="request">Request</param>
             public void StartRequest(BaseRequest request)
             {
-                requests.Add(request.RequestID, request);
+                _requests.Add(request.RequestID, request);
             }
 
-            /// <summary>
-            /// Stops a request.
-            /// </summary>
-            /// <param name="requestID">Request identifier.</param>
             public void StopRequest(int requestID)
             {
-                requests.Remove(requestID);
+                _requests.Remove(requestID);
             }
 
-            /// <summary>
-            /// Determines if a request is pending
-            /// </summary>
-            /// <param name="requestID">Request identifier</param>
             public bool RequestPending(int requestID)
             {
-                return requests.ContainsKey(requestID);
+                return _requests.ContainsKey(requestID);
             }
 
-            /// <summary>
-            /// Gets the request for a request ID.
-            /// </summary>
-            /// <param name="requestID">Request identifier</param>
             public BaseRequest GetRequest(int requestID)
             {
-                return requests[requestID];
+                return _requests[requestID];
             }
         }
 
-        /// <summary>
-        /// Remote subscription manager.
-        /// </summary>
         internal class RemoteSubscriptionManager
         {
-            /// <summary>
-            /// DSLink container link instance.
-            /// </summary>
             private readonly AbstractContainer _link;
-
-            /// <summary>
-            /// Storage of subscription objects, by node path.
-            /// </summary>
             private readonly Dictionary<string, Subscription> _subscriptions;
-
-            /// <summary>
-            /// Direct mapping of subscription ID(virtual) to 
-            /// node path.
-            /// </summary>
             private readonly Dictionary<int, string> _subIdToPath;
-
-            /// <summary>
-            /// Real sub IDs to node paths.
-            /// </summary>
             private readonly Dictionary<int, string> _realSubIdToPath;
-
-            /// <summary>
-            /// Current subscription ID.
-            /// </summary>
-            private int _sid = 0;
-
-            /// <summary>
-            /// Initializes a new instance of the
-            /// <see cref="T:DSLink.Request.Requester.RemoteSubscriptionManager"/> class.
-            /// </summary>
+            private int _subscriptionId = 0;
+            
             public RemoteSubscriptionManager(AbstractContainer link)
             {
                 _link = link;
@@ -324,14 +277,9 @@ namespace DSLink.Request
                 _realSubIdToPath = new Dictionary<int, string>();
             }
 
-            /// <summary>
-            /// Subscribe to specified path.
-            /// </summary>
-            /// <param name="path">Path</param>
-            /// <param name="callback">Callback</param>
             public async Task<int> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos)
             {
-                var sid = _sid++;
+                var sid = _subscriptionId++;
                 var request = new SubscribeRequest(_link.Requester.NextRequestID, new JArray
                 {
                     new JObject
@@ -359,10 +307,6 @@ namespace DSLink.Request
                 return sid;
             }
 
-            /// <summary>
-            /// Unsubscribe from the specified subscription ID.
-            /// </summary>
-            /// <param name="subId">Subscription ID</param>
             public async Task Unsubscribe(int subId)
             {
                 var path = _subIdToPath[subId];
@@ -384,11 +328,6 @@ namespace DSLink.Request
                 }
             }
 
-            /// <summary>
-            /// Get subscription IDs from path.
-            /// </summary>
-            /// <param name="path">Path of node</param>
-            /// <returns>Subscription IDs in List</returns>
             public List<int> GetSubsByPath(string path)
             {
                 var sids = new List<int>();
@@ -404,11 +343,6 @@ namespace DSLink.Request
                 return sids;
             }
 
-            /// <summary>
-            /// Invoke subscription update callbacks.
-            /// </summary>
-            /// <param name="subId">Subscription ID</param>
-            /// <param name="update">Update to send</param>
             public void InvokeSubscriptionUpdate(int subId, SubscriptionUpdate update)
             {
                 if (!_realSubIdToPath.ContainsKey(subId))
