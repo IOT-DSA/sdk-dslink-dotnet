@@ -103,16 +103,10 @@ namespace RNG
         {
             NETPlatform.Initialize();
 
-            var config = new ConfigurationBuilder(args.ToList())
-            {
-                Name = "sdk-dotnet-rng",
-                Requester = true,
-                Responder = true
-            }.Build();
-
+            var config = new Configuration(args, "RNG", true, true);
             var dslink = new ExampleDSLink(config);
 
-            await dslink.Connect();
+            await dslink.Connect(3);
         }
     }
 }

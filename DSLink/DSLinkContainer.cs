@@ -33,6 +33,7 @@ namespace DSLink
         public DSLinkContainer(Configuration config)
         {
             _config = config;
+            _config._processOptions();
             _logger = BasePlatform.Current.CreateLogger("DSLink", Config.LogLevel);
             ReconnectOnFailure = true;
             _connector = BasePlatform.Current.CreateConnector(this);
@@ -61,9 +62,6 @@ namespace DSLink
             _pingTask = Task.Factory.StartNew(OnPingTaskElapsed);
         }
 
-        public DSLinkContainer(ConfigurationBuilder configBuilder) : this(configBuilder.Build())
-        {}
-
         /// <summary>
         /// Initializes the DSLink's node structure by building, or
         /// loading from disk when the link has been ran before.
@@ -75,6 +73,8 @@ namespace DSLink
                 return;
             }
             _isLinkInitialized = true;
+
+            await _config._initKeyPair();
 
             if (Config.Responder)
             {
@@ -93,20 +93,20 @@ namespace DSLink
         public virtual void InitializeDefaultNodes()
         {}
 
-        public override async Task<ConnectionState> Connect(int maxAttempts = -1)
+        public override async Task<ConnectionState> Connect(uint maxAttempts = 0)
         {
             await Initialize();
 
             ReconnectOnFailure = true;
             ProtocolHandshake = new Handshake(this);
             var attemptsLeft = maxAttempts;
-            var attempts = 1;
-            while (attemptsLeft == -1 || attemptsLeft > 0)
+            uint attempts = 1;
+            while (maxAttempts == 0 || attemptsLeft > 0)
             {
                 var handshakeStatus = await ProtocolHandshake.Shake();
                 if (handshakeStatus)
                 {
-                    SerializationManager = new SerializationManager(Config.CommunicationFormat);
+                    SerializationManager = new SerializationManager(Config.CommunicationFormatUsed);
                     Connector.DataSerializer = SerializationManager.Serializer;
                     await Connector.Connect();
                     return Connector.ConnectionState;

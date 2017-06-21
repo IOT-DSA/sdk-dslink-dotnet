@@ -149,7 +149,7 @@ namespace DSLink.Connection
                 sb.Append("?");
                 sb.Append("dsId=").Append(config.DsId);
                 sb.Append("&auth=").Append(config.Authentication);
-                sb.Append("&format=").Append(config.CommunicationFormat);
+                sb.Append("&format=").Append(config.CommunicationFormatUsed);
 
                 return sb.ToString();
             }

@@ -1,9 +1,7 @@
-using System;
 using DSLink.Connection;
 using DSLink.Request;
 using DSLink.Respond;
 using DSLink.Util.Logger;
-using DSLink.Platform;
 using System.Threading.Tasks;
 
 namespace DSLink.Container
@@ -40,7 +38,7 @@ namespace DSLink.Container
             get;
         }
 
-        public abstract Task<ConnectionState> Connect(int maxAttempts = -1);
+        public abstract Task<ConnectionState> Connect(uint maxAttempts = 0);
         public abstract void Disconnect();
     }
 }
