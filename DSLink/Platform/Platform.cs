@@ -55,10 +55,6 @@ namespace DSLink.Platform
 
         public static void SetPlatform(BasePlatform platform)
         {
-            if (Current != null)
-            {
-                throw new Exception("Platform has already been initialized.");
-            }
             Current = platform;
             Current.Init();
         }

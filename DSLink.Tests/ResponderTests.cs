@@ -6,6 +6,7 @@ using DSLink.Respond;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
+using PCLStorage;
 
 namespace DSLink.Tests
 {
@@ -14,18 +15,18 @@ namespace DSLink.Tests
     {
         private Configuration _config;
         private Responder _responder;
-        private Mock<BasePlatform> _mockPlatform;
+        private Mock<IFolder> _mockFolder;
         private Mock<AbstractContainer> _mockContainer;
         private Mock<Connector> _mockConnector;
 
         [SetUp]
         public void SetUp()
         {
-            NETPlatform.Initialize();
+            _mockFolder = new Mock<IFolder>();
 
+            BasePlatform.SetPlatform(new TestPlatform(_mockFolder));
             _config = new Configuration(new List<string>(), "Test", responder: true);
 
-            _mockPlatform = new Mock<BasePlatform>();
             _mockContainer = new Mock<AbstractContainer>();
             _mockConnector = new Mock<Connector>(_mockContainer.Object);
 
@@ -38,6 +39,21 @@ namespace DSLink.Tests
         [Test]
         public void TestyTest()
         {
+        }
+
+        public class TestPlatform : NETPlatform
+        {
+            private readonly Mock<IFolder> _mockFolder;
+
+            public TestPlatform(Mock<IFolder> mockFolder)
+            {
+                _mockFolder = mockFolder;
+            }
+
+            public override IFolder GetPlatformStorageFolder()
+            {
+                return _mockFolder.Object;
+            }
         }
     }
 }

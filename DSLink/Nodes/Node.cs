@@ -482,11 +482,8 @@ namespace DSLink.Nodes
         /// <summary>
         /// Check whether this Node has a value.
         /// </summary>
-        /// <returns>True when Node has a value</returns>
-        public bool HasValue()
-        {
-            return Value != null && !Value.IsNull;
-        }
+        /// <value>True when Node has a value</value>
+        public bool HasValue => Value != null && !Value.IsNull;
 
         /// <summary>
         /// Create a child via the NodeFactory.
@@ -587,10 +584,6 @@ namespace DSLink.Nodes
             Parent?.RemoveChild(Name);
         }
 
-        /// <summary>
-        /// Remove a Node configuration or attribute in the Node tree from here.
-        /// </summary>
-        /// <param name="path">Path of configuration/attribute</param>
         internal void RemoveConfigAttribute(string path)
         {
             if (path.StartsWith("/$") || path.StartsWith(Path + "/@"))
@@ -614,18 +607,21 @@ namespace DSLink.Nodes
         /// <param name="value"></param>
         protected virtual async void ValueSet(Value value)
         {
+            List<Task> tasks = new List<Task>();
             lock (Subscribers)
             {
                 foreach (var sid in Subscribers)
                 {
-                    _link.Connector.AddValueUpdateResponse(new JArray
+                    tasks.Add(_link.Connector.AddValueUpdateResponse(new JArray
                     {
                         sid,
                         value.JToken,
                         value.LastUpdated
-                    });
+                    }));
                 }
             }
+
+            await Task.WhenAll(tasks);
         }
 
         /// <summary>
@@ -668,7 +664,7 @@ namespace DSLink.Nodes
                     {
                         value[attr.Key] = attr.Value.JToken;
                     }
-                    if (child.Value.HasValue())
+                    if (child.Value.HasValue)
                     {
                         value["value"] = child.Value.Value.JToken;
                         value["ts"] = child.Value.Value.LastUpdated;
@@ -702,7 +698,7 @@ namespace DSLink.Nodes
         /// </summary>
         public async Task TriggerSerialize()
         {
-            await _link.Responder.Serialize();
+            await _link.Responder.SerializeToDisk();
         }
 
         /// <summary>
@@ -731,7 +727,7 @@ namespace DSLink.Nodes
                 }
             }
 
-            if (HasValue())
+            if (HasValue)
             {
                 obj.Add(new JProperty("?value", Value.JToken));
             }
@@ -819,7 +815,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Clones this node.
         /// </summary>
-        /// <returns>>A new Node instance that is exactly the same as this node.</returns>
+        /// <returns>A new Node instance that is exactly the same as this node.</returns>
         public Node Clone()
         {
             var node = new Node(Name, Parent, _link, Profile);
@@ -827,9 +823,6 @@ namespace DSLink.Nodes
             return node;
         }
 
-        /// <summary>
-        /// Update all subscribers of this Node.
-        /// </summary>
         internal virtual async void UpdateSubscribers()
         {
             if (Building)
