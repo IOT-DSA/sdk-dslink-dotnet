@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using DSLink;
 using DSLink.NET;
@@ -18,11 +17,11 @@ namespace RNG
         public ExampleDSLink(Configuration config) : base(config)
         {
             Responder.AddNodeClass("testAction", delegate (Node node)
-                {
+            {
                 node.AddParameter(new Parameter("string", ValueType.String));
                 node.AddParameter(new Parameter("int", ValueType.Number));
                 node.AddParameter(new Parameter("number", ValueType.Number));
-                node.AddColumn(new Column("success", "bool"));
+                node.AddColumn(new Column("success", ValueType.Boolean));
 
                 var handler = new ActionHandler(Permission.Write, async (request) =>
                 {

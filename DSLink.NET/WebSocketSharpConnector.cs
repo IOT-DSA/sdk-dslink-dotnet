@@ -8,9 +8,6 @@ namespace DSLink.NET
 {
     public class WebSocketSharpConnector : Connector
     {
-        /// <summary>
-        /// WebSocket client instance.
-        /// </summary>
         private WebSocket _webSocket;
 
         public override bool SupportsBinary => true;
@@ -20,9 +17,6 @@ namespace DSLink.NET
         {
         }
 
-        /// <summary>
-        /// Connect to the WebSocket.
-        /// </summary>
         public async override Task Connect()
         {
             await base.Connect();
@@ -67,9 +61,6 @@ namespace DSLink.NET
             _webSocket.ConnectAsync();
         }
 
-        /// <summary>
-        /// Disconnect from the WebSocket.
-        /// </summary>
         public override void Disconnect()
         {
             base.Disconnect();
@@ -77,28 +68,17 @@ namespace DSLink.NET
             _webSocket.Close();
         }
 
-        /// <summary>
-        /// Returns true if the WebSocket is connected.
-        /// </summary>
         public override bool Connected()
         {
             return _webSocket != null && _webSocket.IsAlive;
         }
 
-        /// <summary>
-        /// Writes a string to the WebSocket connection.
-        /// </summary>
-        /// <param name="data">String data</param>
         public override void WriteString(string data)
         {
             base.WriteString(data);
             _webSocket.Send(data);
         }
 
-        /// <summary>
-        /// Writes binary to the WebSocket connection.
-        /// </summary>
-        /// <param name="data">Binary data</param>
         public override void WriteBinary(byte[] data)
         {
             base.WriteBinary(data);

@@ -31,16 +31,15 @@ namespace DSLink.iOS.Example
             // If not required for your application you can safely delete this method
 
             iOSPlatform.Initialize();
-            var dslink =
-                new ExampleDSLink(new Configuration(new List<string>(), "sdk-dotnet",
-                                                    responder: true,
-                                                    requester: true,
-                                                    logLevel: LogLevel.Debug,
-                                                    communicationFormat: "json",
-                                                    keysLocation: Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/dsa_mobile.keys",
-                                                    connectionAttemptLimit: -1));
+            var config = new Configuration(new List<string>(), "sdk-dotnet", true, true)
+            {
+                LogLevel = LogLevel.Debug,
+                CommunicationFormat = "json",
+                KeysLocation = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/dsa_mobile.keys"
+            };
+            var dslink = new ExampleDSLink(config);
             
-            dslink.Connect();
+            dslink.Connect().Wait();
             dslink.Subscribe();
 
             return true;
@@ -83,8 +82,8 @@ namespace DSLink.iOS.Example
         public ExampleDSLink(Configuration config) : base(config)
         {
             var testAction = Responder.SuperRoot.CreateChild("Test")
-                                      .AddColumn(new Column("Column", "number"))
-                                      .AddColumn(new Column("Column2", "string"))
+                                      .AddColumn(new Column("Column", Nodes.ValueType.Number))
+                                      .AddColumn(new Column("Column2", Nodes.ValueType.String))
                                       .SetResult(ResultType.Stream)
                                       .SetAction(new ActionHandler(Permission.Write, Test))
                                       .SetInvokable(Permission.Read)

@@ -4,7 +4,6 @@ namespace DSLink.UWP.Example
     {
         public UniversalWindowsDSLink(Configuration config) : base(config)
         {
-            
         }
     }
 }
