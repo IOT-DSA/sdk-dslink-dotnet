@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.13
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{FE63D2B0-7717-4BEF-9D7B-6154DF1D7B5B}"
 EndProject
@@ -217,8 +217,6 @@ Global
 		{98D1F344-F373-402A-8B3C-E3E867A26DBB}.Release|x86.ActiveCfg = Release|x86
 		{98D1F344-F373-402A-8B3C-E3E867A26DBB}.Release|x86.Build.0 = Release|x86
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Debug|Any CPU.Build.0 = Debug|x86
-		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Debug|Any CPU.Deploy.0 = Debug|x86
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Debug|ARM.ActiveCfg = Debug|ARM
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Debug|ARM.Build.0 = Debug|ARM
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Debug|ARM.Deploy.0 = Debug|ARM
@@ -231,8 +229,6 @@ Global
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Debug|x86.Build.0 = Debug|x86
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Debug|x86.Deploy.0 = Debug|x86
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Release|Any CPU.ActiveCfg = Release|x86
-		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Release|Any CPU.Build.0 = Release|x86
-		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Release|Any CPU.Deploy.0 = Release|x86
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Release|ARM.ActiveCfg = Release|ARM
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Release|ARM.Build.0 = Release|ARM
 		{DB2096BA-1D38-4B6C-A13E-67A06FE61456}.Release|ARM.Deploy.0 = Release|ARM
