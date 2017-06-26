@@ -103,7 +103,7 @@ namespace RNG
                 //CommunicationFormat = "json",
                 //LoadNodesJson = false,
                 LogLevel = LogLevel.Debug,
-                BrokerUrl = "http://localhost:8090/conn"
+                //BrokerUrl = "http://localhost:8090/conn"
             };
             var dslink = new ExampleDSLink(config);
 
