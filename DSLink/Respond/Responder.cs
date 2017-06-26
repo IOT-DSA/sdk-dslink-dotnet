@@ -73,9 +73,12 @@ namespace DSLink.Respond
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
-                _link.Logger.Debug("Failed to load nodes.json");
+                _link.Logger.Warning("Failed to load nodes.json");
+                _link.Logger.Warning(e.Message);
+                _link.Logger.Warning(e.StackTrace);
+                SuperRoot.ResetNode();
             }
 
             return false;

@@ -6,6 +6,7 @@ using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using System.Threading.Tasks;
 using ValueType = DSLink.Nodes.ValueType;
+using DSLink.Util.Logger;
 
 namespace RNG
 {
@@ -73,19 +74,14 @@ namespace RNG
         {
             Responder.SuperRoot.CreateChild("Test", "testAction").BuildNode();
 
-            Task.Run(async () =>
+            for (var x = 1; x <= 5; x++)
             {
-                await Task.Delay(5000);
-
-                for (var x = 1; x <= 5; x++)
+                var node = Responder.SuperRoot.CreateChild($"Container{x}").BuildNode();
+                for (var i = 1; i <= 50; i++)
                 {
-                    var node = Responder.SuperRoot.CreateChild($"Container{x}").BuildNode();
-                    for (var i = 1; i <= 50; i++)
-                    {
-                        node.CreateChild($"TestVal{i}", "rng").BuildNode();
-                    }
+                    node.CreateChild($"TestVal{i}", "rng").BuildNode();
                 }
-            });
+            }
         }
 
         private static void Main(string[] args)
@@ -102,10 +98,16 @@ namespace RNG
         {
             NETPlatform.Initialize();
 
-            var config = new Configuration(args, "RNG", true, true);
+            var config = new Configuration(args, "RNG", true, true)
+            {
+                CommunicationFormat = "json",
+                //LoadNodesJson = false,
+                LogLevel = LogLevel.Debug
+            };
             var dslink = new ExampleDSLink(config);
 
             await dslink.Connect();
+            await dslink.SaveNodes();
         }
     }
 }

@@ -78,8 +78,12 @@ namespace DSLink
 
             if (Config.Responder)
             {
-                var loaded = await LoadSavedNodes();
-                if (!loaded)
+                var initDefault = true;
+                if (Config.LoadNodesJson)
+                {
+                    initDefault = !(await LoadSavedNodes());
+                }
+                if (initDefault)
                 {
                     InitializeDefaultNodes();
                 }

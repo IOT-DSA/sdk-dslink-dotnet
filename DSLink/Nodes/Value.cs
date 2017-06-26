@@ -17,7 +17,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// When the value was last updated.
         /// </summary>
-        private DateTime _lastUpdated;
+        private DateTime? _lastUpdated;
 
         /// <summary>
         /// Event occurs when value is set.
@@ -32,7 +32,14 @@ namespace DSLink.Nodes
         /// <summary>
         /// Gets last updated time in the ISO 8601 format that DSA uses.
         /// </summary>
-        public string LastUpdated => TimeUtil.ToIso8601(_lastUpdated);
+        public string LastUpdated
+        {
+            get
+            {
+                if (!_lastUpdated.HasValue) return null;
+                return TimeUtil.ToIso8601(_lastUpdated.Value);
+            }
+        }
 
         public Value()
         {
@@ -151,6 +158,12 @@ namespace DSLink.Nodes
         {
             _val = jtoken;
             SetValue();
+        }
+
+        public void Clear()
+        {
+            _val = null;
+            _lastUpdated = null;
         }
 
         public JToken JToken => _val;
