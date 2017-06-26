@@ -1,3 +1,4 @@
+using DSLink.Container;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink.Connection.Serializer
@@ -5,8 +6,10 @@ namespace DSLink.Connection.Serializer
     /// <summary>
     /// Interface for serialization
     /// </summary>
-    public interface ISerializer
+    public abstract class BaseSerializer
     {
+        protected AbstractContainer _link;
+
         /// <summary>
         /// True if the connection used requires binary stream support.
         /// </summary>
@@ -15,18 +18,23 @@ namespace DSLink.Connection.Serializer
             get;
         }
 
+        public BaseSerializer(AbstractContainer link)
+        {
+            _link = link;
+        }
+
         /// <summary>
         /// Serialize the specified data.
         /// </summary>
         /// <param name="data">Data to serialize in serialization object form.</param>
         /// <returns>Serialized data</returns>
-        dynamic Serialize(JObject data);
+        public abstract dynamic Serialize(JObject data);
 
         /// <summary>
         /// Deserialize the specified data.
         /// </summary>
         /// <param name="data">Data in serialized form.</param>
         /// <returns>Deserialized data in serialization object form.</returns>
-        JObject Deserialize(dynamic data);
+        public abstract JObject Deserialize(dynamic data);
     }
 }

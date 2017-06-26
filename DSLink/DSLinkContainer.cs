@@ -14,7 +14,6 @@ namespace DSLink
     public class DSLinkContainer : AbstractContainer
     {
         private readonly Task _pingTask;
-        internal SerializationManager SerializationManager;
         protected Handshake ProtocolHandshake;
         internal bool ReconnectOnFailure;
         private bool _isLinkInitialized;
@@ -23,12 +22,14 @@ namespace DSLink
         private readonly Requester _requester;
         private readonly Connector _connector;
         private readonly BaseLogger _logger;
+        private BaseSerializer _serializer;
 
         public override Configuration Config => _config;
         public override Responder Responder => _responder;
         public override Requester Requester => _requester;
         public override Connector Connector => _connector;
         public override BaseLogger Logger => _logger;
+        internal override BaseSerializer DataSerializer => _serializer;
 
         public DSLinkContainer(Configuration config)
         {
@@ -110,8 +111,7 @@ namespace DSLink
                 var handshakeStatus = await ProtocolHandshake.Shake();
                 if (handshakeStatus)
                 {
-                    SerializationManager = new SerializationManager(Config.CommunicationFormatUsed);
-                    Connector.DataSerializer = SerializationManager.Serializer;
+                    _serializer = (BaseSerializer) Activator.CreateInstance(Serializers.Types[Config.CommunicationFormatUsed], this);
                     await Connector.Connect();
                     return Connector.ConnectionState;
                 }
@@ -223,7 +223,7 @@ namespace DSLink
         private async void OnStringRead(MessageEvent messageEvent)
         {
             LogMessageString(false, messageEvent);
-            await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
+            await OnMessage(DataSerializer.Deserialize(messageEvent.Message));
         }
 
         private void OnStringWrite(MessageEvent messageEvent)
@@ -234,7 +234,7 @@ namespace DSLink
         private async void OnBinaryRead(BinaryMessageEvent messageEvent)
         {
             LogMessageBytes(false, messageEvent);
-            await OnMessage(SerializationManager.Serializer.Deserialize(messageEvent.Message));
+            await OnMessage(DataSerializer.Deserialize(messageEvent.Message));
         }
 
         private void OnBinaryWrite(BinaryMessageEvent messageEvent)

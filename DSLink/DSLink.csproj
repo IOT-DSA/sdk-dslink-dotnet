@@ -38,7 +38,7 @@
     <Compile Include="Connection\ConnectionEvents.cs" />
     <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Handshake.cs" />
-    <Compile Include="Connection\Serializer\ISerializer.cs" />
+    <Compile Include="Connection\Serializer\BaseSerializer.cs" />
     <Compile Include="Connection\Serializer\JsonSerializer.cs" />
     <Compile Include="Connection\Serializer\SerializationManager.cs" />
     <Compile Include="Connection\WebSocketBaseConnector.cs" />

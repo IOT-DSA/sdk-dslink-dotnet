@@ -1,7 +1,6 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using DSLink.Connection.Serializer;
 using DSLink.Container;
 using Newtonsoft.Json.Linq;
 
@@ -15,12 +14,6 @@ namespace DSLink.Connection
         {
             private set;
             get;
-        }
-
-        public ISerializer DataSerializer
-        {
-            get;
-            internal set;
         }
 
         /// <summary>
@@ -123,7 +116,7 @@ namespace DSLink.Connection
             OnOpen += () =>
             {
                 ConnectionState = ConnectionState.Connected;
-                _link.Logger.Info("Connected");
+                _link.Logger.Info($"Connected to {WsUrl}");
             };
 
             OnClose += () =>
@@ -245,7 +238,7 @@ namespace DSLink.Connection
                 data.Remove("responses");
             }
 
-            WriteData(DataSerializer.Serialize(data));
+            WriteData(_link.DataSerializer.Serialize(data));
         }
 
         /// <summary>

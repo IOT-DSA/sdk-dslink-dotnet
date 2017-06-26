@@ -1,4 +1,5 @@
 using DSLink.Connection;
+using DSLink.Connection.Serializer;
 using DSLink.Request;
 using DSLink.Respond;
 using DSLink.Util.Logger;
@@ -34,6 +35,11 @@ namespace DSLink.Container
         }
 
         public abstract Connector Connector
+        {
+            get;
+        }
+
+        internal abstract BaseSerializer DataSerializer
         {
             get;
         }
