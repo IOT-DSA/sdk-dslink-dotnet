@@ -5,7 +5,7 @@ using Newtonsoft.Msgpack;
 using JSONSerializer = Newtonsoft.Json.JsonSerializer;
 using DSLink.Container;
 
-namespace DSLink.Connection.Serializer
+namespace DSLink.Serializer
 {
     /// <summary>
     /// MessagePack implementation of serializer. Uses an extension of Json.NET,

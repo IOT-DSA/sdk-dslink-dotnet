@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using DSLink.Connection;
-using DSLink.Connection.Serializer;
+using DSLink.Serializer;
 using DSLink.Container;
 using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DSLink.Connection.Serializer;
+using DSLink.Serializer;
 using DSLink.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

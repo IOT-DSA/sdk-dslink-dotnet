@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using DSLink.Container;
 
-namespace DSLink.Connection.Serializer
+namespace DSLink.Serializer
 {
     /// <summary>
     /// JSON implementation of serializer.

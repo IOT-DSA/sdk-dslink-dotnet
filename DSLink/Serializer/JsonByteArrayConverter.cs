@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using DSLink.Util;
 using JSONSerializer = Newtonsoft.Json.JsonSerializer;
 
-namespace DSLink.Connection.Serializer
+namespace DSLink.Serializer
 {
     /// <summary>
     /// Custom serializer extension for JSON, which serializes binary data to

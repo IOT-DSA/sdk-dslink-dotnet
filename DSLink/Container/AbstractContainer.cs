@@ -1,5 +1,5 @@
 using DSLink.Connection;
-using DSLink.Connection.Serializer;
+using DSLink.Serializer;
 using DSLink.Request;
 using DSLink.Respond;
 using DSLink.Util.Logger;

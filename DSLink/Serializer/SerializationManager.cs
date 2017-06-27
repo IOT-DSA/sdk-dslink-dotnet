@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DSLink.Connection.Serializer
+namespace DSLink.Serializer
 {
     internal static class Serializers
     {
