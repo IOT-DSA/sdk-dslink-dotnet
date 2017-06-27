@@ -39,7 +39,7 @@ namespace DSLink.Container
             get;
         }
 
-        internal abstract BaseSerializer DataSerializer
+        public abstract BaseSerializer DataSerializer
         {
             get;
         }

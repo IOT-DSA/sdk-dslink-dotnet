@@ -29,7 +29,7 @@ namespace DSLink
         public override Requester Requester => _requester;
         public override Connector Connector => _connector;
         public override BaseLogger Logger => _logger;
-        internal override BaseSerializer DataSerializer => _serializer;
+        public override BaseSerializer DataSerializer => _serializer;
 
         public DSLinkContainer(Configuration config)
         {
