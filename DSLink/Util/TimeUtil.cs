@@ -2,9 +2,9 @@ using System;
 
 namespace DSLink.Util
 {
-    internal static class TimeUtil
+    public static class TimeUtil
     {
-        public static string ToIso8601(DateTime dateTime)
+        public static string ToIso8601(this DateTime dateTime)
         {
             return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
         }
