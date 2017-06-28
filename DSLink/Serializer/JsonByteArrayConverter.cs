@@ -11,36 +11,39 @@ namespace DSLink.Serializer
     /// <see cref="JsonSerializer"/> 
     /// </summary>
 	public class JsonByteArrayConverter : JsonConverter
-	{
-        /// <summary>
-        /// Whether the converter is applicable for this type.
-        /// </summary>
-        /// <param name="objectType">Type</param>
-        /// <returns>True if this converter is applicable</returns>
-		public override bool CanConvert(Type objectType)
-		{
-			return objectType == typeof(byte[]);
-		}
+    {
+        public override bool CanRead => true;
 
-        /// <summary>
-        /// Generate the JSON data.
-        /// </summary>
-        /// <param name="writer">Stream to write to</param>
-        /// <param name="value">Value</param>
-        /// <param name="serializer">Serializer instance</param>
-		public override void WriteJson(JsonWriter writer, object value, JSONSerializer serializer)
-		{
-			writer.WriteValue("\x1B" + "bytes:" + UrlBase64.Encode((byte[]) value));
-		}
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(byte[]) || objectType == typeof(string);
+        }
 
-        /// <summary>
-        /// Not implemented. Required by interface. Actual deserialization
-        /// happens in Value.
-        /// <see cref="Nodes.Value"/> 
-        /// </summary>
+        public override void WriteJson(JsonWriter writer, object value, JSONSerializer serializer)
+        {
+            var type = value.GetType();
+            if (type == typeof(byte[]))
+            {
+                writer.WriteValue("\x1B" + "bytes:" + UrlBase64.Encode((byte[])value));
+            }
+            else if (type == typeof(string))
+            {
+                writer.WriteValue((string)value);
+            }
+        }
+
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JSONSerializer serializer)
-		{
-			throw new NotImplementedException();
-		}
-	}
+        {
+            if (reader.TokenType == JsonToken.String)
+            {
+                string val = (string)reader.Value;
+                if (val.StartsWith("\x1B" + "bytes:") || val.StartsWith("\\u001bbytes:"))
+                {
+                    return UrlBase64.Decode(val.Substring(val.IndexOf(":", StringComparison.Ordinal) + 1));
+                }
+                return val;
+            }
+            return null;
+        }
+    }
 }

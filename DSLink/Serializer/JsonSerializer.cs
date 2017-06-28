@@ -12,24 +12,30 @@ namespace DSLink.Serializer
     {
         public bool RequiresBinaryStream => false;
 
-        public JsonSerializer(AbstractContainer link) : base(link)
-        {}
+        private readonly JsonByteArrayConverter _byteArrayConverter;
+        private readonly JsonSerializerSettings _serializerSettings;
 
-        public override dynamic Serialize(JObject data)
+        public JsonSerializer(AbstractContainer link) : base(link)
         {
-            return JsonConvert.SerializeObject(data, Formatting.None, new JsonSerializerSettings()
+            _byteArrayConverter = new JsonByteArrayConverter();
+            _serializerSettings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 Converters = new List<JsonConverter>
                 {
-                    new JsonByteArrayConverter()
+                    _byteArrayConverter
                 }
-            });
+            };
+        }
+
+        public override dynamic Serialize(JObject data)
+        {
+            return JsonConvert.SerializeObject(data, Formatting.None, _serializerSettings);
         }
 
         public override JObject Deserialize(dynamic data)
         {
-            return JsonConvert.DeserializeObject(data);
+            return JsonConvert.DeserializeObject(data, _serializerSettings);
         }
     }
 }
