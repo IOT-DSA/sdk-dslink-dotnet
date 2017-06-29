@@ -254,7 +254,7 @@ namespace DSLink.Nodes
         /// </summary>
         public void InitializeClass()
         {
-            if (_initializedClass)
+            if (_initializedClass || _link == null)
             {
                 return;
             }
