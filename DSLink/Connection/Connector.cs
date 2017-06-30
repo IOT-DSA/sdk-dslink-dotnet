@@ -151,10 +151,12 @@ namespace DSLink.Connection
         /// <summary>
         /// Connect to the broker.
         /// </summary>
-        public virtual async Task Connect()
+        public virtual Task Connect()
         {
             ConnectionState = ConnectionState.Connecting;
             _link.Logger.Info("Connecting");
+
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -176,7 +178,7 @@ namespace DSLink.Connection
         /// </summary>
         /// <param name="data">RootObject to serialize and send</param>
         /// <param name="allowQueue">Whether to allow the data to be added to the queue</param>
-        public async Task Write(JObject data, bool allowQueue = true)
+        public virtual async Task Write(JObject data, bool allowQueue = true)
         {
             if ((!Connected() || EnableQueue) && allowQueue)
             {
@@ -215,12 +217,14 @@ namespace DSLink.Connection
 
                     if (!_hasQueueEvent)
                     {
+                        // Set flag to queue flush
                         _hasQueueEvent = true;
-                        // Schedule event for queue flush.
-                        Task.Run((() => TriggerQueueFlush()));
                     }
                 }
-                return;
+                if (_hasQueueEvent)
+                {
+                    await TriggerQueueFlush();
+                }
             }
 
             if (data["msg"] == null)
@@ -333,13 +337,14 @@ namespace DSLink.Connection
         /// <summary>
         /// Flush the queue.
         /// </summary>
-        internal void Flush(bool fromEvent = false)
+        internal async Task Flush(bool fromEvent = false)
         {
             if (!Connected())
             {
                 return;
             }
             _link.Logger.Debug("Flushing connection message queue");
+            JObject _queueToFlush = null;
             lock (_queueLock)
             {
                 if (fromEvent)
@@ -368,7 +373,7 @@ namespace DSLink.Connection
 
                 if (_queue != null)
                 {
-                    Write(_queue, false).Wait();
+                    _queueToFlush = _queue;
                     _queue = null;
                 }
 
@@ -377,14 +382,18 @@ namespace DSLink.Connection
                     _subscriptionValueQueue = new JArray();
                 }
             }
+            if (_queueToFlush != null)
+            {
+                await Write(_queueToFlush, false);
+            }
         }
 
         /// <summary>
         /// Flushes the queue for scheduled queue events.
         /// </summary>
-        internal void TriggerQueueFlush()
+        internal async Task TriggerQueueFlush()
         {
-            Flush(true);
+            await Flush(true);
         }
 
         /// <summary>

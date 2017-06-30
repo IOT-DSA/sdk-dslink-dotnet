@@ -29,7 +29,7 @@ namespace DSLink.Container
             get;
         }
 
-        public abstract Requester Requester
+        public abstract DSLinkRequester Requester
         {
             get;
         }

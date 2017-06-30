@@ -14,7 +14,7 @@ namespace DSLink.Tests
     public class ResponderTests
     {
         private Configuration _config;
-        private Responder _responder;
+        private DSLinkResponder _responder;
         private Mock<IFolder> _mockFolder;
         private Mock<AbstractContainer> _mockContainer;
         private Mock<Connector> _mockConnector;
@@ -33,7 +33,7 @@ namespace DSLink.Tests
             _mockContainer.SetupGet(c => c.Config).Returns(_config);
             _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
 
-            _responder = new Responder(_mockContainer.Object);
+            _responder = new DSLinkResponder(_mockContainer.Object);
         }
 
         [Test]

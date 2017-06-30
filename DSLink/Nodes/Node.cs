@@ -738,7 +738,7 @@ namespace DSLink.Nodes
         /// </summary>
         public async Task TriggerSerialize()
         {
-            await _link.Responder.SerializeToDisk();
+            await _link.Responder.NodeSerializer.SerializeToDisk();
         }
 
         /// <summary>

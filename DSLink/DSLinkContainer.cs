@@ -18,15 +18,15 @@ namespace DSLink
         internal bool ReconnectOnFailure;
         private bool _isLinkInitialized;
         private readonly Configuration _config;
-        private readonly Responder _responder;
-        private readonly Requester _requester;
+        private readonly DSLinkResponder _responder;
+        private readonly DSLinkRequester _requester;
         private readonly Connector _connector;
         private readonly BaseLogger _logger;
         private BaseSerializer _serializer;
 
         public override Configuration Config => _config;
         public override Responder Responder => _responder;
-        public override Requester Requester => _requester;
+        public override DSLinkRequester Requester => _requester;
         public override Connector Connector => _connector;
         public override BaseLogger Logger => _logger;
         public override BaseSerializer DataSerializer => _serializer;
@@ -41,11 +41,11 @@ namespace DSLink
 
             if (Config.Responder)
             {
-                _responder = new Responder(this);
+                _responder = new DSLinkResponder(this);
             }
             if (Config.Requester)
             {
-                _requester = new Requester(this);
+                _requester = new DSLinkRequester(this);
             }
 
             // Events
@@ -143,12 +143,12 @@ namespace DSLink
 
         public async Task<bool> LoadSavedNodes()
         {
-            return await Responder.DeserializeFromDisk();
+            return await Responder.NodeSerializer.DeserializeFromDisk();
         }
 
         public async Task SaveNodes()
         {
-            await Responder.SerializeToDisk();
+            await Responder.NodeSerializer.SerializeToDisk();
         }
 
         private void OnOpen()

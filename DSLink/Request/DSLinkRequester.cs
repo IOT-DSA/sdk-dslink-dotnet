@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +13,7 @@ namespace DSLink.Request
     /// The requester module of a DSLink gives the ability access to
     /// outer data on the broker.
     /// </summary>
-    public class Requester
+    public class DSLinkRequester
     {
         private readonly AbstractContainer _link;
         internal readonly RequestManager _requestManager;
@@ -21,7 +21,7 @@ namespace DSLink.Request
         private int _requestId = 1;
         private int NextRequestID => _requestId++;
 
-        public Requester(AbstractContainer link)
+        public DSLinkRequester(AbstractContainer link)
         {
             _link = link;
             _requestManager = new RequestManager();

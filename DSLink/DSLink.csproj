@@ -38,6 +38,11 @@
     <Compile Include="Connection\ConnectionEvents.cs" />
     <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Handshake.cs" />
+    <Compile Include="Request\DSLinkRequester.cs" />
+    <Compile Include="Respond\Responder.cs" />
+    <Compile Include="Respond\NodeSerializer.cs" />
+    <Compile Include="Respond\StreamManager.cs" />
+    <Compile Include="Respond\SubscriptionManager.cs" />
     <Compile Include="Serializer\BaseSerializer.cs" />
     <Compile Include="Serializer\JsonSerializer.cs" />
     <Compile Include="Serializer\SerializationManager.cs" />
@@ -62,8 +67,7 @@
     <Compile Include="Util\ReadOnlyDictionary.cs" />
     <Compile Include="Request\Requests.cs" />
     <Compile Include="Respond\Responses.cs" />
-    <Compile Include="Request\Requester.cs" />
-    <Compile Include="Respond\Responder.cs" />
+    <Compile Include="Respond\DSLinkResponder.cs" />
     <Compile Include="Util\Logger\BaseLogger.cs" />
     <Compile Include="Util\Logger\LogLevel.cs" />
     <Compile Include="Util\Logger\DiagnosticsLogger.cs" />
