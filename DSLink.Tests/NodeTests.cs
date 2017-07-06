@@ -6,6 +6,7 @@ using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using System;
+using System.Threading.Tasks;
 
 namespace DSLink.Tests
 {
@@ -31,6 +32,9 @@ namespace DSLink.Tests
             _mockContainer.SetupGet(c => c.Responder).Returns(_mockResponder.Object);
             _mockResponder.SetupGet(r => r.SuperRoot).Returns(_superRootNode);
             _mockResponder.SetupGet(r => r.SubscriptionManager).Returns(_mockSubManager.Object);
+
+            _mockConnector.Setup(c => c.AddValueUpdateResponse(It.IsAny<JToken>()))
+                .Returns(Task.FromResult(false));
         }
 
         [Test]
@@ -63,21 +67,42 @@ namespace DSLink.Tests
         {
             int first = 5; // Number of children of root to create
             int second = 100; // Number of children to make below each first node.
-            var root = new Node("", null, null);
             for (int i = 0; i < first; i++)
             {
-                var firstNode = root.CreateChild($"Node{i}").BuildNode();
+                var firstNode = _superRootNode.CreateChild($"Node{i}").BuildNode();
                 for (int j = 0; j < second; j++)
                 {
                     firstNode.CreateChild($"Node{j}").BuildNode();
                 }
             }
 
-            Assert.AreEqual(first, root.Children.Count);
-            foreach (var kv in root.Children)
+            Assert.AreEqual(first, _superRootNode.Children.Count);
+            foreach (var kv in _superRootNode.Children)
             {
                 Assert.AreEqual(second, kv.Value.Children.Count);
             }
+        }
+
+        [Test]
+        public void TestRemoveChildren()
+        {
+            const int childrenCount = 100;
+
+            Assert.AreEqual(0, _superRootNode.Children.Count);
+
+            for (int i = 0; i < childrenCount; i++)
+            {
+                _superRootNode.CreateChild($"Node{i}").BuildNode();
+            }
+
+            Assert.AreEqual(childrenCount, _superRootNode.Children.Count);
+
+            for (int i = 0; i < childrenCount; i++)
+            {
+                _superRootNode[$"Node{i}"].RemoveFromParent();
+            }
+
+            Assert.AreEqual(0, _superRootNode.Children.Count);
         }
 
         [Test]
@@ -89,18 +114,126 @@ namespace DSLink.Tests
                 .BuildNode();
 
             _mockResponder.Object.SubscriptionManager.Subscribe(1, testValue);
+            testValue.Value.Set(123);
 
-            //_mockConnector.Verify(c => c.Write(null), Times.Once());
-            /*_mockConnector.Verify(
-                c => c.Write(
-                    It.Is<JObject>(
-                        data =>
-                        {
-                        }
-                    ),
-                    false
+            _mockConnector.Verify(c => c.AddValueUpdateResponse(
+                It.Is<JToken>(
+                    token => JToken.DeepEquals(token, new JArray
+                    {
+                        1,
+                        testValue.Value.JToken,
+                        testValue.Value.LastUpdated
+                    })
                 )
-            );*/
+            ));
+        }
+
+        [Test]
+        public void TestNodeTraversal()
+        {
+            var testParent = _superRootNode.CreateChild("testParent").BuildNode();
+            var testChild = testParent.CreateChild("testChild").BuildNode();
+
+            Assert.AreEqual(testParent, _superRootNode.Get(testParent.Path));
+            Assert.AreEqual(testChild, _superRootNode.Get(testChild.Path));
+
+            Assert.AreEqual(testParent, _superRootNode[testParent.Path]);
+            Assert.AreEqual(testChild, _superRootNode[testChild.Path]);
+
+            Assert.AreEqual(_superRootNode, testParent.Parent);
+            Assert.AreEqual(_superRootNode, testChild.Parent.Parent);
+        }
+
+        [Test]
+        public void TestConfigAttributeSerialization()
+        {
+            var testNode = _superRootNode
+                .CreateChild("testNode")
+                .SetConfig("number", new Value(123))
+                .SetConfig("string", new Value("123"))
+                .SetAttribute("number", new Value(123))
+                .SetAttribute("string", new Value("123"))
+                .BuildNode();
+
+            Assert.IsTrue(
+                JToken.DeepEquals(_superRootNode.SerializeUpdates(), new JArray
+                {
+                    new JArray
+                    {
+                        "$is",
+                        "node"
+                    },
+                    new JArray
+                    {
+                        "testNode",
+                        new JObject
+                        {
+                            new JProperty("$is", "node"),
+                            new JProperty("$number", 123),
+                            new JProperty("$string", "123"),
+                            new JProperty("@number", 123),
+                            new JProperty("@string", "123")
+                        }
+                    }
+                })
+            );
+        }
+
+        [Test]
+        public void TestLocalSerialization()
+        {
+            var testNode = _superRootNode
+                .CreateChild("testNode")
+                .SetConfig("number", new Value(123))
+                .SetConfig("string", new Value("123"))
+                .SetAttribute("number", new Value(123))
+                .SetAttribute("string", new Value("123"))
+                .BuildNode();
+
+            Assert.IsTrue(
+                JToken.DeepEquals(_superRootNode.Serialize(), new JObject
+                {
+                    new JProperty("$is", "node"),
+                    new JProperty("privateConfigs", new JObject()),
+                    new JProperty("testNode", new JObject
+                    {
+                        new JProperty("$is", "node"),
+                        new JProperty("$number", 123),
+                        new JProperty("$string", "123"),
+                        new JProperty("@number", 123),
+                        new JProperty("@string", "123"),
+                        new JProperty("privateConfigs", new JObject())
+                    })
+                })
+            );
+        }
+
+        [Test]
+        public void TestLocalDeserialization()
+        {
+            var testObject = new JObject
+            {
+                new JProperty("$is", "node"),
+                new JProperty("privateConfigs", new JObject()),
+                new JProperty("testNode", new JObject
+                {
+                    new JProperty("$is", "node"),
+                    new JProperty("$number", 123),
+                    new JProperty("$string", "123"),
+                    new JProperty("@number", 123),
+                    new JProperty("@string", "123"),
+                    new JProperty("privateConfigs", new JObject())
+                })
+            };
+
+            _superRootNode.Deserialize(testObject);
+
+            Assert.IsNotNull(_superRootNode["testNode"]);
+            var testNode = _superRootNode["testNode"];
+            Assert.AreEqual(123, testNode.GetConfig("number").Int);
+            Assert.AreEqual("123", testNode.GetConfig("string").String);
+            Assert.AreEqual(123, testNode.GetAttribute("number").Int);
+            Assert.AreEqual("123", testNode.GetAttribute("string").String);
         }
     }
 }
