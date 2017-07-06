@@ -7,39 +7,34 @@ namespace DSLink.Nodes
     /// </summary>
     public class Permission
     {
+        public static readonly Permission Never = new Permission("never");
         public static readonly Permission Read = new Permission("read");
         public static readonly Permission Write = new Permission("write");
         public static readonly Permission Config = new Permission("config");
-        public static readonly Permission Never = new Permission("never");
 
         /// <summary>
         /// Dictionary mapping strings to permissions.
         /// </summary>
         internal static Dictionary<string, Permission> PermissionMap = new Dictionary<string, Permission>
         {
+            {"never", Never},
             {"read", Read},
             {"write", Write},
-            {"config", Config},
-            {"never", Never}
+            {"config", Config}
         };
 
         /// <summary>
-        /// Permission string.
+        /// Permission string used in the DSA protocol.
         /// </summary>
-        internal string Permit;
+        public readonly string Permit;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Nodes.Permission"/> class.
-        /// </summary>
-        /// <param name="permit">Permit</param>
-        internal Permission(string permit)
+        private Permission(string permit)
         {
             Permit = permit;
         }
 
         /// <summary>
-        /// Converts to string.
+        /// Converts this Permission to its permission string.
         /// </summary>
         public override string ToString()
         {
@@ -47,11 +42,11 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// Converts from string.
+        /// Convert from string to permission.
         /// </summary>
-        /// <param name="permit">Permission</param>
+        /// <param name="permit">Permission string</param>
         /// <returns>Permission from specific string</returns>
-        public static Permission FromString(string permit)
+        internal static Permission FromString(string permit)
         {
             if (string.IsNullOrEmpty(permit))
             {
