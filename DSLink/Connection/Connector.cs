@@ -249,7 +249,7 @@ namespace DSLink.Connection
         /// Called to add value updates.
         /// </summary>
         /// <param name="update">Value Update</param>
-        public async Task AddValueUpdateResponse(JToken update)
+        public virtual async Task AddValueUpdateResponse(JToken update)
         {
             if (EnableQueue)
             {
@@ -409,6 +409,10 @@ namespace DSLink.Connection
             else if (data is byte[])
             {
                 WriteBinary(data);
+            }
+            else
+            {
+                throw new FormatException($"Cannot send message of type {data.Type}");
             }
         }
     }
