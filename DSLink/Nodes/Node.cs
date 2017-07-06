@@ -188,6 +188,10 @@ namespace DSLink.Nodes
             {
                 lock (_childrenLock)
                 {
+                    if (name.StartsWith("/"))
+                    {
+                        return Get(name);
+                    }
                     return _children[name];
                 }
             }
