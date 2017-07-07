@@ -158,8 +158,12 @@ namespace DSLink
 
         private async void OnClose()
         {
-            Responder.SubscriptionManager.ClearAll();
-            Responder.StreamManager.ClearAll();
+            if (Responder != null)
+            {
+                Responder.SubscriptionManager.ClearAll();
+                Responder.StreamManager.ClearAll();
+            }
+
             if (ReconnectOnFailure)
             {
                 await Connect();
