@@ -60,21 +60,11 @@ namespace DSLink.Nodes
                     key = key.Substring(1);
                     if (key.Equals("params") && value.Type == JTokenType.Array)
                     {
-                        var parameters = new JArray();
-                        foreach (var parameter in value.Value<JArray>())
-                        {
-                            parameters.Add(parameter.ToObject<Parameter>());
-                        }
-                        SetConfig(key, new Value(parameters));
+                        SetConfig(key, new Value(value.Value<JArray>()));
                     }
                     else if (key.Equals("columns") && value.Type == JTokenType.Array)
                     {
-                        var columns = new JArray();
-                        foreach (var column in value.Value<JArray>())
-                        {
-                            columns.Add(column.ToObject<Column>());
-                        }
-                        SetConfig(key, new Value(columns));
+                        SetConfig(key, new Value(value.Value<JArray>()));
                     }
                     else
                     {
