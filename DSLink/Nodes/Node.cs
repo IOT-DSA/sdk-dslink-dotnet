@@ -210,10 +210,6 @@ namespace DSLink.Nodes
             {
                 throw new ArgumentException("Name must not be null.");
             }
-            if (name.IndexOfAny(BannedChars) != -1)
-            {
-                throw new ArgumentException("Invalid character(s) in Node name.");
-            }
             ClassName = className;
             Parent = parent;
             _children = new Dictionary<string, Node>();
@@ -520,6 +516,10 @@ namespace DSLink.Nodes
         /// <returns>NodeFactory of new child</returns>
         public virtual NodeFactory CreateChild(string name, string className)
         {
+            if (name.IndexOfAny(BannedChars) != -1)
+            {
+                throw new ArgumentException("Invalid character(s) in Node name.");
+            }
             Node child = new Node(name, this, _link, className);
             return new NodeFactory(child);
         }
