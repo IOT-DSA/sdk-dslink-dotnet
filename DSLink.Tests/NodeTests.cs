@@ -45,20 +45,20 @@ namespace DSLink.Tests
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    new Node($"Test{c}", null, null);
+                    _superRootNode.CreateChild($"Test{c}").BuildNode();
                 });
             }
 
             var multiCharTest = new string(Node.BannedChars);
             Assert.Throws<ArgumentException>(() =>
             {
-                new Node(multiCharTest, null, null);
+                _superRootNode.CreateChild(multiCharTest).BuildNode();
             });
 
             var noCharTest = "TestNoBannedChars";
             Assert.DoesNotThrow(() =>
             {
-                new Node(noCharTest, null, null);
+                _superRootNode.CreateChild(noCharTest).BuildNode();
             });
         }
 
