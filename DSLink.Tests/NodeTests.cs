@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace DSLink.Tests
 {
@@ -21,7 +22,7 @@ namespace DSLink.Tests
         [SetUp]
         public void SetUp()
         {
-            _mockContainer = new Mock<DSLinkContainer>();
+            _mockContainer = new Mock<DSLinkContainer>(new Configuration(new List<string>(), "Test"));
             _mockConnector = new Mock<Connector>(_mockContainer.Object);
             _mockResponder = new Mock<Responder>();
             _mockSubManager = new Mock<SubscriptionManager>(_mockContainer.Object);

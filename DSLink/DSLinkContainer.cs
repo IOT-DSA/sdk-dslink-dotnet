@@ -25,12 +25,12 @@ namespace DSLink
         private readonly BaseLogger _logger;
         private BaseSerializer _serializer;
 
-        public Configuration Config => _config;
-        public Responder Responder => _responder;
-        public DSLinkRequester Requester => _requester;
-        public Connector Connector => _connector;
-        public BaseLogger Logger => _logger;
-        public BaseSerializer DataSerializer => _serializer;
+        public virtual Configuration Config => _config;
+        public virtual Responder Responder => _responder;
+        public virtual DSLinkRequester Requester => _requester;
+        public virtual Connector Connector => _connector;
+        public virtual BaseLogger Logger => _logger;
+        public virtual BaseSerializer DataSerializer => _serializer;
         public int MessageId => _msg++;
         public int RequestId => ++_rid;
 

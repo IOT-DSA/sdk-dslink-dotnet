@@ -1,4 +1,5 @@
-﻿using DSLink.Connection;
+﻿using System.Collections.Generic;
+using DSLink.Connection;
 using DSLink.Nodes;
 using DSLink.Respond;
 using Moq;
@@ -18,7 +19,7 @@ namespace DSLink.Tests
         [SetUp]
         public void SetUp()
         {
-            _mockContainer = new Mock<DSLinkContainer>();
+            _mockContainer = new Mock<DSLinkContainer>(new Configuration(new List<string>(), "Test"));
             _mockConnector = new Mock<Connector>(_mockContainer.Object);
             _mockResponder = new Mock<Responder>();
             _superRootNode = new Node("", null, _mockContainer.Object);

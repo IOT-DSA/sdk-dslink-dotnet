@@ -66,6 +66,7 @@
     <Compile Include="TestPlatform.cs" />
     <Compile Include="NodeChildrenTests.cs" />
     <Compile Include="Utilities.cs" />
+    <Compile Include="RootTestsSetUp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
