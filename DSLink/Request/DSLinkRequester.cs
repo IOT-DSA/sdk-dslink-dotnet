@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Respond;
 using Newtonsoft.Json.Linq;
@@ -15,13 +14,13 @@ namespace DSLink.Request
     /// </summary>
     public class DSLinkRequester
     {
-        private readonly AbstractContainer _link;
+        private readonly DSLinkContainer _link;
         internal readonly RequestManager _requestManager;
         internal readonly RemoteSubscriptionManager _remoteSubscriptionManager;
         private int _requestId = 1;
         private int NextRequestID => _requestId++;
 
-        public DSLinkRequester(AbstractContainer link)
+        public DSLinkRequester(DSLinkContainer link)
         {
             _link = link;
             _requestManager = new RequestManager();
@@ -263,13 +262,13 @@ namespace DSLink.Request
 
         internal class RemoteSubscriptionManager
         {
-            private readonly AbstractContainer _link;
+            private readonly DSLinkContainer _link;
             private readonly Dictionary<string, Subscription> _subscriptions;
             private readonly Dictionary<int, string> _subIdToPath;
             private readonly Dictionary<int, string> _realSubIdToPath;
             private int _subscriptionId = 0;
             
-            public RemoteSubscriptionManager(AbstractContainer link)
+            public RemoteSubscriptionManager(DSLinkContainer link)
             {
                 _link = link;
                 _subscriptions = new Dictionary<string, Subscription>();

@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Serializer;
-using DSLink.Container;
 using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
 using DSLink.Platform;
@@ -11,12 +10,14 @@ using DSLink.Respond;
 
 namespace DSLink
 {
-    public class DSLinkContainer : AbstractContainer
+    public class DSLinkContainer
     {
         private readonly Task _pingTask;
         protected Handshake ProtocolHandshake;
         internal bool ReconnectOnFailure;
         private bool _isLinkInitialized;
+        private int _msg;
+        private int _rid;
         private readonly Configuration _config;
         private readonly DSLinkResponder _responder;
         private readonly DSLinkRequester _requester;
@@ -24,12 +25,14 @@ namespace DSLink
         private readonly BaseLogger _logger;
         private BaseSerializer _serializer;
 
-        public override Configuration Config => _config;
-        public override Responder Responder => _responder;
-        public override DSLinkRequester Requester => _requester;
-        public override Connector Connector => _connector;
-        public override BaseLogger Logger => _logger;
-        public override BaseSerializer DataSerializer => _serializer;
+        public Configuration Config => _config;
+        public Responder Responder => _responder;
+        public DSLinkRequester Requester => _requester;
+        public Connector Connector => _connector;
+        public BaseLogger Logger => _logger;
+        public BaseSerializer DataSerializer => _serializer;
+        public int MessageId => _msg++;
+        public int RequestId => ++_rid;
 
         public DSLinkContainer(Configuration config)
         {
@@ -98,7 +101,7 @@ namespace DSLink
         public virtual void InitializeDefaultNodes()
         {}
 
-        public override async Task<ConnectionState> Connect(uint maxAttempts = 0)
+        public async Task<ConnectionState> Connect(uint maxAttempts = 0)
         {
             await Initialize();
 
@@ -135,7 +138,7 @@ namespace DSLink
             return ConnectionState.Disconnected;
         }
 
-        public override void Disconnect()
+        public void Disconnect()
         {
             ReconnectOnFailure = false;
             Connector.Disconnect();

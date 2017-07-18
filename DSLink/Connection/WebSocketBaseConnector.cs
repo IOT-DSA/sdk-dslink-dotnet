@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using DSLink.Container;
 using Websockets;
 
 namespace DSLink.Connection
@@ -12,7 +11,7 @@ namespace DSLink.Connection
         /// </summary>
         private IWebSocketConnection _webSocket;
 
-        public WebSocketBaseConnector(AbstractContainer link) : base(link)
+        public WebSocketBaseConnector(DSLinkContainer link) : base(link)
         {
         }
 

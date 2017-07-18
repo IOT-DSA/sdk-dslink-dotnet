@@ -1,5 +1,4 @@
-﻿using DSLink.Container;
-using DSLink.Nodes;
+﻿using DSLink.Nodes;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ namespace DSLink.Respond
     {
         internal IDictionary<string, Action<Node>> NodeClasses;
 
-        internal virtual AbstractContainer Link
+        internal virtual DSLinkContainer Link
         {
             get;
             set;

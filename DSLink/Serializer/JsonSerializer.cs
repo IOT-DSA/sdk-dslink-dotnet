@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using DSLink.Container;
 
 namespace DSLink.Serializer
 {
@@ -15,7 +14,7 @@ namespace DSLink.Serializer
         private readonly JsonByteArrayConverter _byteArrayConverter;
         private readonly JsonSerializerSettings _serializerSettings;
 
-        public JsonSerializer(AbstractContainer link) : base(link)
+        public JsonSerializer(DSLinkContainer link) : base(link)
         {
             _byteArrayConverter = new JsonByteArrayConverter();
             _serializerSettings = new JsonSerializerSettings

@@ -1,6 +1,4 @@
 ﻿using DSLink.Connection;
-using DSLink.Container;
-using DSLink.NET;
 using DSLink.Platform;
 using DSLink.Respond;
 using Moq;
@@ -21,7 +19,7 @@ namespace DSLink.Tests
         private Configuration _config;
         private DSLinkResponder _responder;
         private Mock<IFolder> _mockFolder;
-        private Mock<AbstractContainer> _mockContainer;
+        private Mock<DSLinkContainer> _mockContainer;
         private Mock<Connector> _mockConnector;
 
         [SetUp]
@@ -32,7 +30,7 @@ namespace DSLink.Tests
             BasePlatform.SetPlatform(new TestPlatform(_mockFolder));
             _config = new Configuration(new List<string>(), "Test", responder: true);
 
-            _mockContainer = new Mock<AbstractContainer>();
+            _mockContainer = new Mock<DSLinkContainer>();
             _mockConnector = new Mock<Connector>(_mockContainer.Object);
 
             _mockContainer.SetupGet(c => c.Config).Returns(_config);

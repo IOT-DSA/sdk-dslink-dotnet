@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using DSLink.Connection;
-using DSLink.Container;
 using WebSocketSharp;
 
 namespace DSLink.NET
@@ -13,7 +12,7 @@ namespace DSLink.NET
         public override bool SupportsBinary => true;
         public override bool SupportsCompression => false;
 
-        public WebSocketSharpConnector(AbstractContainer link) : base(link)
+        public WebSocketSharpConnector(DSLinkContainer link) : base(link)
         {
         }
 

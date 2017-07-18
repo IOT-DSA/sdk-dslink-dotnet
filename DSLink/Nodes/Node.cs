@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DSLink.Container;
 using DSLink.Nodes.Actions;
 using DSLink.Util;
 using Newtonsoft.Json.Linq;
@@ -65,7 +64,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// DSLink container instance.
         /// </summary>
-        private readonly AbstractContainer _link;
+        private readonly DSLinkContainer _link;
 
         /// <summary>
         /// Used to lock the children dictionary.
@@ -204,7 +203,7 @@ namespace DSLink.Nodes
         /// <param name="parent">Parent of Node</param>
         /// <param name="link">DSLink container of Node</param>
         /// <param name="className">Node class name</param>
-        public Node(string name, Node parent, AbstractContainer link, string className = "node")
+        public Node(string name, Node parent, DSLinkContainer link, string className = "node")
         {
             if (name == null)
             {

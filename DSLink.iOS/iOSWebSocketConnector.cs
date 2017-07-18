@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using DSLink.Connection;
-using DSLink.Container;
 using Foundation;
 using Square.SocketRocket;
 
@@ -16,7 +15,7 @@ namespace DSLink.iOS
 
         public override bool SupportsBinary => true;
 
-        public iOSWebSocketConnector(AbstractContainer link) : base(link)
+        public iOSWebSocketConnector(DSLinkContainer link) : base(link)
         {
         }
 

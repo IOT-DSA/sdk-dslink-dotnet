@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using DSLink.Container;
 using DSLink.Nodes;
 
 namespace DSLink.Respond
@@ -7,9 +6,9 @@ namespace DSLink.Respond
     public class StreamManager
     {
         private readonly Dictionary<int, string> _requestIdToPath = new Dictionary<int, string>();
-        private readonly AbstractContainer _link;
+        private readonly DSLinkContainer _link;
 
-        public StreamManager(AbstractContainer link)
+        public StreamManager(DSLinkContainer link)
         {
             _link = link;
         }

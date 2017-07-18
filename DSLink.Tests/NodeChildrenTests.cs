@@ -1,5 +1,4 @@
 ﻿using DSLink.Connection;
-using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Respond;
 using Moq;
@@ -10,7 +9,7 @@ namespace DSLink.Tests
     [TestFixture]
     public class NodeChildrenTests
     {
-        private Mock<AbstractContainer> _mockContainer;
+        private Mock<DSLinkContainer> _mockContainer;
         private Mock<Connector> _mockConnector;
         private Mock<Responder> _mockResponder;
         private Mock<SubscriptionManager> _mockSubManager;
@@ -19,7 +18,7 @@ namespace DSLink.Tests
         [SetUp]
         public void SetUp()
         {
-            _mockContainer = new Mock<AbstractContainer>();
+            _mockContainer = new Mock<DSLinkContainer>();
             _mockConnector = new Mock<Connector>(_mockContainer.Object);
             _mockResponder = new Mock<Responder>();
             _superRootNode = new Node("", null, _mockContainer.Object);

@@ -1,14 +1,13 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using DSLink.Container;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink.Connection
 {
     public abstract class Connector
     {
-        protected readonly AbstractContainer _link;
+        protected readonly DSLinkContainer _link;
 
         public ConnectionState ConnectionState
         {
@@ -108,7 +107,7 @@ namespace DSLink.Connection
         /// setting the connection state.
         /// </summary>
         /// <param name="link">Link</param>
-        protected Connector(AbstractContainer link)
+        protected Connector(DSLinkContainer link)
         {
             _link = link;
             ConnectionState = ConnectionState.Disconnected;

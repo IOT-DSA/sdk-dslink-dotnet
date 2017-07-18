@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Request;
 using Newtonsoft.Json.Linq;
@@ -9,7 +8,7 @@ namespace DSLink.Respond
 {
     public class DSLinkResponder : Responder
     {
-        public DSLinkResponder(AbstractContainer link) : base()
+        public DSLinkResponder(DSLinkContainer link) : base()
         {
             Link = link;
             NodeSerializer = new NodeSerializer(this);

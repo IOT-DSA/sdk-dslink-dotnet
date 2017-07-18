@@ -47,7 +47,6 @@
     <Compile Include="Serializer\JsonSerializer.cs" />
     <Compile Include="Serializer\SerializationManager.cs" />
     <Compile Include="Connection\WebSocketBaseConnector.cs" />
-    <Compile Include="Container\AbstractContainer.cs" />
     <Compile Include="Crypto\KeyPair.cs" />
     <Compile Include="Mono.Options-PCL.cs" />
     <Compile Include="Nodes\Actions\ActionHandler.cs" />

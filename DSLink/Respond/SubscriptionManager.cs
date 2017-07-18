@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using DSLink.Container;
 using DSLink.Nodes;
 
 namespace DSLink.Respond
@@ -7,9 +6,9 @@ namespace DSLink.Respond
     public class SubscriptionManager
     {
         private readonly Dictionary<int, Node> _subscriptionToNode;
-        private readonly AbstractContainer _link;
+        private readonly DSLinkContainer _link;
 
-        public SubscriptionManager(AbstractContainer link)
+        public SubscriptionManager(DSLinkContainer link)
         {
             _subscriptionToNode = new Dictionary<int, Node>();
             _link = link;

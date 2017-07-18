@@ -1,4 +1,3 @@
-using DSLink.Container;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink.Serializer
@@ -8,7 +7,7 @@ namespace DSLink.Serializer
     /// </summary>
     public abstract class BaseSerializer
     {
-        protected AbstractContainer _link;
+        protected DSLinkContainer _link;
 
         /// <summary>
         /// True if the connection used requires binary stream support.
@@ -18,7 +17,7 @@ namespace DSLink.Serializer
             get;
         }
 
-        public BaseSerializer(AbstractContainer link)
+        public BaseSerializer(DSLinkContainer link)
         {
             _link = link;
         }

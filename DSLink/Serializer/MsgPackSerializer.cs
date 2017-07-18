@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Msgpack;
 using JSONSerializer = Newtonsoft.Json.JsonSerializer;
-using DSLink.Container;
 
 namespace DSLink.Serializer
 {
@@ -16,7 +15,7 @@ namespace DSLink.Serializer
         private readonly JSONSerializer _serializer;
         public bool RequiresBinaryStream => true;
 
-        public MsgPackSerializer(AbstractContainer link) : base(link)
+        public MsgPackSerializer(DSLinkContainer link) : base(link)
         {
             _serializer = new JSONSerializer()
             {
