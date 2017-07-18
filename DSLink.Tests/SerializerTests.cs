@@ -83,7 +83,6 @@ namespace DSLink.Tests
         private void TestJson_Common(JObject jObj, string expected, bool deepEquals = true)
         {
             var serialized = _json.Serialize(jObj);
-            Console.WriteLine(serialized);
             Assert.AreEqual(serialized.GetType(), typeof(string));
             Assert.AreEqual(serialized, expected);
             var deserialized = _json.Deserialize(serialized);

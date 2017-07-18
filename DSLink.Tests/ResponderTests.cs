@@ -168,8 +168,6 @@ namespace DSLink.Tests
                 .SetInvokable(Permission.Write)
                 .SetAction(new ActionHandler(Permission.Write, async (request) =>
                 {
-                    Assert.AreEqual("string", request.Parameters["testString"].Value<string>());
-                    Assert.AreEqual(123, request.Parameters["testNumber"].Value<int>());
                     actionInvoked = true;
                     await request.Close();
                 }))
@@ -178,6 +176,22 @@ namespace DSLink.Tests
             await _invokeNode();
 
             Assert.IsTrue(actionInvoked);
+        }
+
+        [Test]
+        public async Task TestInvokeParameters()
+        {
+            _responder.SuperRoot.CreateChild("testAction")
+                .SetInvokable(Permission.Write)
+                .SetAction(new ActionHandler(Permission.Write, async (request) =>
+                {
+                    Assert.AreEqual("string", request.Parameters["testString"].Value<string>());
+                    Assert.AreEqual(123, request.Parameters["testNumber"].Value<int>());
+                    await request.Close();
+                }))
+                .BuildNode();
+
+            await _invokeNode();
         }
 
         [Test]
@@ -211,21 +225,6 @@ namespace DSLink.Tests
             // Test for unsubscribe method stream close.
             Assert.AreEqual(2, requestClose["rid"].Value<int>());
             Assert.AreEqual("closed", requestClose["stream"].Value<string>());
-        }
-
-        public class TestPlatform : NETPlatform
-        {
-            private readonly Mock<IFolder> _mockFolder;
-
-            public TestPlatform(Mock<IFolder> mockFolder)
-            {
-                _mockFolder = mockFolder;
-            }
-
-            public override IFolder GetPlatformStorageFolder()
-            {
-                return _mockFolder.Object;
-            }
         }
     }
 }

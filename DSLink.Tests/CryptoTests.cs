@@ -15,7 +15,7 @@ namespace DSLink.Tests
         [SetUp]
         public async Task SetUp()
         {
-            var tempPath = GetTempDirectory();
+            var tempPath = Utilities.GetTempDirectory();
             Console.WriteLine(tempPath);
             _tempFolder = await FileSystem.Current.GetFolderFromPathAsync(tempPath);
         }
@@ -39,13 +39,6 @@ namespace DSLink.Tests
             await keyPair2.Load();
 
             Assert.AreEqual(keyPair1.EncodedPublicKey, keyPair2.EncodedPublicKey);
-        }
-
-        public static string GetTempDirectory()
-        {
-            string tempDirectory = PortablePath.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(tempDirectory);
-            return tempDirectory;
         }
     }
 }

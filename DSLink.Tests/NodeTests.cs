@@ -38,23 +38,30 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestBannedCharacters()
+        public void TestEachBannedCharacterInName()
         {
-            var bannedChars = Node.BannedChars;
-            foreach (char c in bannedChars)
+            foreach (char c in Node.BannedChars)
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
                     _superRootNode.CreateChild($"Test{c}").BuildNode();
                 });
             }
+        }
 
+        [Test]
+        public void TestMultipleBannedCharactersInName()
+        {
             var multiCharTest = new string(Node.BannedChars);
             Assert.Throws<ArgumentException>(() =>
             {
                 _superRootNode.CreateChild(multiCharTest).BuildNode();
             });
+        }
 
+        [Test]
+        public void TestNoBannedCharactersInName()
+        {
             var noCharTest = "TestNoBannedChars";
             Assert.DoesNotThrow(() =>
             {
@@ -63,50 +70,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestCreateChildren()
-        {
-            int first = 5; // Number of children of root to create
-            int second = 100; // Number of children to make below each first node.
-            for (int i = 0; i < first; i++)
-            {
-                var firstNode = _superRootNode.CreateChild($"Node{i}").BuildNode();
-                for (int j = 0; j < second; j++)
-                {
-                    firstNode.CreateChild($"Node{j}").BuildNode();
-                }
-            }
-
-            Assert.AreEqual(first, _superRootNode.Children.Count);
-            foreach (var kv in _superRootNode.Children)
-            {
-                Assert.AreEqual(second, kv.Value.Children.Count);
-            }
-        }
-
-        [Test]
-        public void TestRemoveChildren()
-        {
-            const int childrenCount = 100;
-
-            Assert.AreEqual(0, _superRootNode.Children.Count);
-
-            for (int i = 0; i < childrenCount; i++)
-            {
-                _superRootNode.CreateChild($"Node{i}").BuildNode();
-            }
-
-            Assert.AreEqual(childrenCount, _superRootNode.Children.Count);
-
-            for (int i = 0; i < childrenCount; i++)
-            {
-                _superRootNode[$"Node{i}"].RemoveFromParent();
-            }
-
-            Assert.AreEqual(0, _superRootNode.Children.Count);
-        }
-
-        [Test]
-        public void TestSubscriberUpdate()
+        public void TestSubscriberValueUpdate()
         {
             var testValue = _superRootNode.CreateChild("TestValue")
                 .SetType(Nodes.ValueType.Number)

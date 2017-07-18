@@ -1,14 +1,12 @@
 using System.Collections.Generic;
 using System.Threading;
-using DSLink;
 using DSLink.NET;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using System.Threading.Tasks;
 using ValueType = DSLink.Nodes.ValueType;
-using DSLink.Util.Logger;
 
-namespace RNG
+namespace DSLink.Example
 {
     public class ExampleDSLink : DSLinkContainer
     {
@@ -104,6 +102,7 @@ namespace RNG
                 //LoadNodesJson = false,
                 //LogLevel = LogLevel.Debug,
                 //BrokerUrl = "http://localhost:8090/conn"
+                BrokerUrl = "http://rnd.iot-dsa.org/conn"
             };
             var dslink = new ExampleDSLink(config);
 
