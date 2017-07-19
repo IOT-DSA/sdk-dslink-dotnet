@@ -40,14 +40,14 @@
     <Compile Include="Connection\Handshake.cs" />
     <Compile Include="Request\DSLinkRequester.cs" />
     <Compile Include="Respond\Responder.cs" />
-    <Compile Include="Respond\NodeSerializer.cs" />
+    <Compile Include="Respond\DiskSerializer.cs" />
     <Compile Include="Respond\StreamManager.cs" />
     <Compile Include="Respond\SubscriptionManager.cs" />
     <Compile Include="Serializer\BaseSerializer.cs" />
     <Compile Include="Serializer\JsonSerializer.cs" />
     <Compile Include="Serializer\SerializationManager.cs" />
     <Compile Include="Connection\WebSocketBaseConnector.cs" />
-    <Compile Include="Crypto\KeyPair.cs" />
+    <Compile Include="Connection\KeyPair.cs" />
     <Compile Include="Mono.Options-PCL.cs" />
     <Compile Include="Nodes\Actions\ActionHandler.cs" />
     <Compile Include="Nodes\Actions\Column.cs" />

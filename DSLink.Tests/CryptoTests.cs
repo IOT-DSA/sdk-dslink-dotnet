@@ -1,4 +1,4 @@
-﻿using DSLink.Crypto;
+﻿using DSLink.Connection;
 using NUnit.Framework;
 using PCLStorage;
 using System;

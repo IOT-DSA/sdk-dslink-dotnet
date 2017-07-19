@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSLink.Connection;
-using DSLink.Crypto;
+using DSLink.Connection;
 using DSLink.Platform;
 using DSLink.Util;
 using DSLink.Util.Logger;
