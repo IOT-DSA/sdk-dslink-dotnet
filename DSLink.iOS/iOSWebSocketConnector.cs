@@ -34,7 +34,7 @@ namespace DSLink.iOS
 
             _webSocket.WebSocketClosed += (sender, e) =>
             {
-                Logger.Info(e.WasClean
+                _logger.Info(e.WasClean
                     ? $"WebSocket was closed cleanly with code {e.Code}, and reason \"{e.Reason}\""
                     : $"WebSocket was closed uncleanly with code {e.Code}, and reason \"{e.Reason}\"");
 
@@ -43,7 +43,7 @@ namespace DSLink.iOS
 
             _webSocket.WebSocketFailed += (sender, e) =>
             {
-                Logger.Error($"WebSocket error: {e.Error}");
+                _logger.Error($"WebSocket error: {e.Error}");
             };
 
             _webSocket.ReceivedMessage += (sender, e) =>
@@ -98,7 +98,7 @@ namespace DSLink.iOS
         /// <param name="data">Binary data</param>
         public override void WriteBinary(byte[] data)
         {
-            Logger.Debug("Sent binary " + BitConverter.ToString(data));
+            _logger.Debug("Sent binary " + BitConverter.ToString(data));
             _webSocket.Send(NSData.FromArray(data));
         }
     }

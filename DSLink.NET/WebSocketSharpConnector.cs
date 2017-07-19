@@ -32,11 +32,11 @@ namespace DSLink.NET
             {
                 if (e.WasClean)
                 {
-                    Logger.Info(string.Format("WebSocket was closed cleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
+                    _logger.Info(string.Format("WebSocket was closed cleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
                 }
                 else
                 {
-                    Logger.Info(string.Format("WebSocket was closed uncleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
+                    _logger.Info(string.Format("WebSocket was closed uncleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
                 }
 
                 EmitClose();
@@ -44,7 +44,7 @@ namespace DSLink.NET
 
             _webSocket.OnError += (object sender, ErrorEventArgs e) =>
             {
-                Logger.Error(string.Format("WebSocket error: {0}", e.Message));
+                _logger.Error(string.Format("WebSocket error: {0}", e.Message));
             };
 
             _webSocket.OnMessage += (object sender, MessageEventArgs e) =>

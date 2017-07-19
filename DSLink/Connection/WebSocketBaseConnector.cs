@@ -30,14 +30,14 @@ namespace DSLink.Connection
             _webSocket.OnClosed += EmitClose;
             _webSocket.OnError += error =>
             {
-                Logger.Error("WebSocket error: " + error);
+                _logger.Error("WebSocket error: " + error);
             };
             _webSocket.OnMessage += text =>
             {
                 EmitMessage(new MessageEvent(text));
             };
 
-            Logger.Info("WebSocket connecting to " + WsUrl);
+            _logger.Info("WebSocket connecting to " + WsUrl);
             _webSocket.Open(WsUrl);
         }
 

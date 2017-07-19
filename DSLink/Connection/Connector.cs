@@ -11,12 +11,11 @@ namespace DSLink.Connection
     {
         private int _msgId;
         private BaseSerializer _serializer;
-        private readonly BaseLogger _logger;
+        protected readonly BaseLogger _logger;
         protected readonly Configuration _config;
 
         private int MessageId => _msgId++;
         public BaseSerializer DataSerializer => _serializer;
-        public BaseLogger Logger => _logger;
 
         public ConnectionState ConnectionState
         {
