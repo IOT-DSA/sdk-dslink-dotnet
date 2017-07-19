@@ -38,11 +38,15 @@
     <Compile Include="Connection\ConnectionEvents.cs" />
     <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Handshake.cs" />
-    <Compile Include="Connection\Serializer\ISerializer.cs" />
-    <Compile Include="Connection\Serializer\JsonSerializer.cs" />
-    <Compile Include="Connection\Serializer\SerializationManager.cs" />
+    <Compile Include="Request\DSLinkRequester.cs" />
+    <Compile Include="Respond\Responder.cs" />
+    <Compile Include="Respond\NodeSerializer.cs" />
+    <Compile Include="Respond\StreamManager.cs" />
+    <Compile Include="Respond\SubscriptionManager.cs" />
+    <Compile Include="Serializer\BaseSerializer.cs" />
+    <Compile Include="Serializer\JsonSerializer.cs" />
+    <Compile Include="Serializer\SerializationManager.cs" />
     <Compile Include="Connection\WebSocketBaseConnector.cs" />
-    <Compile Include="Container\AbstractContainer.cs" />
     <Compile Include="Crypto\KeyPair.cs" />
     <Compile Include="Mono.Options-PCL.cs" />
     <Compile Include="Nodes\Actions\ActionHandler.cs" />
@@ -62,16 +66,15 @@
     <Compile Include="Util\ReadOnlyDictionary.cs" />
     <Compile Include="Request\Requests.cs" />
     <Compile Include="Respond\Responses.cs" />
-    <Compile Include="Request\Requester.cs" />
-    <Compile Include="Respond\Responder.cs" />
+    <Compile Include="Respond\DSLinkResponder.cs" />
     <Compile Include="Util\Logger\BaseLogger.cs" />
     <Compile Include="Util\Logger\LogLevel.cs" />
     <Compile Include="Util\Logger\DiagnosticsLogger.cs" />
-    <Compile Include="Connection\Serializer\JsonByteArrayConverter.cs" />
+    <Compile Include="Serializer\JsonByteArrayConverter.cs" />
     <Compile Include="Nodes\RemoteNode.cs" />
-    <Compile Include="Connection\Serializer\MsgPackSerializer.cs" />
-    <Compile Include="MsgPack\MessagePackReader.cs" />
-    <Compile Include="MsgPack\MessagePackWriter.cs" />
+    <Compile Include="Serializer\MsgPackSerializer.cs" />
+    <Compile Include="Serializer\Newtonsoft.MsgPack\MessagePackReader.cs" />
+    <Compile Include="Serializer\Newtonsoft.MsgPack\MessagePackWriter.cs" />
     <Compile Include="Request\SubscriptionUpdate.cs" />
     <Compile Include="Connection\ConnectionState.cs" />
     <Compile Include="Nodes\ValueType.cs" />
@@ -80,9 +83,11 @@
     <Compile Include="Nodes\Actions\Table.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="MsgPack, Version=0.8.0.0, Culture=neutral, PublicKeyToken=a2625990d5dc0167, processorArchitecture=MSIL">
+      <HintPath>..\packages\MsgPack.Cli.0.8.1\lib\netstandard1.1\MsgPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\portable-net45+win8+wp8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PCLStorage, Version=1.0.2.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
       <HintPath>..\packages\PCLStorage.1.0.2\lib\portable-net45+wp8+wpa81+win8+monoandroid+monotouch+Xamarin.iOS+Xamarin.Mac\PCLStorage.dll</HintPath>
@@ -95,9 +100,6 @@
     <Reference Include="WebSockets.PCL, Version=1.0.0.8, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Websockets.Pcl.1.1.9\lib\portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10\WebSockets.PCL.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="MsgPack">
-      <HintPath>..\packages\MsgPack.Cli.0.6.8\lib\portable-net45+win+wpa81\MsgPack.dll</HintPath>
     </Reference>
     <Reference Include="crypto">
       <HintPath>..\packages\Portable.BouncyCastle-Signed.1.7.0.2\lib\portable-net4+sl5+wp8+win8+wpa81+MonoTouch10+MonoAndroid10+xamarinmac20+xamarinios10\crypto.dll</HintPath>

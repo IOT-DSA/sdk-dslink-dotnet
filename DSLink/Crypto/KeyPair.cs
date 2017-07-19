@@ -62,7 +62,7 @@ namespace DSLink.Crypto
         /// <summary>
         /// Generate the KeyPair.
         /// </summary>
-        private static AsymmetricCipherKeyPair Generate()
+        public static AsymmetricCipherKeyPair Generate()
         {
             var generator = new ECKeyPairGenerator();
             var secureRandom = new SecureRandom();
@@ -80,38 +80,55 @@ namespace DSLink.Crypto
             switch (res)
             {
                 case ExistenceCheckResult.FileExists:
-                    var file = await _folder.GetFileAsync(_location);
-                    var reader = new StreamReader(await file.OpenAsync(FileAccess.Read));
-                    var data = reader.ReadLine();
-
-                    if (data != null)
-                    {
-                        var split = data.Split(' ');
-                        if (split.Length != 2)
-                        {
-                            throw new FormatException("Keys file doesn't contain proper data.");
-                        }
-
-                        var ecp = GetParams();
-
-                        var q = Convert.FromBase64String(split[1]);
-                        var point = ecp.Curve.DecodePoint(q);
-                        var pubParams = new ECPublicKeyParameters(point, ecp);
-
-                        var d = new BigInteger(Convert.FromBase64String(split[0]));
-                        var privParams = new ECPrivateKeyParameters(d, ecp);
-
-                        BcKeyPair = new AsymmetricCipherKeyPair(pubParams, privParams);
-                    }
+                    await LoadFromFile();
                     break;
                 case ExistenceCheckResult.NotFound:
-                    var key = Generate();
-                    await Save(key);
-                    BcKeyPair = key;
+                    await GenerateAndSave();
                     break;
                 default:
                     throw new IOException("Unknown error occurred while trying to load/save crypto keypair.");
             }
+        }
+
+        private async Task LoadFromFile()
+        {
+            var file = await _folder.GetFileAsync(_location);
+            using (var reader = new StreamReader(await file.OpenAsync(FileAccess.Read)))
+            {
+                var data = reader.ReadLine();
+
+                if (data != null)
+                {
+                    DeserializeKeyPair(data);
+                }
+            }
+        }
+
+        private void DeserializeKeyPair(string data)
+        {
+            var split = data.Split(' ');
+            if (split.Length != 2)
+            {
+                throw new FormatException("Keys file doesn't contain proper data.");
+            }
+
+            var ecp = GetParams();
+
+            var q = Convert.FromBase64String(split[1]);
+            var point = ecp.Curve.DecodePoint(q);
+            var pubParams = new ECPublicKeyParameters(point, ecp);
+
+            var d = new BigInteger(Convert.FromBase64String(split[0]));
+            var privParams = new ECPrivateKeyParameters(d, ecp);
+
+            BcKeyPair = new AsymmetricCipherKeyPair(pubParams, privParams);
+        }
+
+        private async Task GenerateAndSave()
+        {
+            var key = Generate();
+            await Save(key);
+            BcKeyPair = key;
         }
 
         /// <summary>

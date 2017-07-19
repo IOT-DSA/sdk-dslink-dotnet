@@ -13,7 +13,7 @@ namespace DSLink.NET
 
         public override Connector CreateConnector(DSLinkContainer container)
         {
-            return new WebSocketSharpConnector(container);
+            return new WebSocketSharpConnector(container.Config, container.Logger);
         }
 
         protected override Type GetLoggerType()

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using DSLink.Connection.Serializer;
-using DSLink.Container;
 using DSLink.Nodes;
-using DSLink.Nodes.Actions;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink.Respond
@@ -17,7 +13,7 @@ namespace DSLink.Respond
         /// <summary>
         /// DSLink container.
         /// </summary>
-        private readonly AbstractContainer _link;
+        private readonly DSLinkContainer _link;
 
         /// <summary>
         /// Request identifier for request.
@@ -34,7 +30,7 @@ namespace DSLink.Respond
         /// </summary>
         /// <param name="link">Link instance</param>
         /// <param name="requestID">Request identifier</param>
-        public Response(AbstractContainer link, int requestID)
+        public Response(DSLinkContainer link, int requestID)
         {
             _link = link;
             RequestID = requestID;
@@ -93,7 +89,7 @@ namespace DSLink.Respond
         /// <param name="requestID">Request identifier</param>
         /// <param name="path">Path</param>
         /// <param name="node">Node</param>
-        public ListResponse(AbstractContainer link, int requestID,
+        public ListResponse(DSLinkContainer link, int requestID,
                             string path, Node node)
             : base(link, requestID)
         {
@@ -148,7 +144,7 @@ namespace DSLink.Respond
         /// <param name="path">Path</param>
         /// <param name="columns">Columns</param>
         /// <param name="updates">Updates</param>
-        public InvokeResponse(AbstractContainer link, int requestID,
+        public InvokeResponse(DSLinkContainer link, int requestID,
                               string path, JArray columns,
                               JArray updates)
             : base(link, requestID)

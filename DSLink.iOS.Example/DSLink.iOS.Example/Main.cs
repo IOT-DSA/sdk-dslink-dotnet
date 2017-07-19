@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DSLink.Util.Logger;
-using UIKit;
+﻿using UIKit;
 
 namespace DSLink.iOS.Example
 {

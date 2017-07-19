@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DSLink.Container;
 using DSLink.Nodes.Actions;
 using DSLink.Util;
 using Newtonsoft.Json.Linq;
@@ -26,12 +25,13 @@ namespace DSLink.Nodes
         private readonly IDictionary<string, Node> _children;
 
         /// <summary>
-        /// Dictionary of Node configurations
+        /// Config values store data on the configuration of
+        /// a Node or its children.
         /// </summary>
         private readonly IDictionary<string, Value> _configs;
 
         /// <summary>
-        /// Dictionary of Node attributes
+        /// Attributes store data specific values.
         /// </summary>
         private readonly IDictionary<string, Value> _attributes;
 
@@ -64,7 +64,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// DSLink container instance.
         /// </summary>
-        private readonly AbstractContainer _link;
+        private readonly DSLinkContainer _link;
 
         /// <summary>
         /// Used to lock the children dictionary.
@@ -170,6 +170,12 @@ namespace DSLink.Nodes
         public ReadOnlyDictionary<string, Value> Attributes => new ReadOnlyDictionary<string, Value>(_attributes);
 
         /// <summary>
+        /// Private configuration values only stored locally, these
+        /// are not available over DSA.
+        /// </summary>
+        public readonly IDictionary<string, Value> PrivateConfigs;
+
+        /// <summary>
         /// Index operator overload.
         /// Example: Parent["Child"]["ChildOfChild"]
         /// </summary>
@@ -181,6 +187,10 @@ namespace DSLink.Nodes
             {
                 lock (_childrenLock)
                 {
+                    if (name.StartsWith("/"))
+                    {
+                        return Get(name);
+                    }
                     return _children[name];
                 }
             }
@@ -193,28 +203,24 @@ namespace DSLink.Nodes
         /// <param name="parent">Parent of Node</param>
         /// <param name="link">DSLink container of Node</param>
         /// <param name="className">Node class name</param>
-        public Node(string name, Node parent, AbstractContainer link, string className = "node")
+        public Node(string name, Node parent, DSLinkContainer link, string className = "node")
         {
             if (name == null)
             {
                 throw new ArgumentException("Name must not be null.");
             }
-            if (name.IndexOfAny(BannedChars) != -1)
-            {
-                throw new ArgumentException("Invalid character(s) in Node name.");
-            }
             ClassName = className;
             Parent = parent;
             _children = new Dictionary<string, Node>();
-            _configs = new Dictionary<string, Value>
-            {
-                {"$is", new Value("node")}
-            };
+            _configs = new Dictionary<string, Value>();
             _attributes = new Dictionary<string, Value>();
+            PrivateConfigs = new Dictionary<string, Value>();
             _removedChildren = new List<Node>();
             Subscribers = new List<int>();
             Streams = new List<int>();
             _link = link;
+
+            _createInitialData();
 
             Value = new Value();
             Value.OnSet += ValueSet;
@@ -237,20 +243,45 @@ namespace DSLink.Nodes
             link?.Responder?.StreamManager?.OnActivateNode(this);
         }
 
+        private void _createInitialData()
+        {
+            _configs["$is"] = new Value(ClassName);
+        }
+
         /// <summary>
         /// Initializes the Node Class.
         /// </summary>
         public void InitializeClass()
         {
-            if (_initializedClass)
+            if (_initializedClass || _link == null)
             {
                 return;
             }
             _initializedClass = true;
-            if (_link.Responder.NodeClasses.ContainsKey(ClassName))
+            if (_link.Responder.NodeClasses.ContainsKey(ClassName) &&
+                (!PrivateConfigs.ContainsKey("nodeClassInit") || PrivateConfigs["nodeClassInit"].Boolean == false))
             {
+                PrivateConfigs["nodeclassInit"] = new Value(true);
+                ResetNode();
                 _link.Responder.NodeClasses[ClassName](this);
             }
+        }
+
+        /// <summary>
+        /// Clears everything from the Node, including
+        /// children, nodes, config, attributes, etc.
+        /// TODO: To become a public API, properly implement
+        /// this, don't just kill off children.
+        /// </summary>
+        internal void ResetNode()
+        {
+            _children.Clear();
+            _configs.Clear();
+            _attributes.Clear();
+            PrivateConfigs.Clear();
+            Value.Clear();
+
+            _createInitialData();
         }
 
         /// <summary>
@@ -271,14 +302,9 @@ namespace DSLink.Nodes
         /// <returns>Attribute value</returns>
         public Value GetConfig(string key)
         {
-            try
-            {
-                return _configs["$" + key];
-            }
-            catch (KeyNotFoundException)
-            {
-                return null;
-            }
+            var name = "$" + key;
+            if (!_configs.ContainsKey(name)) return null;
+            return _configs[name];
         }
 
         /// <summary>
@@ -299,14 +325,9 @@ namespace DSLink.Nodes
         /// <returns>Attribute value</returns>
         public Value GetAttribute(string key)
         {
-            try
-            {
-                return _attributes["@" + key];
-            }
-            catch (KeyNotFoundException)
-            {
-                return null;
-            }
+            var name = "@" + key;
+            if (!_attributes.ContainsKey(name)) return null;
+            return _attributes[name];
         }
 
         /// <summary>
@@ -482,11 +503,8 @@ namespace DSLink.Nodes
         /// <summary>
         /// Check whether this Node has a value.
         /// </summary>
-        /// <returns>True when Node has a value</returns>
-        public bool HasValue()
-        {
-            return Value != null && !Value.IsNull;
-        }
+        /// <value>True when Node has a value</value>
+        public bool HasValue => Value != null && !Value.IsNull;
 
         /// <summary>
         /// Create a child via the NodeFactory.
@@ -497,6 +515,10 @@ namespace DSLink.Nodes
         /// <returns>NodeFactory of new child</returns>
         public virtual NodeFactory CreateChild(string name, string className)
         {
+            if (name.IndexOfAny(BannedChars) != -1)
+            {
+                throw new ArgumentException("Invalid character(s) in Node name.");
+            }
             Node child = new Node(name, this, _link, className);
             return new NodeFactory(child);
         }
@@ -520,6 +542,10 @@ namespace DSLink.Nodes
         {
             lock (_childrenLock)
             {
+                if (_children.ContainsKey(child.Name))
+                {
+                    throw new ArgumentException($"Child already exists at {child.Path}");
+                }
                 _children.Add(child.Name, child);
             }
             UpdateSubscribers();
@@ -535,6 +561,13 @@ namespace DSLink.Nodes
             {
                 Parameters = new JArray();
             }
+            foreach (JToken token in Parameters)
+            {
+                if (token["name"].Value<string>() == parameter.Name)
+                {
+                    throw new Exception($"Parameter {parameter.Name} already exists on {_path}");
+                }
+            }
             Parameters.Add(parameter);
         }
 
@@ -547,6 +580,13 @@ namespace DSLink.Nodes
             if (Columns == null)
             {
                 Columns = new JArray();
+            }
+            foreach (JToken token in Columns)
+            {
+                if (token["name"].Value<string>() == column.Name)
+                {
+                    throw new Exception($"Column {column.Name} already exists on {_path}");
+                }
             }
             Columns.Add(column);
         }
@@ -587,10 +627,6 @@ namespace DSLink.Nodes
             Parent?.RemoveChild(Name);
         }
 
-        /// <summary>
-        /// Remove a Node configuration or attribute in the Node tree from here.
-        /// </summary>
-        /// <param name="path">Path of configuration/attribute</param>
         internal void RemoveConfigAttribute(string path)
         {
             if (path.StartsWith("/$") || path.StartsWith(Path + "/@"))
@@ -614,18 +650,21 @@ namespace DSLink.Nodes
         /// <param name="value"></param>
         protected virtual async void ValueSet(Value value)
         {
+            List<Task> tasks = new List<Task>();
             lock (Subscribers)
             {
                 foreach (var sid in Subscribers)
                 {
-                    _link.Connector.AddValueUpdateResponse(new JArray
+                    tasks.Add(_link.Connector.AddValueUpdateResponse(new JArray
                     {
                         sid,
                         value.JToken,
                         value.LastUpdated
-                    });
+                    }));
                 }
             }
+
+            await Task.WhenAll(tasks);
         }
 
         /// <summary>
@@ -668,7 +707,7 @@ namespace DSLink.Nodes
                     {
                         value[attr.Key] = attr.Value.JToken;
                     }
-                    if (child.Value.HasValue())
+                    if (child.Value.HasValue)
                     {
                         value["value"] = child.Value.Value.JToken;
                         value["ts"] = child.Value.Value.LastUpdated;
@@ -702,7 +741,7 @@ namespace DSLink.Nodes
         /// </summary>
         public async Task TriggerSerialize()
         {
-            await _link.Responder.Serialize();
+            await _link.Responder.NodeSerializer.SerializeToDisk();
         }
 
         /// <summary>
@@ -723,6 +762,13 @@ namespace DSLink.Nodes
                 obj.Add(new JProperty(entry.Key, entry.Value.JToken));
             }
 
+            var privateConfigs = new JObject();
+            obj.Add("privateConfigs", privateConfigs);
+            foreach (var entry in PrivateConfigs)
+            {
+                privateConfigs.Add(new JProperty(entry.Key, entry.Value.JToken));
+            }
+
             foreach (var entry in Children)
             {
                 if (entry.Value.Serializable)
@@ -731,7 +777,7 @@ namespace DSLink.Nodes
                 }
             }
 
-            if (HasValue())
+            if (HasValue)
             {
                 obj.Add(new JProperty("?value", Value.JToken));
             }
@@ -762,6 +808,13 @@ namespace DSLink.Nodes
                 else if (prop.Key.StartsWith("@"))
                 {
                     SetAttribute(prop.Key.Substring(1), new Value(prop.Value));
+                }
+                else if (prop.Key == "privateConfigs")
+                {
+                    foreach (var entry in prop.Value.Value<JObject>())
+                    {
+                        PrivateConfigs[entry.Key] = new Value(entry.Value);
+                    }
                 }
                 else if (prop.Value is JObject)
                 {
@@ -819,7 +872,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Clones this node.
         /// </summary>
-        /// <returns>>A new Node instance that is exactly the same as this node.</returns>
+        /// <returns>A new Node instance that is exactly the same as this node.</returns>
         public Node Clone()
         {
             var node = new Node(Name, Parent, _link, Profile);
@@ -827,9 +880,6 @@ namespace DSLink.Nodes
             return node;
         }
 
-        /// <summary>
-        /// Update all subscribers of this Node.
-        /// </summary>
         internal virtual async void UpdateSubscribers()
         {
             if (Building)

@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using DSLink.Connection;
-using DSLink.Container;
 using Foundation;
 using Square.SocketRocket;
+using DSLink.Util.Logger;
 
 namespace DSLink.iOS
 {
@@ -16,7 +16,8 @@ namespace DSLink.iOS
 
         public override bool SupportsBinary => true;
 
-        public iOSWebSocketConnector(AbstractContainer link) : base(link)
+        public iOSWebSocketConnector(Configuration config, BaseLogger logger)
+            : base(config, logger)
         {
         }
 
@@ -33,16 +34,19 @@ namespace DSLink.iOS
 
             _webSocket.WebSocketClosed += (sender, e) =>
             {
-                _link.Logger.Info(e.WasClean
-                    ? $"WebSocket was closed cleanly with code {e.Code}, and reason \"{e.Reason}\""
-                    : $"WebSocket was closed uncleanly with code {e.Code}, and reason \"{e.Reason}\"");
+                var cleanString = e.WasClean
+                    ? "cleanly"
+                    : "uncleanly";
+                _logger.Info(
+                    $"WebSocket was closed {cleanString} with code {e.Code}, and reason \"{e.Reason}\""
+                );
 
                 EmitClose();
             };
 
             _webSocket.WebSocketFailed += (sender, e) =>
             {
-                _link.Logger.Error($"WebSocket error: {e.Error}");
+                _logger.Error($"WebSocket error: {e.Error}");
             };
 
             _webSocket.ReceivedMessage += (sender, e) =>
@@ -97,7 +101,7 @@ namespace DSLink.iOS
         /// <param name="data">Binary data</param>
         public override void WriteBinary(byte[] data)
         {
-            _link.Logger.Debug("Sent binary " + BitConverter.ToString(data));
+            _logger.Debug("Sent binary " + BitConverter.ToString(data));
             _webSocket.Send(NSData.FromArray(data));
         }
     }

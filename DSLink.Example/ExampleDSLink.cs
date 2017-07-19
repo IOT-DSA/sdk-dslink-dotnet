@@ -1,14 +1,12 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using DSLink;
 using DSLink.NET;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using System.Threading.Tasks;
 using ValueType = DSLink.Nodes.ValueType;
 
-namespace RNG
+namespace DSLink.Example
 {
     public class ExampleDSLink : DSLinkContainer
     {
@@ -18,11 +16,11 @@ namespace RNG
         public ExampleDSLink(Configuration config) : base(config)
         {
             Responder.AddNodeClass("testAction", delegate (Node node)
-                {
+            {
                 node.AddParameter(new Parameter("string", ValueType.String));
                 node.AddParameter(new Parameter("int", ValueType.Number));
                 node.AddParameter(new Parameter("number", ValueType.Number));
-                node.AddColumn(new Column("success", "bool"));
+                node.AddColumn(new Column("success", ValueType.Boolean));
 
                 var handler = new ActionHandler(Permission.Write, async (request) =>
                 {
@@ -74,19 +72,14 @@ namespace RNG
         {
             Responder.SuperRoot.CreateChild("Test", "testAction").BuildNode();
 
-            Task.Run(async () =>
+            for (var x = 1; x <= 5; x++)
             {
-                await Task.Delay(5000);
-
-                for (var x = 1; x <= 5; x++)
+                var node = Responder.SuperRoot.CreateChild($"Container{x}").BuildNode();
+                for (var i = 1; i <= 50; i++)
                 {
-                    var node = Responder.SuperRoot.CreateChild($"Container{x}").BuildNode();
-                    for (var i = 1; i <= 50; i++)
-                    {
-                        node.CreateChild($"TestVal{i}", "rng").BuildNode();
-                    }
+                    node.CreateChild($"TestVal{i}", "rng").BuildNode();
                 }
-            });
+            }
         }
 
         private static void Main(string[] args)
@@ -103,16 +96,18 @@ namespace RNG
         {
             NETPlatform.Initialize();
 
-            var config = new ConfigurationBuilder(args.ToList())
+            var config = new Configuration(args, "RNG", true, true)
             {
-                Name = "sdk-dotnet-rng",
-                Requester = true,
-                Responder = true
-            }.Build();
-
+                //CommunicationFormat = "json",
+                //LoadNodesJson = false,
+                //LogLevel = LogLevel.Debug,
+                //BrokerUrl = "http://localhost:8090/conn"
+                BrokerUrl = "http://rnd.iot-dsa.org/conn"
+            };
             var dslink = new ExampleDSLink(config);
 
             await dslink.Connect();
+            await dslink.SaveNodes();
         }
     }
 }

@@ -1,36 +1,26 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using DSLink.Connection.Serializer;
-using DSLink.Container;
 using Newtonsoft.Json.Linq;
+using DSLink.Util.Logger;
+using DSLink.Serializer;
 
 namespace DSLink.Connection
 {
     public abstract class Connector
     {
-        /// <summary>
-        /// Instance of link container.
-        /// </summary>
-        protected readonly AbstractContainer _link;
+        private int _msgId;
+        private BaseSerializer _serializer;
+        protected readonly BaseLogger _logger;
+        protected readonly Configuration _config;
 
-        /// <summary>
-        /// Gets the state of the WebSocket connection.
-        /// </summary>
+        private int MessageId => _msgId++;
+        public BaseSerializer DataSerializer => _serializer;
+
         public ConnectionState ConnectionState
         {
             private set;
             get;
-        }
-
-        /// <summary>
-        /// Instance of serializer, used to serialize data going through the
-        /// connection.
-        /// </summary>
-        public ISerializer Serializer
-        {
-            get;
-            internal set;
         }
 
         /// <summary>
@@ -120,26 +110,22 @@ namespace DSLink.Connection
         /// </summary>
         public event Action<BinaryMessageEvent> OnBinaryMessage;
 
-        /// <summary>
-        /// Base constructor for connectors, registers default events for
-        /// setting the connection state.
-        /// </summary>
-        /// <param name="link">Link</param>
-        protected Connector(AbstractContainer link)
+        protected Connector(Configuration config, BaseLogger logger)
         {
-            _link = link;
+            _config = config;
+            _logger = logger;
             ConnectionState = ConnectionState.Disconnected;
 
             OnOpen += () =>
             {
                 ConnectionState = ConnectionState.Connected;
-                _link.Logger.Info("Connected");
+                _logger.Info($"Connected to {WsUrl}");
             };
 
             OnClose += () =>
             {
                 ConnectionState = ConnectionState.Disconnected;
-                _link.Logger.Info("Disconnected");
+                _logger.Info("Disconnected");
             };
         }
 
@@ -150,16 +136,15 @@ namespace DSLink.Connection
         {
             get
             {
-                var config = _link.Config;
-                var uri = new Uri(config.BrokerUrl);
+                var uri = new Uri(_config.BrokerUrl);
                 var sb = new StringBuilder();
 
                 sb.Append(uri.Scheme.Equals("https") ? "wss://" : "ws://");
-                sb.Append(uri.Host).Append(":").Append(uri.Port).Append(config.RemoteEndpoint.wsUri);
+                sb.Append(uri.Host).Append(":").Append(uri.Port).Append(_config.RemoteEndpoint.wsUri);
                 sb.Append("?");
-                sb.Append("dsId=").Append(config.DsId);
-                sb.Append("&auth=").Append(config.Authentication);
-                sb.Append("&format=").Append(config.CommunicationFormat);
+                sb.Append("dsId=").Append(_config.DsId);
+                sb.Append("&auth=").Append(_config.Authentication);
+                sb.Append("&format=").Append(_config.CommunicationFormatUsed);
 
                 return sb.ToString();
             }
@@ -168,10 +153,16 @@ namespace DSLink.Connection
         /// <summary>
         /// Connect to the broker.
         /// </summary>
-        public virtual async Task Connect()
+        public virtual Task Connect()
         {
+            _serializer = (BaseSerializer) Activator.CreateInstance(
+                Serializers.Types[_config.CommunicationFormatUsed],
+                this
+            );
             ConnectionState = ConnectionState.Connecting;
-            _link.Logger.Info("Connecting");
+            _logger.Info("Connecting");
+
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -180,7 +171,7 @@ namespace DSLink.Connection
         public virtual void Disconnect()
         {
             ConnectionState = ConnectionState.Disconnecting;
-            _link.Logger.Info("Disconnecting");
+            _logger.Info("Disconnecting");
         }
 
         /// <summary>
@@ -193,7 +184,7 @@ namespace DSLink.Connection
         /// </summary>
         /// <param name="data">RootObject to serialize and send</param>
         /// <param name="allowQueue">Whether to allow the data to be added to the queue</param>
-        public async Task Write(JObject data, bool allowQueue = true)
+        public virtual async Task Write(JObject data, bool allowQueue = true)
         {
             if ((!Connected() || EnableQueue) && allowQueue)
             {
@@ -203,7 +194,7 @@ namespace DSLink.Connection
                     {
                         _queue = new JObject
                         {
-                            new JProperty("msg", _link.MessageId),
+                            new JProperty("msg", MessageId),
                             new JProperty("responses", new JArray()),
                             new JProperty("requests", new JArray())
                         };
@@ -232,17 +223,19 @@ namespace DSLink.Connection
 
                     if (!_hasQueueEvent)
                     {
+                        // Set flag to queue flush
                         _hasQueueEvent = true;
-                        // Schedule event for queue flush.
-                        Task.Run((() => TriggerQueueFlush()));
                     }
                 }
-                return;
+                if (_hasQueueEvent)
+                {
+                    await TriggerQueueFlush();
+                }
             }
 
             if (data["msg"] == null)
             {
-                data["msg"] = _link.MessageId;
+                data["msg"] = MessageId;
             }
 
             if (data["requests"] != null && data["requests"].Value<JArray>().Count == 0)
@@ -255,14 +248,14 @@ namespace DSLink.Connection
                 data.Remove("responses");
             }
 
-            WriteData(Serializer.Serialize(data));
+            WriteData(DataSerializer.Serialize(data));
         }
 
         /// <summary>
         /// Called to add value updates.
         /// </summary>
         /// <param name="update">Value Update</param>
-        public async Task AddValueUpdateResponse(JToken update)
+        public virtual async Task AddValueUpdateResponse(JToken update)
         {
             if (EnableQueue)
             {
@@ -350,13 +343,14 @@ namespace DSLink.Connection
         /// <summary>
         /// Flush the queue.
         /// </summary>
-        internal void Flush(bool fromEvent = false)
+        internal async Task Flush(bool fromEvent = false)
         {
             if (!Connected())
             {
                 return;
             }
-            _link.Logger.Debug("Flushing connection message queue");
+            _logger.Debug("Flushing connection message queue");
+            JObject _queueToFlush = null;
             lock (_queueLock)
             {
                 if (fromEvent)
@@ -385,7 +379,7 @@ namespace DSLink.Connection
 
                 if (_queue != null)
                 {
-                    Write(_queue, false).Wait();
+                    _queueToFlush = _queue;
                     _queue = null;
                 }
 
@@ -394,14 +388,18 @@ namespace DSLink.Connection
                     _subscriptionValueQueue = new JArray();
                 }
             }
+            if (_queueToFlush != null)
+            {
+                await Write(_queueToFlush, false);
+            }
         }
 
         /// <summary>
         /// Flushes the queue for scheduled queue events.
         /// </summary>
-        internal void TriggerQueueFlush()
+        internal async Task TriggerQueueFlush()
         {
-            Flush(true);
+            await Flush(true);
         }
 
         /// <summary>
@@ -417,6 +415,10 @@ namespace DSLink.Connection
             else if (data is byte[])
             {
                 WriteBinary(data);
+            }
+            else
+            {
+                throw new FormatException($"Cannot send message of type {data.Type}");
             }
         }
     }

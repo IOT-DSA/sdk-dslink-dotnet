@@ -132,18 +132,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Globalization;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Linq;
 using System.Reflection;
 
 namespace Mono.Options
 {
-	static class StringCoda
+    static class StringCoda
 	{
 		public static IEnumerable<string> WrappedLines (string self, params int[] widths)
 		{

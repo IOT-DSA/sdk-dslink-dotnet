@@ -20,7 +20,7 @@ namespace DSLink.Platform
 
         public virtual Connector CreateConnector(DSLinkContainer container)
         {
-            return new WebSocketBaseConnector(container);
+            return new WebSocketBaseConnector(container.Config, container.Logger);
         }
 
         public virtual IFolder GetPlatformStorageFolder()
@@ -55,10 +55,6 @@ namespace DSLink.Platform
 
         public static void SetPlatform(BasePlatform platform)
         {
-            if (Current != null)
-            {
-                throw new Exception("Platform has already been initialized.");
-            }
             Current = platform;
             Current.Init();
         }

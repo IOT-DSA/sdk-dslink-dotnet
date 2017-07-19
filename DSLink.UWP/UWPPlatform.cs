@@ -18,7 +18,7 @@ namespace DSLink.UWP
 
         public override Connector CreateConnector(DSLinkContainer container)
         {
-            return new WebSocketBaseConnector(container);
+            return new WebSocketBaseConnector(container.Config, container.Logger);
         }
 
         public override IFolder GetPlatformStorageFolder()

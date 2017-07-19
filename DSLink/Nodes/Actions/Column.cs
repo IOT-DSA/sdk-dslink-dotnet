@@ -3,30 +3,47 @@ using Newtonsoft.Json.Linq;
 namespace DSLink.Nodes.Actions
 {
     /// <summary>
-    /// Column of an action.
+    /// Used to return data from an action while invoking.
     /// </summary>
     public class Column : JObject
     {
         /// <summary>
-        /// Name of the column.
+        /// Name of column.
         /// </summary>
-        public string Name => this["name"].Value<string>();
-
-        /// <summary>
-        /// Type of the column.
-        /// </summary>
-        public string ValueType => this["type"].Value<string>();
-
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Nodes.Actions.Column"/> class.
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="type">Type</param>
-        public Column(string name, string type)
+        public string Name
         {
-            this["name"] = name;
-            this["type"] = type;
+            get
+            {
+                return this["name"].Value<string>();
+            }
+            set
+            {
+                this["name"] = value;
+            }
+        }
+
+        /// <summary>
+        /// Type of the value attached to this column.
+        /// </summary>
+        public ValueType ValueType
+        {
+            get
+            {
+                return ValueType.FromString(this["type"].Value<string>());
+            }
+            set
+            {
+                this["type"] = value.Type;
+            }
+        }
+
+        public Column()
+        {}
+
+        public Column(string name, ValueType type)
+        {
+            Name = name;
+            ValueType = type;
         }
     }
 }

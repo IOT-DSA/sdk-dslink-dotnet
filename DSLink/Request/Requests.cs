@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using DSLink.Connection.Serializer;
-using DSLink.Container;
 using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using DSLink.Respond;
@@ -70,7 +66,7 @@ namespace DSLink.Request
         /// <summary>
         /// Link container instance.
         /// </summary>
-        private readonly AbstractContainer _link;
+        private readonly DSLinkContainer _link;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -80,7 +76,7 @@ namespace DSLink.Request
         /// <param name="callback">Callback</param>
         /// <param name="path">Path</param>
         /// <param name="link">Link</param>
-        public ListRequest(int requestID, Action<ListResponse> callback, string path, AbstractContainer link) : base(requestID)
+        public ListRequest(int requestID, Action<ListResponse> callback, string path, DSLinkContainer link) : base(requestID)
         {
             Callback = callback;
             Path = path;
@@ -141,7 +137,7 @@ namespace DSLink.Request
         /// <summary>
         /// Method of this request.
         /// </summary>
-        public string Method => "set";
+        public override string Method => "set";
 
         /// <summary>
         /// Serialize the request.
@@ -224,7 +220,7 @@ namespace DSLink.Request
         /// <summary>
         /// Link container.
         /// </summary>
-        private readonly AbstractContainer _link;
+        private readonly DSLinkContainer _link;
 
         /// <summary>
         /// Columns of the request.
@@ -253,7 +249,8 @@ namespace DSLink.Request
         /// <param name="link">Link</param>
         /// <param name="columns">Columns</param>
         public InvokeRequest(int requestID, string path, Permission permission, JObject parameters,
-                             Action<InvokeResponse> callback = null, AbstractContainer link = null, JArray columns = null) : base(requestID)
+                             Action<InvokeResponse> callback = null, DSLinkContainer link = null,
+                             JArray columns = null) : base(requestID)
         {
             Path = path;
             Permission = permission;
