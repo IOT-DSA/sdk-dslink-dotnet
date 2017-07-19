@@ -119,8 +119,9 @@ namespace DSLink.Tests
             });
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestList()
+        public async Task List()
         {
             var responses = await _listNode();
             var response = responses[0];
@@ -154,12 +155,11 @@ namespace DSLink.Tests
             Assert.AreEqual("node", testNodeUpdate["$is"].Value<string>());
             Assert.AreEqual("string", testNodeUpdate["$testString"].Value<string>());
             Assert.AreEqual(123, testNodeUpdate["$testNumber"].Value<int>());
-
-            Console.WriteLine(updates.ToString());
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestInvoke()
+        public async Task Invoke()
         {
             bool actionInvoked = false;
             _responder.SuperRoot.CreateChild("testAction")
@@ -176,8 +176,9 @@ namespace DSLink.Tests
             Assert.IsTrue(actionInvoked);
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestInvokeParameters()
+        public async Task InvokeParameters()
         {
             _responder.SuperRoot.CreateChild("testAction")
                 .SetInvokable(Permission.Write)
@@ -192,8 +193,9 @@ namespace DSLink.Tests
             await _invokeNode();
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestSubscribe()
+        public async Task Subscribe()
         {
             var requestResponses = await _subscribeToNode();
 
@@ -212,8 +214,9 @@ namespace DSLink.Tests
             Assert.AreEqual("closed", requestClose["stream"].Value<string>());
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestUnsubscribe()
+        public async Task Unsubscribe()
         {
             await _subscribeToNode();
             var requestResponses = await _unsubscribeFromNode();

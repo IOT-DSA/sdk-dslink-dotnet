@@ -80,7 +80,7 @@ namespace DSLink.Tests
             0x38, 0x3A, 0x30, 0x30
         };
 
-        private void TestJson_Common(JObject jObj, string expected, bool deepEquals = true)
+        private void Json_Common(JObject jObj, string expected, bool deepEquals = true)
         {
             var serialized = _json.Serialize(jObj);
             Assert.AreEqual(serialized.GetType(), typeof(string));
@@ -90,7 +90,7 @@ namespace DSLink.Tests
                 Assert.IsTrue(JObject.DeepEquals(jObj, deserialized));
         }
 
-        private void TestMsgPack_Common(JObject jObj, byte[] expected)
+        private void MsgPack_Common(JObject jObj, byte[] expected)
         {
             var serialized = _msgpack.Serialize(jObj);
             Console.WriteLine(BitConverter.ToString(serialized));
@@ -101,42 +101,42 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestJson_SimpleMsgAck()
+        public void Json_SimpleMsgAck()
         {
-            TestJson_Common(_simpleMsgAck, _simpleMsgAck_Json_Expected);
+            Json_Common(_simpleMsgAck, _simpleMsgAck_Json_Expected);
         }
 
         [Test]
-        public void TestJson_ListRequest()
+        public void Json_ListRequest()
         {
-            TestJson_Common(_listRequest, _listRequest_Json_Expected);
+            Json_Common(_listRequest, _listRequest_Json_Expected);
         }
 
         [Test]
-        public void TestJson_BinaryUpdate()
+        public void Json_BinaryUpdate()
         {
             // JsonSerializer does not output proper binary, Value takes care of that.
             // Skip DeepEquals
             // TODO: Enable DeepEquals when JsonSerializer supports binary deserialization.
-            TestJson_Common(_binaryUpdate, _binaryUpdate_Json_Expected, false);
+            Json_Common(_binaryUpdate, _binaryUpdate_Json_Expected, false);
         }
 
         [Test]
-        public void TestMsgPack_SimpleMsgAck()
+        public void MsgPack_SimpleMsgAck()
         {
-            TestMsgPack_Common(_simpleMsgAck, _simpleMsgAck_MsgPack_Expected);
+            MsgPack_Common(_simpleMsgAck, _simpleMsgAck_MsgPack_Expected);
         }
 
         [Test]
-        public void TestMsgPack_ListRequest()
+        public void MsgPack_ListRequest()
         {
-            TestMsgPack_Common(_listRequest, _listRequest_MsgPack_Expected);
+            MsgPack_Common(_listRequest, _listRequest_MsgPack_Expected);
         }
 
         [Test]
-        public void TestMsgPack_BinaryUpdate()
+        public void MsgPack_BinaryUpdate()
         {
-            TestMsgPack_Common(_binaryUpdate, _binaryUpdate_MsgPack_Expected);
+            MsgPack_Common(_binaryUpdate, _binaryUpdate_MsgPack_Expected);
         }
     }
 }

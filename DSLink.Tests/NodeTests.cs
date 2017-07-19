@@ -41,7 +41,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestEachBannedCharacterInName()
+        public void EachBannedCharacterInName()
         {
             foreach (char c in Node.BannedChars)
             {
@@ -53,7 +53,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestMultipleBannedCharactersInName()
+        public void MultipleBannedCharactersInName()
         {
             var multiCharTest = new string(Node.BannedChars);
             Assert.Throws<ArgumentException>(() =>
@@ -63,7 +63,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestNoBannedCharactersInName()
+        public void NoBannedCharactersInName()
         {
             var noCharTest = "TestNoBannedChars";
             Assert.DoesNotThrow(() =>
@@ -73,7 +73,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestSubscriberValueUpdate()
+        public void SubscriberValueUpdate()
         {
             var testValue = _superRootNode.CreateChild("TestValue")
                 .SetType(Nodes.ValueType.Number)
@@ -96,7 +96,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestNodeTraversal()
+        public void NodeTraversal()
         {
             var testParent = _superRootNode.CreateChild("testParent").BuildNode();
             var testChild = testParent.CreateChild("testChild").BuildNode();
@@ -112,7 +112,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestConfigAttributeSerialization()
+        public void ConfigAttributeSerialization()
         {
             var testNode = _superRootNode
                 .CreateChild("testNode")
@@ -147,7 +147,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestLocalSerialization()
+        public void LocalSerialization()
         {
             var testNode = _superRootNode
                 .CreateChild("testNode")
@@ -176,7 +176,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestLocalDeserialization()
+        public void LocalDeserialization()
         {
             var testObject = new JObject
             {

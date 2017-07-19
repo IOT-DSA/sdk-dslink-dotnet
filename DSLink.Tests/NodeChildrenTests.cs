@@ -35,7 +35,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestCreateChildren()
+        public void CreateChildren()
         {
             int numberOfFirstLevelNodes = 5;
             int numberOfSecondLevelNodes = 100;
@@ -56,7 +56,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestRemoveChildren()
+        public void RemoveChildren()
         {
             const int childrenCount = 100;
 
