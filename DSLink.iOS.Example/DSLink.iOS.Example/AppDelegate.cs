@@ -6,9 +6,7 @@ using DSLink.Nodes.Actions;
 using DSLink.Request;
 using DSLink.Util.Logger;
 using Foundation;
-using Newtonsoft.Json.Linq;
 using UIKit;
-using Action = DSLink.Nodes.Actions.ActionHandler;
 
 namespace DSLink.iOS.Example
 {

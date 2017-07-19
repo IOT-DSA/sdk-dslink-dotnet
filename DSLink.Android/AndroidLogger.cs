@@ -1,6 +1,4 @@
-﻿using System;
-using Android.Util;
-using DSLink.Util.Logger;
+﻿using DSLink.Util.Logger;
 using Java.Lang;
 
 namespace DSLink.Android

@@ -34,9 +34,12 @@ namespace DSLink.iOS
 
             _webSocket.WebSocketClosed += (sender, e) =>
             {
-                _logger.Info(e.WasClean
-                    ? $"WebSocket was closed cleanly with code {e.Code}, and reason \"{e.Reason}\""
-                    : $"WebSocket was closed uncleanly with code {e.Code}, and reason \"{e.Reason}\"");
+                var cleanString = e.WasClean
+                    ? "cleanly"
+                    : "uncleanly";
+                _logger.Info(
+                    $"WebSocket was closed {cleanString} with code {e.Code}, and reason \"{e.Reason}\""
+                );
 
                 EmitClose();
             };
@@ -48,8 +51,7 @@ namespace DSLink.iOS
 
             _webSocket.ReceivedMessage += (sender, e) =>
             {
-                var data = e.Message as NSData;
-                if (data != null)
+                if (e.Message is NSData data)
                 {
                     EmitBinaryMessage(new BinaryMessageEvent(data.ToArray()));
                 }
