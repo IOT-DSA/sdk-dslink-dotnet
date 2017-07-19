@@ -2,12 +2,21 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using DSLink.Util.Logger;
+using DSLink.Serializer;
 
 namespace DSLink.Connection
 {
     public abstract class Connector
     {
-        protected readonly DSLinkContainer _link;
+        private int _msgId;
+        private BaseSerializer _serializer;
+        private readonly BaseLogger _logger;
+        protected readonly Configuration _config;
+
+        private int MessageId => _msgId++;
+        public BaseSerializer DataSerializer => _serializer;
+        public BaseLogger Logger => _logger;
 
         public ConnectionState ConnectionState
         {
@@ -102,26 +111,22 @@ namespace DSLink.Connection
         /// </summary>
         public event Action<BinaryMessageEvent> OnBinaryMessage;
 
-        /// <summary>
-        /// Base constructor for connectors, registers default events for
-        /// setting the connection state.
-        /// </summary>
-        /// <param name="link">Link</param>
-        protected Connector(DSLinkContainer link)
+        protected Connector(Configuration config, BaseLogger logger)
         {
-            _link = link;
+            _config = config;
+            _logger = logger;
             ConnectionState = ConnectionState.Disconnected;
 
             OnOpen += () =>
             {
                 ConnectionState = ConnectionState.Connected;
-                _link.Logger.Info($"Connected to {WsUrl}");
+                _logger.Info($"Connected to {WsUrl}");
             };
 
             OnClose += () =>
             {
                 ConnectionState = ConnectionState.Disconnected;
-                _link.Logger.Info("Disconnected");
+                _logger.Info("Disconnected");
             };
         }
 
@@ -132,16 +137,15 @@ namespace DSLink.Connection
         {
             get
             {
-                var config = _link.Config;
-                var uri = new Uri(config.BrokerUrl);
+                var uri = new Uri(_config.BrokerUrl);
                 var sb = new StringBuilder();
 
                 sb.Append(uri.Scheme.Equals("https") ? "wss://" : "ws://");
-                sb.Append(uri.Host).Append(":").Append(uri.Port).Append(config.RemoteEndpoint.wsUri);
+                sb.Append(uri.Host).Append(":").Append(uri.Port).Append(_config.RemoteEndpoint.wsUri);
                 sb.Append("?");
-                sb.Append("dsId=").Append(config.DsId);
-                sb.Append("&auth=").Append(config.Authentication);
-                sb.Append("&format=").Append(config.CommunicationFormatUsed);
+                sb.Append("dsId=").Append(_config.DsId);
+                sb.Append("&auth=").Append(_config.Authentication);
+                sb.Append("&format=").Append(_config.CommunicationFormatUsed);
 
                 return sb.ToString();
             }
@@ -152,8 +156,12 @@ namespace DSLink.Connection
         /// </summary>
         public virtual Task Connect()
         {
+            _serializer = (BaseSerializer) Activator.CreateInstance(
+                Serializers.Types[_config.CommunicationFormatUsed],
+                this
+            );
             ConnectionState = ConnectionState.Connecting;
-            _link.Logger.Info("Connecting");
+            _logger.Info("Connecting");
 
             return Task.FromResult(false);
         }
@@ -164,7 +172,7 @@ namespace DSLink.Connection
         public virtual void Disconnect()
         {
             ConnectionState = ConnectionState.Disconnecting;
-            _link.Logger.Info("Disconnecting");
+            _logger.Info("Disconnecting");
         }
 
         /// <summary>
@@ -187,7 +195,7 @@ namespace DSLink.Connection
                     {
                         _queue = new JObject
                         {
-                            new JProperty("msg", _link.MessageId),
+                            new JProperty("msg", MessageId),
                             new JProperty("responses", new JArray()),
                             new JProperty("requests", new JArray())
                         };
@@ -228,7 +236,7 @@ namespace DSLink.Connection
 
             if (data["msg"] == null)
             {
-                data["msg"] = _link.MessageId;
+                data["msg"] = MessageId;
             }
 
             if (data["requests"] != null && data["requests"].Value<JArray>().Count == 0)
@@ -241,7 +249,7 @@ namespace DSLink.Connection
                 data.Remove("responses");
             }
 
-            WriteData(_link.DataSerializer.Serialize(data));
+            WriteData(DataSerializer.Serialize(data));
         }
 
         /// <summary>
@@ -342,7 +350,7 @@ namespace DSLink.Connection
             {
                 return;
             }
-            _link.Logger.Debug("Flushing connection message queue");
+            _logger.Debug("Flushing connection message queue");
             JObject _queueToFlush = null;
             lock (_queueLock)
             {

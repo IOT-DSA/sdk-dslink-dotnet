@@ -1,3 +1,4 @@
+using DSLink.Util.Logger;
 using System;
 using System.Threading.Tasks;
 using Websockets;
@@ -11,7 +12,8 @@ namespace DSLink.Connection
         /// </summary>
         private IWebSocketConnection _webSocket;
 
-        public WebSocketBaseConnector(DSLinkContainer link) : base(link)
+        public WebSocketBaseConnector(Configuration config, BaseLogger logger)
+            : base(config, logger)
         {
         }
 
@@ -28,14 +30,14 @@ namespace DSLink.Connection
             _webSocket.OnClosed += EmitClose;
             _webSocket.OnError += error =>
             {
-                _link.Logger.Error("WebSocket error: " + error);
+                Logger.Error("WebSocket error: " + error);
             };
             _webSocket.OnMessage += text =>
             {
                 EmitMessage(new MessageEvent(text));
             };
 
-            _link.Logger.Info("WebSocket connecting to " + WsUrl);
+            Logger.Info("WebSocket connecting to " + WsUrl);
             _webSocket.Open(WsUrl);
         }
 

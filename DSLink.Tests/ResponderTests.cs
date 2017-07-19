@@ -26,13 +26,14 @@ namespace DSLink.Tests
         {
             _mockFolder = new Mock<IFolder>();
 
-            //BasePlatform.SetPlatform(new TestPlatform(_mockFolder));
             _config = new Configuration(new List<string>(), "Test", responder: true);
 
             _mockContainer = new Mock<DSLinkContainer>(new Configuration(new List<string>(), "Test"));
-            _mockConnector = new Mock<Connector>(_mockContainer.Object);
+            _mockConnector = new Mock<Connector>(
+                _mockContainer.Object.Config,
+                _mockContainer.Object.Logger
+            );
 
-            _mockContainer.SetupGet(c => c.Config).Returns(_config);
             _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
 
             _responder = new DSLinkResponder(_mockContainer.Object);

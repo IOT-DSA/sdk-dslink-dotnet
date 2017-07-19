@@ -16,22 +16,18 @@ namespace DSLink
         protected Handshake ProtocolHandshake;
         internal bool ReconnectOnFailure;
         private bool _isLinkInitialized;
-        private int _msg;
         private int _rid;
         private readonly Configuration _config;
         private readonly DSLinkResponder _responder;
         private readonly DSLinkRequester _requester;
         private readonly Connector _connector;
         private readonly BaseLogger _logger;
-        private BaseSerializer _serializer;
 
-        public virtual Configuration Config => _config;
+        public Configuration Config => _config;
         public virtual Responder Responder => _responder;
         public virtual DSLinkRequester Requester => _requester;
         public virtual Connector Connector => _connector;
         public virtual BaseLogger Logger => _logger;
-        public virtual BaseSerializer DataSerializer => _serializer;
-        public int MessageId => _msg++;
         public int RequestId => ++_rid;
 
         public DSLinkContainer(Configuration config)
@@ -52,16 +48,16 @@ namespace DSLink
             }
 
             // Events
-            Connector.OnMessage += OnStringRead;
-            Connector.OnBinaryMessage += OnBinaryRead;
-            Connector.OnWrite += OnStringWrite;
-            Connector.OnBinaryWrite += OnBinaryWrite;
-            Connector.OnOpen += OnOpen;
-            Connector.OnClose += OnClose;
+            _connector.OnMessage += OnStringRead;
+            _connector.OnBinaryMessage += OnBinaryRead;
+            _connector.OnWrite += OnStringWrite;
+            _connector.OnBinaryWrite += OnBinaryWrite;
+            _connector.OnOpen += OnOpen;
+            _connector.OnClose += OnClose;
 
             // Overridable events for DSLink writers
-            Connector.OnOpen += OnConnectionOpen;
-            Connector.OnClose += OnConnectionClosed;
+            _connector.OnOpen += OnConnectionOpen;
+            _connector.OnClose += OnConnectionClosed;
 
             _pingTask = Task.Factory.StartNew(OnPingTaskElapsed);
         }
@@ -114,7 +110,6 @@ namespace DSLink
                 var handshakeStatus = await ProtocolHandshake.Shake();
                 if (handshakeStatus)
                 {
-                    _serializer = (BaseSerializer) Activator.CreateInstance(Serializers.Types[Config.CommunicationFormatUsed], this);
                     await Connector.Connect();
                     return Connector.ConnectionState;
                 }
@@ -230,7 +225,7 @@ namespace DSLink
         private async void OnStringRead(MessageEvent messageEvent)
         {
             LogMessageString(false, messageEvent);
-            await OnMessage(DataSerializer.Deserialize(messageEvent.Message));
+            await OnMessage(Connector.DataSerializer.Deserialize(messageEvent.Message));
         }
 
         private void OnStringWrite(MessageEvent messageEvent)
@@ -241,7 +236,7 @@ namespace DSLink
         private async void OnBinaryRead(BinaryMessageEvent messageEvent)
         {
             LogMessageBytes(false, messageEvent);
-            await OnMessage(DataSerializer.Deserialize(messageEvent.Message));
+            await OnMessage(Connector.DataSerializer.Deserialize(messageEvent.Message));
         }
 
         private void OnBinaryWrite(BinaryMessageEvent messageEvent)

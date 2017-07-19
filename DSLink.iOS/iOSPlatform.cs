@@ -14,7 +14,7 @@ namespace DSLink.iOS
 
         public override Connector CreateConnector(DSLinkContainer container)
         {
-            return new iOSWebSocketConnector(container);
+            return new iOSWebSocketConnector(container.Config, container.Logger);
         }
 
         public override IFolder GetPlatformStorageFolder()

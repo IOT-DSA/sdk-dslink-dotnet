@@ -13,20 +13,25 @@ namespace DSLink.Tests
         private Mock<DSLinkContainer> _mockContainer;
         private Mock<Connector> _mockConnector;
         private Mock<Responder> _mockResponder;
-        private Mock<SubscriptionManager> _mockSubManager;
         private Node _superRootNode;
 
         [SetUp]
         public void SetUp()
         {
-            _mockContainer = new Mock<DSLinkContainer>(new Configuration(new List<string>(), "Test"));
-            _mockConnector = new Mock<Connector>(_mockContainer.Object);
+            var config = new Configuration(new List<string>(), "Test");
+
+            _mockContainer = new Mock<DSLinkContainer>(config);
+            _mockConnector = new Mock<Connector>(
+                _mockContainer.Object.Config,
+                _mockContainer.Object.Logger
+            );
             _mockResponder = new Mock<Responder>();
-            _superRootNode = new Node("", null, _mockContainer.Object);
 
             _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
             _mockContainer.SetupGet(c => c.Responder).Returns(_mockResponder.Object);
             _mockResponder.SetupGet(r => r.SuperRoot).Returns(_superRootNode);
+
+            _superRootNode = new Node("", null, _mockContainer.Object);
         }
 
         [Test]

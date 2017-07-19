@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using DSLink.Connection;
 using WebSocketSharp;
+using DSLink.Util.Logger;
 
 namespace DSLink.NET
 {
@@ -12,7 +13,8 @@ namespace DSLink.NET
         public override bool SupportsBinary => true;
         public override bool SupportsCompression => false;
 
-        public WebSocketSharpConnector(DSLinkContainer link) : base(link)
+        public WebSocketSharpConnector(Configuration config, BaseLogger logger)
+            : base(config, logger)
         {
         }
 
@@ -30,11 +32,11 @@ namespace DSLink.NET
             {
                 if (e.WasClean)
                 {
-                    _link.Logger.Info(string.Format("WebSocket was closed cleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
+                    Logger.Info(string.Format("WebSocket was closed cleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
                 }
                 else
                 {
-                    _link.Logger.Info(string.Format("WebSocket was closed uncleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
+                    Logger.Info(string.Format("WebSocket was closed uncleanly with code {0}, and reason \"{1}\"", e.Code, e.Reason));
                 }
 
                 EmitClose();
@@ -42,7 +44,7 @@ namespace DSLink.NET
 
             _webSocket.OnError += (object sender, ErrorEventArgs e) =>
             {
-                _link.Logger.Error(string.Format("WebSocket error: {0}", e.Message));
+                Logger.Error(string.Format("WebSocket error: {0}", e.Message));
             };
 
             _webSocket.OnMessage += (object sender, MessageEventArgs e) =>
