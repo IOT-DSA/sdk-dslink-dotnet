@@ -51,7 +51,8 @@ namespace DSLink.iOS
 
             _webSocket.ReceivedMessage += (sender, e) =>
             {
-                if (e.Message is NSData data)
+                var data = e.Message as NSData;
+                if (data != null)
                 {
                     EmitBinaryMessage(new BinaryMessageEvent(data.ToArray()));
                 }
