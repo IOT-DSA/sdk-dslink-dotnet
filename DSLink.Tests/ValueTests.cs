@@ -231,6 +231,7 @@ namespace DSLink.Tests
             Assert.AreEqual("123", value.String);
         }
 
+        [Test]
         public void TestString_Created_EqualsProperType()
         {
             var value = new Value("123");
@@ -253,6 +254,7 @@ namespace DSLink.Tests
             Assert.AreEqual("321", value.String);
         }
 
+        [Test]
         public void TestString_AfterSet_EqualsProperType()
         {
             var value = new Value("123");
