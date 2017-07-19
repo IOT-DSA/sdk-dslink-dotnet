@@ -261,22 +261,6 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestByteArray()
-        {
-            var value = new Value(_testBytes);
-
-            Assert.IsFalse(value.IsNull);
-            Assert.AreEqual(JTokenType.Bytes, value.JToken.Type);
-            Assert.AreEqual(_testBytes, value.ByteArray);
-
-            value.Set(_testBytesReverse);
-
-            Assert.IsFalse(value.IsNull);
-            Assert.AreEqual(JTokenType.Bytes, value.JToken.Type);
-            Assert.AreEqual(_testBytesReverse, value.ByteArray);
-        }
-
-        [Test]
         public void TestByteArray_Created_IsNullFalse()
         {
             var value = new Value(_testBytes);
