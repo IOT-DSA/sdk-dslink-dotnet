@@ -11,10 +11,14 @@ namespace DSLink.Respond
         public DSLinkResponder(DSLinkContainer link) : base()
         {
             Link = link;
+        }
+
+        public override void Init()
+        {
             DiskSerializer = new DiskSerializer(this);
-            SuperRoot = new Node("", null, Link);
             SubscriptionManager = new SubscriptionManager(Link);
             StreamManager = new StreamManager(Link);
+            SuperRoot = new Node("", null, Link);
         }
 
         public override void AddNodeClass(string name, Action<Node> factory)

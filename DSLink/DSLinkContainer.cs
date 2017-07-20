@@ -40,10 +40,12 @@ namespace DSLink
             if (Config.Responder)
             {
                 _responder = new DSLinkResponder(this);
+                _responder.Init();
             }
             if (Config.Requester)
             {
                 _requester = new DSLinkRequester(this);
+                _requester.Init();
             }
 
             // Events
@@ -106,8 +108,8 @@ namespace DSLink
             uint attempts = 1;
             while (maxAttempts == 0 || attemptsLeft > 0)
             {
-                var handshakeStatus = await ProtocolHandshake.Shake();
-                if (handshakeStatus)
+                _config.RemoteEndpoint = await ProtocolHandshake.Shake();
+                if (_config.RemoteEndpoint != null)
                 {
                     await Connector.Connect();
                     return Connector.ConnectionState;
@@ -118,7 +120,7 @@ namespace DSLink
                 {
                     delay = Config.MaxConnectionCooldown;
                 }
-                Logger.Warning($"Failed to connect, delaying for {delay} seconds");
+                _logger.Warning($"Failed to connect, delaying for {delay} seconds");
                 await Task.Delay(TimeSpan.FromSeconds(delay));
 
                 if (attemptsLeft > 0)
@@ -127,7 +129,7 @@ namespace DSLink
                 }
                 attempts++;
             }
-            Logger.Warning("Failed to connect within the allotted connection attempt limit.");
+            _logger.Warning("Failed to connect within the allotted connection attempt limit.");
             OnConnectionFailed();
             return ConnectionState.Disconnected;
         }
@@ -245,17 +247,17 @@ namespace DSLink
 
         private void LogMessageString(bool sent, MessageEvent messageEvent)
         {
-            if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
+            if (_logger.ToPrint.DoesPrint(LogLevel.Debug))
             {
                 var verb = sent ? "Sent" : "Received";
                 var logString = $"Text {verb}: {messageEvent.Message}";
-                Logger.Debug(logString);
+                _logger.Debug(logString);
             }
         }
 
         private void LogMessageBytes(bool sent, BinaryMessageEvent messageEvent)
         {
-            if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
+            if (_logger.ToPrint.DoesPrint(LogLevel.Debug))
             {
                 var verb = sent ? "Sent" : "Received";
                 var logString = $"Binary {verb}: ";
@@ -267,7 +269,7 @@ namespace DSLink
                 {
                     logString += "(over 5000 bytes)";
                 }
-                Logger.Debug(logString);
+                _logger.Debug(logString);
             }
         }
 
@@ -278,7 +280,7 @@ namespace DSLink
                 if (Connector.Connected())
                 {
                     // Write a blank message containing no responses/requests.
-                    Logger.Debug("Sent ping");
+                    _logger.Debug("Sent ping");
                     await Connector.Write(new JObject(), false);
                 }
                 // TODO: Extract the amount of time to the configuration object.

@@ -47,12 +47,6 @@ namespace DSLink.Connection
         /// </summary>
         public byte[] EncodedPublicKey => ((ECPublicKeyParameters) BcKeyPair.Public).Q.GetEncoded();
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Crypto.KeyPair"/> class.
-        /// </summary>
-        /// <param name="folder">Storage folder</param>
-        /// <param name="location">Location of the key file</param>
         public KeyPair(IFolder folder, string location)
         {
             _folder = folder;

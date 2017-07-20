@@ -427,6 +427,7 @@ namespace DSLink.Nodes
         protected virtual async void ValueSet(Value value)
         {
             List<Task> tasks = new List<Task>();
+
             lock (Subscribers)
             {
                 foreach (var sid in Subscribers)
@@ -460,6 +461,7 @@ namespace DSLink.Nodes
                 {
                     if (child.Value.Building) continue;
                     var value = new JObject();
+
                     foreach (var config in child.Value.Configs)
                     {
                         value[config.Key] = config.Value.JToken;
@@ -468,11 +470,13 @@ namespace DSLink.Nodes
                     {
                         value[attr.Key] = attr.Value.JToken;
                     }
+
                     if (child.Value.HasValue)
                     {
                         value["value"] = child.Value.Value.JToken;
                         value["ts"] = child.Value.Value.LastUpdated;
                     }
+
                     updates.Add(new JArray
                     {
                         child.Key,
@@ -641,33 +645,10 @@ namespace DSLink.Nodes
             return node;
         }
 
-        internal virtual async void UpdateSubscribers()
+        protected virtual async void UpdateSubscribers()
         {
-            if (Building)
-            {
-                return;
-            }
-
-            if (Streams.Count > 0)
-            {
-                var responses = new JArray();
-                lock (Streams)
-                {
-                    foreach (var stream in Streams)
-                    {
-                        responses.Add(new JObject
-                        {
-                            new JProperty("rid", stream),
-                            new JProperty("stream", "open"),
-                            new JProperty("updates", SerializeUpdates())
-                        });
-                    }
-                }
-                await _link.Connector.Write(new JObject
-                {
-                    new JProperty("responses", responses)
-                });
-            }
+            if (_link == null) return;
+            await _link.Responder.SubscriptionManager.UpdateSubscribers(this);
         }
     }
 }

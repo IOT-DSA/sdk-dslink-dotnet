@@ -41,6 +41,8 @@
     <Compile Include="Nodes\MetadataMap.cs" />
     <Compile Include="Nodes\MetadataTypes.cs" />
     <Compile Include="Request\DSLinkRequester.cs" />
+    <Compile Include="Request\RemoteSubscriptionManager.cs" />
+    <Compile Include="Request\RequestManager.cs" />
     <Compile Include="Respond\Responder.cs" />
     <Compile Include="Respond\DiskSerializer.cs" />
     <Compile Include="Respond\StreamManager.cs" />

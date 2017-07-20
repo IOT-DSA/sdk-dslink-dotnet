@@ -46,6 +46,11 @@ namespace DSLink.Respond
         }
 
         /// <summary>
+        /// Initialize the responder.
+        /// </summary>
+        public abstract void Init();
+
+        /// <summary>
         /// Process requests incoming from the broker.
         /// </summary>
         /// <param name="requests">List of requests</param>

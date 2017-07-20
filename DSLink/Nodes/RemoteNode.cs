@@ -8,13 +8,6 @@ namespace DSLink.Nodes
     /// </summary>
     public class RemoteNode : Node
     {
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Nodes.RemoteNode"/> class.
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="parent">Parent</param>
-        /// <param name="path">Path of Node</param>
         public RemoteNode(string name, Node parent, string path) : base(name, parent, null)
         {
             Path = path;
@@ -39,7 +32,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Updates the subscribers.
         /// </summary>
-        internal override void UpdateSubscribers()
+        protected override void UpdateSubscribers()
         {
         }
 

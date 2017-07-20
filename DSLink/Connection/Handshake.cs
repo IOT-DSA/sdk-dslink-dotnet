@@ -14,7 +14,7 @@ namespace DSLink.Connection
         /// <summary>
         /// DSA Version.
         /// </summary>
-        private const string DSAVersion = "1.1.2";
+        private const string _dsaVersion = "1.1.2";
 
         /// <summary>
         /// Instance of link container.
@@ -26,11 +26,6 @@ namespace DSLink.Connection
         /// </summary>
         private readonly HttpClient _httpClient;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Connection.Handshake"/> class.
-        /// </summary>
-        /// <param name="link">Link container</param>
         public Handshake(DSLinkContainer link)
         {
             _link = link;
@@ -40,7 +35,7 @@ namespace DSLink.Connection
         /// <summary>
         /// Run handshake with the server.
         /// </summary>
-        public async Task<bool> Shake()
+        public async Task<RemoteEndpoint> Shake()
         {
             _link.Logger.Info("Handshaking with " + _link.Config.BrokerUrl + "?dsId=" + _link.Config.DsId);
             HttpResponseMessage resp = null;
@@ -56,11 +51,12 @@ namespace DSLink.Connection
             if (resp != null && resp.IsSuccessStatusCode)
             {
                 _link.Logger.Info("Handshake successful");
-                _link.Config.RemoteEndpoint = JsonConvert.DeserializeObject<RemoteEndpoint>(await resp.Content.ReadAsStringAsync());
-                return true;
+                return JsonConvert.DeserializeObject<RemoteEndpoint>(
+                    await resp.Content.ReadAsStringAsync()
+                );
             }
 
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -84,7 +80,7 @@ namespace DSLink.Connection
                 {"isRequester", _link.Config.Requester},
                 {"isResponder", _link.Config.Responder},
                 {"linkData", new JObject()},
-                {"version", DSAVersion},
+                {"version", _dsaVersion},
                 {"formats", new JArray(Serializers.Types.Keys.ToArray())},
                 {"enableWebSocketCompression", _link.Connector.SupportsCompression}
             };

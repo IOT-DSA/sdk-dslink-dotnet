@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using DSLink.Nodes;
+using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace DSLink.Respond
 {
@@ -36,6 +38,35 @@ namespace DSLink.Respond
             catch (KeyNotFoundException)
             {
                 _link.Logger.Debug($"Failed to Unsubscribe: unknown subscription id {sid}");
+            }
+        }
+
+        public async Task UpdateSubscribers(Node node)
+        {
+            if (node.Building)
+            {
+                return;
+            }
+
+            if (node.Streams.Count > 0)
+            {
+                var responses = new JArray();
+                lock (node.Streams)
+                {
+                    foreach (var stream in node.Streams)
+                    {
+                        responses.Add(new JObject
+                        {
+                            new JProperty("rid", stream),
+                            new JProperty("stream", "open"),
+                            new JProperty("updates", node.SerializeUpdates())
+                        });
+                    }
+                }
+                await _link.Connector.Write(new JObject
+                {
+                    new JProperty("responses", responses)
+                });
             }
         }
 

@@ -12,6 +12,7 @@ namespace DSLink.Nodes
         private string _prefix;
 
         public event OnSetEventHandler OnSet;
+        public int Count => _metadataDictionary.Count;
 
         public MetadataMap(string prefix)
         {
@@ -21,7 +22,7 @@ namespace DSLink.Nodes
         public void Set(string key, Value value)
         {
             _metadataDictionary[_prefix + key] = value;
-            OnSet();
+            OnSet?.Invoke();
         }
 
         public void Set(BaseType key, Value value)

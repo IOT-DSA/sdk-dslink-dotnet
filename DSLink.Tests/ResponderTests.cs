@@ -37,6 +37,7 @@ namespace DSLink.Tests
             _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
 
             _responder = new DSLinkResponder(_mockContainer.Object);
+            _responder.Init();
 
             _mockContainer.SetupGet(c => c.Responder).Returns(_responder);
 

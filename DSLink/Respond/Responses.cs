@@ -45,7 +45,7 @@ namespace DSLink.Respond
             {
                 throw new NullReferenceException("Link is null, cannot close stream.");
             }
-            _link.Requester._requestManager.StopRequest(RequestID);
+            _link.Requester.RequestManager.StopRequest(RequestID);
             await _link.Connector.Write(new JObject
             {
                 new JProperty("responses", new JObject
