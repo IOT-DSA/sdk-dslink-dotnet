@@ -34,7 +34,7 @@ namespace DSLink.Respond
             protected set;
         }
 
-        public virtual DiskSerializer NodeSerializer
+        public virtual DiskSerializer DiskSerializer
         {
             get;
             protected set;

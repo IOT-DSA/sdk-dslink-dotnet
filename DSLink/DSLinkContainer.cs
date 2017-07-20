@@ -140,12 +140,12 @@ namespace DSLink
 
         public async Task<bool> LoadSavedNodes()
         {
-            return await Responder.NodeSerializer.DeserializeFromDisk();
+            return await Responder.DiskSerializer.DeserializeFromDisk();
         }
 
         public async Task SaveNodes()
         {
-            await Responder.NodeSerializer.SerializeToDisk();
+            await Responder.DiskSerializer.SerializeToDisk();
         }
 
         private void OnOpen()

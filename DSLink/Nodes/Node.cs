@@ -68,10 +68,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Name of this node.
         /// </summary>
-        public string Name
-        {
-            get;
-        }
+        public readonly string Name;
 
         private string _path;
 
@@ -161,7 +158,7 @@ namespace DSLink.Nodes
         /// Private configuration values only stored locally, these
         /// are not available over DSA.
         /// </summary>
-        public readonly IDictionary<string, Value> PrivateConfigs;
+        public readonly MetadataMap PrivateConfigs;
 
         /// <summary>
         /// Index operator overload.
@@ -203,11 +200,11 @@ namespace DSLink.Nodes
 
             Configs = new MetadataMap("$");
             Attributes = new MetadataMap("@");
+            PrivateConfigs = new MetadataMap("");
 
             Configs.OnSet += UpdateSubscribers;
             Attributes.OnSet += UpdateSubscribers;
 
-            PrivateConfigs = new Dictionary<string, Value>();
             _removedChildren = new List<Node>();
             Subscribers = new List<int>();
             Streams = new List<int>();
@@ -252,9 +249,9 @@ namespace DSLink.Nodes
             }
             _initializedClass = true;
             if (_link.Responder.NodeClasses.ContainsKey(ClassName) &&
-                (!PrivateConfigs.ContainsKey("nodeClassInit") || PrivateConfigs["nodeClassInit"].Boolean == false))
+                (!PrivateConfigs.Has("nodeClassInit") || PrivateConfigs.Get("nodeClassInit").Boolean == false))
             {
-                PrivateConfigs["nodeclassInit"] = new Value(true);
+                PrivateConfigs.Set("nodeClassInit", new Value(true));
                 ResetNode();
                 _link.Responder.NodeClasses[ClassName](this);
             }
@@ -505,7 +502,7 @@ namespace DSLink.Nodes
         /// </summary>
         public async Task TriggerSerialize()
         {
-            await _link.Responder.NodeSerializer.SerializeToDisk();
+            await _link.Responder.DiskSerializer.SerializeToDisk();
         }
 
         /// <summary>
@@ -577,7 +574,7 @@ namespace DSLink.Nodes
                 {
                     foreach (var entry in prop.Value.Value<JObject>())
                     {
-                        PrivateConfigs[entry.Key] = new Value(entry.Value);
+                        PrivateConfigs.Set(entry.Key, new Value(entry.Value));
                     }
                 }
                 else if (prop.Value is JObject)

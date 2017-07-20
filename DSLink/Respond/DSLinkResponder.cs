@@ -11,7 +11,7 @@ namespace DSLink.Respond
         public DSLinkResponder(DSLinkContainer link) : base()
         {
             Link = link;
-            NodeSerializer = new DiskSerializer(this);
+            DiskSerializer = new DiskSerializer(this);
             SuperRoot = new Node("", null, Link);
             SubscriptionManager = new SubscriptionManager(Link);
             StreamManager = new StreamManager(Link);
