@@ -32,49 +32,59 @@ namespace DSLink.Nodes
 
         public NodeFactory SetConfig(string name, Value value)
         {
-            _node.SetConfig(name, value);
+            _node.Configs.Set(name, value);
             return this;
+        }
+
+        public NodeFactory SetConfig(BaseType type, Value value)
+        {
+            return SetConfig(type.String, value);
         }
 
         public NodeFactory SetAttribute(string name, Value value)
         {
-            _node.SetAttribute(name, value);
+            _node.Attributes.Set(name, value);
             return this;
+        }
+
+        public NodeFactory SetAttribute(BaseType type, Value value)
+        {
+            return SetAttribute(type.String, value);
         }
 
         public NodeFactory SetDisplayName(string displayName)
         {
-            _node.DisplayName = displayName;
+            SetConfig(ConfigType.DisplayName, new Value(displayName));
             return this;
         }
 
-        public NodeFactory SetProfile(string profile)
+        public NodeFactory SetClassName(string className)
         {
-            _node.Profile = profile;
+            SetConfig(ConfigType.ClassName, new Value(className));
             return this;
         }
 
         public NodeFactory SetWritable(Permission writable)
         {
-            _node.Writable = writable;
+            SetConfig(ConfigType.Writable, new Value(writable.Permit));
             return this;
         }
 
         public NodeFactory SetInvokable(Permission invokable)
         {
-            _node.Invokable = invokable;
+            SetConfig(ConfigType.Invokable, new Value(invokable.Permit));
             return this;
         }
 
         public NodeFactory SetActionGroup(string actionGroup)
         {
-            _node.ActionGroup = actionGroup;
+            SetConfig(ConfigType.ActionGroup, new Value(actionGroup));
             return this;
         }
 
         public NodeFactory SetActionGroupSubtitle(string actionGroupSubtitle)
         {
-            _node.ActionGroupSubtitle = actionGroupSubtitle;
+            SetConfig(ConfigType.ActionGroupSubtitle, new Value(actionGroupSubtitle));
             return this;
         }
 
@@ -86,13 +96,13 @@ namespace DSLink.Nodes
 
         public NodeFactory SetType(ValueType valueType)
         {
-            _node.ValueType = valueType;
+            SetConfig(ConfigType.ValueType, valueType.TypeValue);
             return this;
         }
 
         public NodeFactory SetResult(ResultType resultType)
         {
-            _node.Result = resultType;
+            SetConfig(ConfigType.Result, resultType.Value);
             return this;
         }
 

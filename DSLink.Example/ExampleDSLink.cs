@@ -39,8 +39,8 @@ namespace DSLink.Example
 
             Responder.AddNodeClass("rng", delegate (Node node)
             {
-                node.Writable = Permission.Read;
-                node.ValueType = ValueType.Number;
+                node.Configs.Set(ConfigType.Writable, new Value(Permission.Read.Permit));
+                node.Configs.Set(ConfigType.ValueType, ValueType.Number.TypeValue);
                 node.Value.Set(0.1);
 
                 lock (_values)

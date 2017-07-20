@@ -85,7 +85,8 @@ namespace DSLink.Respond
             var node = SuperRoot.Get(request["path"].Value<string>());
             if (node != null)
             {
-                if (request["permit"] == null || request["permit"].Value<string>().Equals(node.GetConfig("writable").String))
+                if (request["permit"] == null ||
+                    request["permit"].Value<string>().Equals(node.Configs.Get(ConfigType.Writable).String))
                 {
                     node.Value.Set(request["value"]);
                     node.Value.InvokeRemoteSet();
@@ -115,7 +116,15 @@ namespace DSLink.Respond
             {
                 if (request["permit"] == null || request["permit"].Value<string>().Equals(node.ActionHandler.Permission.ToString()))
                 {
-                    JArray columns = node.Columns ?? new JArray();
+                    JArray columns;
+                    if (node.Configs.Has(ConfigType.Columns))
+                    {
+                        columns = node.Configs.Get(ConfigType.Columns).JArray;
+                    }
+                    else
+                    {
+                        columns = new JArray();
+                    }
                     var permit = (request["permit"] != null) ? Permission.PermissionMap[request["permit"].Value<string>().ToLower()] : null;
                     var invokeRequest = new InvokeRequest(request["rid"].Value<int>(), request["path"].Value<string>(),
                                                           permit, request["params"].Value<JObject>(), link: Link,

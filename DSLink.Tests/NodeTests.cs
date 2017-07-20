@@ -197,10 +197,10 @@ namespace DSLink.Tests
 
             Assert.IsNotNull(_superRootNode["testNode"]);
             var testNode = _superRootNode["testNode"];
-            Assert.AreEqual(123, testNode.GetConfig("number").Int);
-            Assert.AreEqual("123", testNode.GetConfig("string").String);
-            Assert.AreEqual(123, testNode.GetAttribute("number").Int);
-            Assert.AreEqual("123", testNode.GetAttribute("string").String);
+            Assert.AreEqual(123, testNode.Configs.Get("number").Int);
+            Assert.AreEqual("123", testNode.Configs.Get("string").String);
+            Assert.AreEqual(123, testNode.Attributes.Get("number").Int);
+            Assert.AreEqual("123", testNode.Attributes.Get("string").String);
         }
     }
 }

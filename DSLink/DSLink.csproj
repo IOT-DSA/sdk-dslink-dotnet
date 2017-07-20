@@ -38,6 +38,8 @@
     <Compile Include="Connection\ConnectionEvents.cs" />
     <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Handshake.cs" />
+    <Compile Include="Nodes\MetadataMap.cs" />
+    <Compile Include="Nodes\MetadataTypes.cs" />
     <Compile Include="Request\DSLinkRequester.cs" />
     <Compile Include="Respond\Responder.cs" />
     <Compile Include="Respond\DiskSerializer.cs" />

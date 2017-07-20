@@ -14,7 +14,7 @@ namespace DSLink.Serializer
         private readonly JsonByteArrayConverter _byteArrayConverter;
         private readonly JsonSerializerSettings _serializerSettings;
 
-        public JsonSerializer(DSLinkContainer link) : base(link)
+        public JsonSerializer()
         {
             _byteArrayConverter = new JsonByteArrayConverter();
             _serializerSettings = new JsonSerializerSettings

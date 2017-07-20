@@ -15,7 +15,7 @@ namespace DSLink.Serializer
         private readonly JSONSerializer _serializer;
         public bool RequiresBinaryStream => true;
 
-        public MsgPackSerializer(DSLinkContainer link) : base(link)
+        public MsgPackSerializer()
         {
             _serializer = new JSONSerializer()
             {
