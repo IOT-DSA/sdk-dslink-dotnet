@@ -449,10 +449,10 @@ namespace DSLink.Nodes
         /// <returns>Serialized data</returns>
         public JArray SerializeUpdates()
         {
-            var val = new JArray();
+            var updates = new JArray();
 
-            val.Merge(Configs.CreateUpdateArray());
-            val.Merge(Attributes.CreateUpdateArray());
+            updates.Merge(Configs.CreateUpdateArray());
+            updates.Merge(Attributes.CreateUpdateArray());
 
             lock (_childrenLock)
             {
@@ -473,7 +473,7 @@ namespace DSLink.Nodes
                         value["value"] = child.Value.Value.JToken;
                         value["ts"] = child.Value.Value.LastUpdated;
                     }
-                    val.Add(new JArray
+                    updates.Add(new JArray
                     {
                         child.Key,
                         value
@@ -485,7 +485,7 @@ namespace DSLink.Nodes
             {
                 foreach (Node node in _removedChildren)
                 {
-                    val.Add(new JObject
+                    updates.Add(new JObject
                     {
                         new JProperty("name", node.Name),
                         new JProperty("change", "remove")
@@ -494,7 +494,7 @@ namespace DSLink.Nodes
                 _removedChildren.Clear();
             }
 
-            return val;
+            return updates;
         }
 
         /// <summary>
@@ -511,20 +511,20 @@ namespace DSLink.Nodes
         /// <returns>Serialized data</returns>
         public JObject Serialize()
         {
-            var obj = new JObject();
+            var serializedObject = new JObject();
 
             foreach (var entry in Configs)
             {
-                obj.Add(new JProperty(entry.Key, entry.Value.JToken));
+                serializedObject.Add(new JProperty(entry.Key, entry.Value.JToken));
             }
 
             foreach (var entry in Attributes)
             {
-                obj.Add(new JProperty(entry.Key, entry.Value.JToken));
+                serializedObject.Add(new JProperty(entry.Key, entry.Value.JToken));
             }
 
             var privateConfigs = new JObject();
-            obj.Add("privateConfigs", privateConfigs);
+            serializedObject.Add("privateConfigs", privateConfigs);
             foreach (var entry in PrivateConfigs)
             {
                 privateConfigs.Add(new JProperty(entry.Key, entry.Value.JToken));
@@ -534,21 +534,21 @@ namespace DSLink.Nodes
             {
                 if (entry.Value.Serializable)
                 {
-                    obj.Add(new JProperty(entry.Key, entry.Value.Serialize()));
+                    serializedObject.Add(new JProperty(entry.Key, entry.Value.Serialize()));
                 }
             }
 
             if (HasValue)
             {
-                obj.Add(new JProperty("?value", Value.JToken));
+                serializedObject.Add(new JProperty("?value", Value.JToken));
             }
 
             if (ClassName != "node")
             {
-                obj.Add(new JProperty("?class", ClassName));
+                serializedObject.Add(new JProperty("?class", ClassName));
             }
 
-            return obj;
+            return serializedObject;
         }
 
         // <summary>
