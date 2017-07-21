@@ -16,8 +16,14 @@ namespace DSLink.Util
 
         public T this[int index]
         {
-            get => _backedList[index];
-            set => throw new ReadOnlyException();
+            get
+            {
+                return _backedList[index];
+            }
+            set
+            {
+                throw new ReadOnlyException();
+            }
         }
 
         public void Add(T item)
