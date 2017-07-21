@@ -75,7 +75,12 @@ namespace DSLink.Respond
                 {
                     new JProperty("rid", request["rid"].Value<int>()),
                     new JProperty("stream", "open"),
-                    new JProperty("updates", SuperRoot.Get(request["path"].Value<string>()).SerializeUpdates())
+                    new JProperty(
+                        "updates",
+                        SubscriptionManager.SerializeUpdates(
+                            SuperRoot.Get(request["path"].Value<string>())
+                        )
+                    )
                 });
             }
             else

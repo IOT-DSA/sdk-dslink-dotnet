@@ -19,58 +19,27 @@ namespace DSLink.Nodes
             '%', '.', '/', '\\', '?', '*', ':', '|', '<', '>', '$', '@', ',', '\'', '"'
         };
 
-        /// <summary>
-        /// Dictionary of children
-        /// </summary>
-        private readonly IDictionary<string, Node> _children;
-
-        /// <summary>
-        /// List of removed children, used to notify watchers about
-        /// removed children.
-        /// </summary>
-        private readonly List<Node> _removedChildren;
-
-        /// <summary>
-        /// List of subscription IDs belonging to this Node
-        /// </summary>
-        internal readonly List<int> Subscribers;
-
-        /// <summary>
-        /// Event fired when something subscribes to this node.
-        /// </summary>
-        public Action<int> OnSubscribed;
-
-        /// <summary>
-        /// Event fired when something unsubscribes to this node.
-        /// </summary>
-        public Action<int> OnUnsubscribed;
-
-        /// <summary>
-        /// List of request IDs belonging to this Node
-        /// </summary>
-        internal readonly List<int> Streams;
-
-        /// <summary>
-        /// DSLink container instance.
-        /// </summary>
         private readonly DSLinkContainer _link;
-
-        /// <summary>
-        /// Used to lock the children dictionary.
-        /// </summary>
-        private readonly object _childrenLock = new object();
-
-        /// <summary>
-        /// Used to lock the removed children list.
-        /// </summary>
-        private readonly object _removedChildrenLock = new object();
+        private string _path;
+        private readonly IDictionary<string, Node> _children;
+        internal readonly List<Node> _removedChildren;
+        internal readonly List<int> _subscribers;
+        internal readonly List<int> _streams;
 
         /// <summary>
         /// Name of this node.
         /// </summary>
         public readonly string Name;
 
-        private string _path;
+        /// <summary>
+        /// Parent of this Node.
+        /// </summary>
+        public readonly Node Parent;
+
+        /// <summary>
+        /// Value of this Node.
+        /// </summary>
+        public readonly Value Value;
 
         /// <summary>
         /// Path of this Node.
@@ -81,68 +50,11 @@ namespace DSLink.Nodes
             {
                 return _path;
             }
-            internal set
+            protected set
             {
                 _path = value.TrimEnd('/');
             }
         }
-
-        /// <summary>
-        /// Parent of this Node.
-        /// </summary>
-        public Node Parent
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Value of this Node.
-        /// </summary>
-        public Value Value
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Node action
-        /// </summary>
-        public ActionHandler ActionHandler;
-
-        /// <summary>
-        /// Metadata object attached to a node.
-        /// </summary>
-        public object Metadata;
-
-        /// <summary>
-        /// Node is serializable
-        /// </summary>
-        public bool Serializable = true;
-
-        /// <summary>
-        /// Node is still being created via NodeFactory
-        /// </summary>
-        internal bool Building;
-
-        /// <summary>
-        /// Node is subscribed to
-        /// </summary>
-        public bool Subscribed => Subscribers.Count != 0;
-
-        /// <summary>
-        /// Class name of the node.
-        /// </summary>
-        public string ClassName { get; internal set; }
-
-        /// <summary>
-        /// Flag for when the Node Class is initialized.
-        /// Used to prevent duplicate initializations.
-        /// </summary>
-        private bool _initializedClass;
-
-        /// <summary>
-        /// Public-facing dictionary of children.
-        /// </summary>
-        public ReadOnlyDictionary<string, Node> Children => new ReadOnlyDictionary<string, Node>(_children);
 
         /// <summary>
         /// Class for manipulating configs.
@@ -161,6 +73,71 @@ namespace DSLink.Nodes
         public readonly MetadataMap PrivateConfigs;
 
         /// <summary>
+        /// Event fired when something subscribes to this node.
+        /// </summary>
+        public Action<int> OnSubscribed;
+
+        /// <summary>
+        /// Event fired when something unsubscribes to this node.
+        /// </summary>
+        public Action<int> OnUnsubscribed;
+
+        /// <summary>
+        /// Node action
+        /// </summary>
+        public ActionHandler ActionHandler
+        {
+            get;
+            protected set;
+        }
+
+        /// <summary>
+        /// Node is serializable
+        /// </summary>
+        public bool Serializable = true;
+
+        /// <summary>
+        /// Node is still being created via NodeFactory
+        /// </summary>
+        internal bool Building;
+
+        /// <summary>
+        /// True if Node is subscribed to.
+        /// </summary>
+        public bool Subscribed => _subscribers.Count != 0;
+
+        /// <summary>
+        /// Class name of the node.
+        /// </summary>
+        public string ClassName { get; internal set; }
+
+        /// <summary>
+        /// Flag for when the Node Class is initialized.
+        /// Used to prevent duplicate initializations.
+        /// </summary>
+        private bool _initializedClass;
+
+        /// <summary>
+        /// Public-facing dictionary of children.
+        /// </summary>
+        public ReadOnlyDictionary<string, Node> Children => new ReadOnlyDictionary<string, Node>(_children);
+
+        /// <summary>
+        /// List of children that are being removed.
+        /// </summary>
+        public ReadOnlyList<Node> RemovedChildren => new ReadOnlyList<Node>(_removedChildren);
+
+        /// <summary>
+        /// List of request IDs belonging to this Node.
+        /// </summary>
+        public ReadOnlyList<int> Streams => new ReadOnlyList<int>(_streams);
+
+        /// <summary>
+        /// List of subscription IDs belonging to this Node.
+        /// </summary>
+        public ReadOnlyList<int> Subscribers => new ReadOnlyList<int>(_subscribers);
+
+        /// <summary>
         /// Index operator overload.
         /// Example: Parent["Child"]["ChildOfChild"]
         /// </summary>
@@ -170,7 +147,7 @@ namespace DSLink.Nodes
         {
             get
             {
-                lock (_childrenLock)
+                lock (_children)
                 {
                     if (name.StartsWith("/"))
                     {
@@ -206,8 +183,8 @@ namespace DSLink.Nodes
             Attributes.OnSet += UpdateSubscribers;
 
             _removedChildren = new List<Node>();
-            Subscribers = new List<int>();
-            Streams = new List<int>();
+            _subscribers = new List<int>();
+            _streams = new List<int>();
             _link = link;
 
             _createInitialData();
@@ -235,7 +212,7 @@ namespace DSLink.Nodes
 
         private void _createInitialData()
         {
-            Configs.Set("is", new Value(ClassName));
+            Configs.Set(ConfigType.ClassName, new Value(ClassName));
         }
 
         /// <summary>
@@ -274,11 +251,10 @@ namespace DSLink.Nodes
             _createInitialData();
         }
 
-        /// <summary>
-        /// Check whether this Node has a value.
-        /// </summary>
-        /// <value>True when Node has a value</value>
-        public bool HasValue => Value != null && !Value.IsNull;
+        internal void ClearRemovedChildren()
+        {
+            _removedChildren.Clear();
+        }
 
         /// <summary>
         /// Create a child via the NodeFactory.
@@ -314,7 +290,7 @@ namespace DSLink.Nodes
         /// <param name="child">Child Node</param>
         public void AddChild(Node child)
         {
-            lock (_childrenLock)
+            lock (_children)
             {
                 if (_children.ContainsKey(child.Name))
                 {
@@ -383,10 +359,10 @@ namespace DSLink.Nodes
         /// <param name="name">Child Node's name</param>
         public void RemoveChild(string name)
         {
-            lock (_childrenLock)
+            lock (_children)
             {
                 if (!_children.ContainsKey(name)) return;
-                lock (_removedChildrenLock)
+                lock (_removedChildren)
                 {
                     _removedChildren.Add(_children[name]);
                 }
@@ -428,9 +404,9 @@ namespace DSLink.Nodes
         {
             List<Task> tasks = new List<Task>();
 
-            lock (Subscribers)
+            lock (_subscribers)
             {
-                foreach (var sid in Subscribers)
+                foreach (var sid in _subscribers)
                 {
                     tasks.Add(_link.Connector.AddValueUpdateResponse(new JArray
                     {
@@ -442,71 +418,6 @@ namespace DSLink.Nodes
             }
 
             await Task.WhenAll(tasks);
-        }
-
-        /// <summary>
-        /// Serialize the Node updates to an array.
-        /// </summary>
-        /// <returns>Serialized data</returns>
-        public JArray SerializeUpdates()
-        {
-            var updates = new JArray();
-
-            updates.Merge(Configs.CreateUpdateArray());
-            updates.Merge(Attributes.CreateUpdateArray());
-
-            lock (_childrenLock)
-            {
-                foreach (var child in _children)
-                {
-                    if (child.Value.Building) continue;
-                    var value = new JObject();
-
-                    foreach (var config in child.Value.Configs)
-                    {
-                        value[config.Key] = config.Value.JToken;
-                    }
-                    foreach (var attr in child.Value.Attributes)
-                    {
-                        value[attr.Key] = attr.Value.JToken;
-                    }
-
-                    if (child.Value.HasValue)
-                    {
-                        value["value"] = child.Value.Value.JToken;
-                        value["ts"] = child.Value.Value.LastUpdated;
-                    }
-
-                    updates.Add(new JArray
-                    {
-                        child.Key,
-                        value
-                    });
-                }
-            }
-
-            lock (_removedChildrenLock)
-            {
-                foreach (Node node in _removedChildren)
-                {
-                    updates.Add(new JObject
-                    {
-                        new JProperty("name", node.Name),
-                        new JProperty("change", "remove")
-                    });
-                }
-                _removedChildren.Clear();
-            }
-
-            return updates;
-        }
-
-        /// <summary>
-        /// Trigger node serialization.
-        /// </summary>
-        public async Task TriggerSerialize()
-        {
-            await _link.Responder.DiskSerializer.SerializeToDisk();
         }
 
         /// <summary>
@@ -542,7 +453,7 @@ namespace DSLink.Nodes
                 }
             }
 
-            if (HasValue)
+            if (!Value.IsNull)
             {
                 serializedObject.Add(new JProperty("?value", Value.JToken));
             }
@@ -620,8 +531,8 @@ namespace DSLink.Nodes
                 return this;
             }
             path = path.TrimStart('/');
-            var i = path.IndexOf('/');
-            var child = i == -1 ? path : path.Substring(0, path.IndexOf('/'));
+            var indexOfFirstSlash = path.IndexOf('/');
+            var child = indexOfFirstSlash == -1 ? path : path.Substring(0, path.IndexOf('/'));
             path = path.TrimStart(child.ToCharArray());
             try
             {
@@ -629,7 +540,6 @@ namespace DSLink.Nodes
             }
             catch (KeyNotFoundException)
             {
-                _link?.Logger.Debug($"Non-existant node {path} requested.");
                 return null;
             }
         }

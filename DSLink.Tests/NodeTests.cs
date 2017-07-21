@@ -123,7 +123,7 @@ namespace DSLink.Tests
                 .BuildNode();
 
             Assert.IsTrue(
-                JToken.DeepEquals(_superRootNode.SerializeUpdates(), new JArray
+                JToken.DeepEquals(_mockSubManager.Object.SerializeUpdates(_superRootNode), new JArray
                 {
                     new JArray
                     {

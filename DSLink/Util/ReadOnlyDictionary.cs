@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -90,13 +89,6 @@ namespace DSLink.Util
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        private class ReadOnlyException : Exception
-        {
-            public ReadOnlyException() : base("Dictionary is readonly.")
-            {
-            }
         }
     }
 }

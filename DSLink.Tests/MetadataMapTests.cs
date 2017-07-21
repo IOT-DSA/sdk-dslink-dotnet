@@ -148,5 +148,20 @@ namespace DSLink.Tests
                 }
             ));
         }
+
+        [Test]
+        public void MetadataEnumerator_2Add()
+        {
+            _metadataMap = new MetadataMap("");
+
+            _metadataMap.Set(ConfigType.ClassName, new Value("light"));
+            _metadataMap.Set(ConfigType.DisplayName, new Value("bulb_abc"));
+
+            var enumerator = _metadataMap.GetEnumerator();
+            enumerator.MoveNext();
+            Assert.AreEqual(ConfigType.ClassName.String, enumerator.Current.Key);
+            enumerator.MoveNext();
+            Assert.AreEqual(ConfigType.DisplayName.String, enumerator.Current.Key);
+        }
     }
 }
