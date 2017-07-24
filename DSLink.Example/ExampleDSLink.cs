@@ -18,6 +18,17 @@ namespace DSLink.Example
             _rngValues = new Dictionary<string, Value>();
             _random = new Random();
 
+            Responder.AddNodeClass("rngAdd", delegate (Node node)
+            {
+                node.Configs.Set(ConfigType.DisplayName, new Value("Create RNG"));
+                node.AddParameter(new Parameter
+                {
+                    Name = "rngName",
+                    ValueType = Nodes.ValueType.String
+                });
+                node.SetAction(new ActionHandler(Permission.Config, _createRngAction));
+            });
+
             Responder.AddNodeClass("rng", delegate (Node node)
             {
                 node.Configs.Set(ConfigType.Writable, new Value(Permission.Read.Permit));
@@ -35,15 +46,7 @@ namespace DSLink.Example
 
         public override void InitializeDefaultNodes()
         {
-            Responder.SuperRoot.CreateChild("createRNG")
-                .SetDisplayName("Create RNG")
-                .AddParameter(new Parameter
-                {
-                    Name = "rngName",
-                    ValueType = Nodes.ValueType.String
-                })
-                .SetAction(new ActionHandler(Permission.Config, _createRngAction))
-                .BuildNode();
+            Responder.SuperRoot.CreateChild("createRNG", "rngAdd").BuildNode();
         }
 
         private async void _updateRandomNumbers()
@@ -65,10 +68,7 @@ namespace DSLink.Example
             if (string.IsNullOrEmpty(rngName)) return;
             if (Responder.SuperRoot.Children.ContainsKey(rngName)) return;
 
-            var newRng = Responder.SuperRoot.CreateChild(rngName, "rng")
-                .SetConfig(ConfigType.ValueType, new Value(Nodes.ValueType.Number.Type))
-                .SetValue(0)
-                .BuildNode();
+            var newRng = Responder.SuperRoot.CreateChild(rngName, "rng").BuildNode();
 
             await request.Close();
             await SaveNodes();
