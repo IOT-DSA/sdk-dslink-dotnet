@@ -25,7 +25,7 @@ namespace DSLink.Tests.Nodes.Actions
                 ValueType = ValueType.Binary
             };
 
-            Assert.AreEqual(ValueType.Binary, ValueType.Binary);
+            Assert.AreEqual(ValueType.Binary, column.ValueType);
         }
     }
 }

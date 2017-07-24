@@ -112,6 +112,22 @@ namespace DSLink.Tests
         }
 
         [Test]
+        public void GetMethodWithVariousPaths()
+        {
+            var testParent = _superRootNode.CreateChild("testParent").BuildNode();
+            var testChild = testParent.CreateChild("testChild").BuildNode();
+
+            Assert.AreEqual(testParent, _superRootNode.Get("/testParent/"));
+            Assert.AreEqual(testParent, _superRootNode.Get("/testParent"));
+            Assert.AreEqual(testParent, _superRootNode.Get("testParent"));
+
+            Assert.AreEqual(testChild, _superRootNode.Get("/testParent/testChild/"));
+            Assert.AreEqual(testChild, _superRootNode.Get("/testParent/testChild"));
+            Assert.AreEqual(testChild, _superRootNode.Get("testParent/testChild/"));
+            Assert.AreEqual(testChild, _superRootNode.Get("testParent/testChild"));
+        }
+
+        [Test]
         public void ConfigAttributeSerialization()
         {
             var testNode = _superRootNode
