@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{FE63D2B0-7717-4BEF-9D7B-6154DF1D7B5B}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7F33741-D2E6-4607-BF9D-04C6B0844FB3}"
 	ProjectSection(SolutionItems) = preProject
 		DSLink.nuspec = DSLink.nuspec
+		LICENSE.md = LICENSE.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink.iOS.Example", "DSLink.iOS.Example\DSLink.iOS.Example\DSLink.iOS.Example.csproj", "{A4C80313-1506-4FF2-ABE3-8F9F5945E9E2}"
@@ -30,7 +32,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink.Tests", "DSLink.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink.Android", "DSLink.Android\DSLink.Android.csproj", "{78B455C4-93FE-4F00-890F-21B9299CC5B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink.Example", "DSLink.Example\DSLink.Example.csproj", "{0E1EE611-CDF7-4A8C-BF7D-A0DA6C628413}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink.NET.Example", "DSLink.NET.Example\DSLink.NET.Example.csproj", "{0E1EE611-CDF7-4A8C-BF7D-A0DA6C628413}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink.Example", "DSLink.Example\DSLink.Example.csproj", "{A367EACB-8AC9-4838-AB29-ECD05D542525}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -264,6 +268,30 @@ Global
 		{0E1EE611-CDF7-4A8C-BF7D-A0DA6C628413}.Release|x64.Build.0 = Release|Any CPU
 		{0E1EE611-CDF7-4A8C-BF7D-A0DA6C628413}.Release|x86.ActiveCfg = Release|Any CPU
 		{0E1EE611-CDF7-4A8C-BF7D-A0DA6C628413}.Release|x86.Build.0 = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|ARM.Build.0 = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|x64.Build.0 = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Debug|x86.Build.0 = Debug|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|ARM.ActiveCfg = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|ARM.Build.0 = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|iPhone.Build.0 = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|x64.ActiveCfg = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|x64.Build.0 = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|x86.ActiveCfg = Release|Any CPU
+		{A367EACB-8AC9-4838-AB29-ECD05D542525}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -277,6 +305,7 @@ Global
 		{D39148FB-B64A-47B9-AF45-0EDC2967034F} = {DB62160D-0AA3-496F-9846-68BA6144FE6E}
 		{78B455C4-93FE-4F00-890F-21B9299CC5B4} = {55032F58-C5F0-4233-B70D-9E3A2606D209}
 		{0E1EE611-CDF7-4A8C-BF7D-A0DA6C628413} = {FE63D2B0-7717-4BEF-9D7B-6154DF1D7B5B}
+		{A367EACB-8AC9-4838-AB29-ECD05D542525} = {FE63D2B0-7717-4BEF-9D7B-6154DF1D7B5B}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0

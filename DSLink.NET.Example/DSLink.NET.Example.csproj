@@ -69,6 +69,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DSLink.Example\DSLink.Example.csproj">
+      <Project>{a367eacb-8ac9-4838-ab29-ecd05d542525}</Project>
+      <Name>DSLink.Example</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DSLink\DSLink.csproj">
       <Project>{88591365-982e-41af-9c02-ad8d84fbb54b}</Project>
       <Name>DSLink</Name>
