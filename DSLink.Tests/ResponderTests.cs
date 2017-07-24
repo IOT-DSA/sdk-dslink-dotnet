@@ -42,7 +42,7 @@ namespace DSLink.Tests
             _mockContainer.SetupGet(c => c.Responder).Returns(_responder);
 
             _responder.SuperRoot.CreateChild("testValue")
-                .SetType(Nodes.ValueType.Number)
+                .SetType(DSLink.Nodes.ValueType.Number)
                 .SetValue(123)
                 .BuildNode();
 

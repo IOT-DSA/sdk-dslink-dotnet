@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using DSLink.Util;
 
 namespace DSLink.Request
 {
@@ -12,7 +12,7 @@ namespace DSLink.Request
         private readonly Dictionary<string, Subscription> _subscriptions;
         private readonly Dictionary<int, string> _subIdToPath;
         private readonly Dictionary<int, string> _realSubIdToPath;
-        private int _subscriptionId = 0;
+        private readonly IncrementingIndex _subscriptionId;
         
         public RemoteSubscriptionManager(DSLinkContainer link)
         {
@@ -20,12 +20,13 @@ namespace DSLink.Request
             _subscriptions = new Dictionary<string, Subscription>();
             _subIdToPath = new Dictionary<int, string>();
             _realSubIdToPath = new Dictionary<int, string>();
+            _subscriptionId = new IncrementingIndex();
         }
 
         public async Task<int> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos)
         {
-            var sid = _subscriptionId++;
-            var request = new SubscribeRequest(_link.Requester.NextRequestID, new JArray
+            var sid = _subscriptionId.Next;
+            var request = new SubscribeRequest(_link.Requester._requestId.Next, new JArray
             {
                 new JObject
                 {
@@ -64,7 +65,13 @@ namespace DSLink.Request
                 {
                     new JProperty("requests", new JArray
                     {
-                        new UnsubscribeRequest(_link.Requester.NextRequestID, new JArray { sub.RealSubID }).Serialize()
+                        new UnsubscribeRequest(
+                            _link.Requester._requestId.Next,
+                            new JArray
+                            {
+                                sub.RealSubID
+                            }
+                        ).Serialize()
                     })
                 });
                 _subscriptions.Remove(path);

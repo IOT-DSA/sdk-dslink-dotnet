@@ -60,9 +60,12 @@
   <ItemGroup>
     <Compile Include="CryptoTests.cs" />
     <Compile Include="MetadataMapTests.cs" />
+    <Compile Include="Nodes\Actions\ColumnTests.cs" />
+    <Compile Include="Nodes\Actions\ParameterTests.cs" />
     <Compile Include="NodeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResponderTests.cs" />
+    <Compile Include="Util\IncrementingIndexTests.cs" />
     <Compile Include="ValueTests.cs" />
     <Compile Include="TestPlatform.cs" />
     <Compile Include="NodeChildrenTests.cs" />

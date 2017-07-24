@@ -1,3 +1,4 @@
+using DSLink.Util;
 using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes.Actions
@@ -44,7 +45,7 @@ namespace DSLink.Nodes.Actions
         {
             get
             {
-                return this["default"].Value<dynamic>();
+                return this["default"].ToDynamic();
             }
             set
             {

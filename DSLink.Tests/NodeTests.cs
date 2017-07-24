@@ -76,7 +76,7 @@ namespace DSLink.Tests
         public void SubscriberValueUpdate()
         {
             var testValue = _superRootNode.CreateChild("TestValue")
-                .SetType(Nodes.ValueType.Number)
+                .SetType(DSLink.Nodes.ValueType.Number)
                 .SetValue(0)
                 .BuildNode();
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DSLink.Nodes;
 using DSLink.Respond;
 using Newtonsoft.Json.Linq;
+using DSLink.Util;
 
 namespace DSLink.Request
 {
@@ -14,7 +15,7 @@ namespace DSLink.Request
     public partial class DSLinkRequester
     {
         private readonly DSLinkContainer _link;
-        private int _requestId = 1;
+        internal readonly IncrementingIndex _requestId;
 
         public RequestManager RequestManager
         {
@@ -28,11 +29,10 @@ namespace DSLink.Request
             private set;
         }
 
-        internal int NextRequestID => _requestId++;
-
         public DSLinkRequester(DSLinkContainer link)
         {
             _link = link;
+            _requestId = new IncrementingIndex(1);
         }
 
         public void Init()
@@ -48,7 +48,7 @@ namespace DSLink.Request
         /// <param name="callback">Callback event</param>
         public async Task<ListRequest> List(string path, Action<ListResponse> callback)
         {
-            var request = new ListRequest(NextRequestID, callback, path);
+            var request = new ListRequest(_requestId.Next, callback, path);
             RequestManager.StartRequest(request);
             await _link.Connector.Write(new JObject
             {
@@ -68,7 +68,7 @@ namespace DSLink.Request
         /// <param name="value">Value</param>
         public async Task<SetRequest> Set(string path, Permission permission, Value value)
         {
-            var request = new SetRequest(NextRequestID, path, permission, value);
+            var request = new SetRequest(_requestId.Next, path, permission, value);
             RequestManager.StartRequest(request);
             await _link.Connector.Write(new JObject
             {
@@ -86,7 +86,7 @@ namespace DSLink.Request
         /// <param name="path">Path</param>
         public async Task<RemoveRequest> Remove(string path)
         {
-            var request = new RemoveRequest(NextRequestID, path);
+            var request = new RemoveRequest(_requestId.Next, path);
             RequestManager.StartRequest(request);
             await _link.Connector.Write(new JObject
             {
@@ -107,7 +107,7 @@ namespace DSLink.Request
         /// <param name="callback">Callback</param>
         public async Task<InvokeRequest> Invoke(string path, Permission permission, JObject parameters, Action<InvokeResponse> callback)
         {
-            var request = new InvokeRequest(NextRequestID, path, permission, parameters, callback);
+            var request = new InvokeRequest(_requestId.Next, path, permission, parameters, callback);
             RequestManager.StartRequest(request);
             await _link.Connector.Write(new JObject
             {

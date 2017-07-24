@@ -60,6 +60,8 @@
     <Compile Include="Nodes\NodeFactory.cs" />
     <Compile Include="Nodes\Permission.cs" />
     <Compile Include="Platform\Platform.cs" />
+    <Compile Include="Util\IncrementingIndex.cs" />
+    <Compile Include="Util\JTokenUtil.cs" />
     <Compile Include="Util\ReadOnly.cs" />
     <Compile Include="Util\ReadOnlyList.cs" />
     <Compile Include="Util\SHA256.cs" />

@@ -4,17 +4,17 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using DSLink.Util.Logger;
 using DSLink.Serializer;
+using DSLink.Util;
 
 namespace DSLink.Connection
 {
     public abstract class Connector
     {
-        private int _msgId;
         private BaseSerializer _serializer;
         protected readonly BaseLogger _logger;
         protected readonly Configuration _config;
+        private readonly IncrementingIndex _msgId;
 
-        private int MessageId => _msgId++;
         public BaseSerializer DataSerializer => _serializer;
 
         public ConnectionState ConnectionState
@@ -115,6 +115,7 @@ namespace DSLink.Connection
             _config = config;
             _logger = logger;
             ConnectionState = ConnectionState.Disconnected;
+            _msgId = new IncrementingIndex();
 
             OnOpen += () =>
             {
@@ -193,7 +194,7 @@ namespace DSLink.Connection
                     {
                         _queue = new JObject
                         {
-                            new JProperty("msg", MessageId),
+                            new JProperty("msg", _msgId.Next),
                             new JProperty("responses", new JArray()),
                             new JProperty("requests", new JArray())
                         };
@@ -234,7 +235,7 @@ namespace DSLink.Connection
 
             if (data["msg"] == null)
             {
-                data["msg"] = MessageId;
+                data["msg"] = _msgId.Next;
             }
 
             if (data["requests"] != null && data["requests"].Value<JArray>().Count == 0)
