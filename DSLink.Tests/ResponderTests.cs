@@ -7,7 +7,6 @@ using PCLStorage;
 using Newtonsoft.Json.Linq;
 using DSLink.Nodes;
 using System.Threading.Tasks;
-using System;
 using DSLink.Nodes.Actions;
 
 namespace DSLink.Tests
@@ -120,6 +119,15 @@ namespace DSLink.Tests
             });
         }
 
+        private void _setUpNodeClass()
+        {
+            _responder.AddNodeClass("testClass", (Node node) =>
+            {
+                node.Configs.Set(ConfigType.DisplayName, new Value("test"));
+                node.Attributes.Set("attr", new Value("test"));
+            });
+        }
+
         // TODO: Split this into multiple tests
         [Test]
         public async Task List()
@@ -227,6 +235,18 @@ namespace DSLink.Tests
             // Test for unsubscribe method stream close.
             Assert.AreEqual(2, requestClose["rid"].Value<int>());
             Assert.AreEqual("closed", requestClose["stream"].Value<string>());
+        }
+
+        [Test]
+        public void NodeClassAdd()
+        {
+            _setUpNodeClass();
+
+            var node = _responder.SuperRoot.CreateChild("testNodeClass", "testClass")
+                .BuildNode();
+
+            Assert.AreEqual("test", node.Configs.Get(ConfigType.DisplayName).String);
+            Assert.AreEqual("test", node.Attributes.Get("attr").String);
         }
     }
 }
