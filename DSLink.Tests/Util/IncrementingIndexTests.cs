@@ -3,6 +3,7 @@ using NUnit.Framework;
 
 namespace DSLink.Tests.Util
 {
+    [TestFixture]
     public class IncrementingIndexTests
     {
         [Test]

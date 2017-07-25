@@ -242,8 +242,7 @@ namespace DSLink.Tests
         {
             _setUpNodeClass();
 
-            var node = _responder.SuperRoot.CreateChild("testNodeClass", "testClass")
-                .BuildNode();
+            var node = _responder.SuperRoot.CreateChild("testNodeClass", "testClass").BuildNode();
 
             Assert.AreEqual("test", node.Configs.Get(ConfigType.DisplayName).String);
             Assert.AreEqual("test", node.Attributes.Get("attr").String);
