@@ -156,8 +156,7 @@ namespace DSLink.Connection
         public virtual Task Connect()
         {
             _serializer = (BaseSerializer) Activator.CreateInstance(
-                Serializers.Types[_config.CommunicationFormatUsed],
-                this
+                Serializers.Types[_config.CommunicationFormatUsed]
             );
             ConnectionState = ConnectionState.Connecting;
             _logger.Info("Connecting");

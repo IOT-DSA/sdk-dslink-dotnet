@@ -8,8 +8,8 @@ namespace DSLink.Tests
     [TestFixture]
     public class SerializerTests
     {
-        private static readonly JsonSerializer _json = new JsonSerializer(null);
-        private static readonly MsgPackSerializer _msgpack = new MsgPackSerializer(null);
+        private static readonly JsonSerializer _json = new JsonSerializer();
+        private static readonly MsgPackSerializer _msgpack = new MsgPackSerializer();
 
         private static readonly JObject _simpleMsgAck = new JObject
         {
