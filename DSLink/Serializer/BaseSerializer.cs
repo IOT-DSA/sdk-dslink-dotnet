@@ -7,8 +7,6 @@ namespace DSLink.Serializer
     /// </summary>
     public abstract class BaseSerializer
     {
-        protected DSLinkContainer _link;
-
         /// <summary>
         /// True if the connection used requires binary stream support.
         /// </summary>
@@ -17,9 +15,8 @@ namespace DSLink.Serializer
             get;
         }
 
-        public BaseSerializer(DSLinkContainer link)
+        public BaseSerializer()
         {
-            _link = link;
         }
 
         /// <summary>
