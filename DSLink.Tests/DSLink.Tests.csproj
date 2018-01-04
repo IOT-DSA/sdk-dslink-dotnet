@@ -67,6 +67,7 @@
     <Compile Include="NodeChildrenTests.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="RootTestsSetUp.cs" />
+    <Compile Include="VFSTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -81,6 +81,8 @@
     <Compile Include="Nodes\ResultType.cs" />
     <Compile Include="Nodes\Actions\Row.cs" />
     <Compile Include="Nodes\Actions\Table.cs" />
+    <Compile Include="VFS\IVFS.cs" />
+    <Compile Include="VFS\SystemVFS.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MsgPack, Version=0.8.0.0, Culture=neutral, PublicKeyToken=a2625990d5dc0167, processorArchitecture=MSIL">
