@@ -15,10 +15,6 @@ namespace DSLink.Serializer
             get;
         }
 
-        public BaseSerializer()
-        {
-        }
-
         /// <summary>
         /// Serialize the specified data.
         /// </summary>

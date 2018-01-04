@@ -34,7 +34,7 @@ namespace DSLink.Respond
             protected set;
         }
 
-        public virtual NodeSerializer NodeSerializer
+        public virtual DiskSerializer DiskSerializer
         {
             get;
             protected set;
@@ -44,6 +44,11 @@ namespace DSLink.Respond
         {
             NodeClasses = new Dictionary<string, Action<Node>>();
         }
+
+        /// <summary>
+        /// Initialize the responder.
+        /// </summary>
+        public abstract void Init();
 
         /// <summary>
         /// Process requests incoming from the broker.

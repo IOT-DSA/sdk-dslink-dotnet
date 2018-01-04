@@ -10,11 +10,6 @@ namespace DSLink.Connection
         /// </summary>
         public readonly string Message;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Connection.MessageEvent"/> class.
-        /// </summary>
-        /// <param name="message">Message</param>
         public MessageEvent(string message)
         {
             Message = message;
@@ -31,11 +26,6 @@ namespace DSLink.Connection
         /// </summary>
         public readonly byte[] Message;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Connection.BinaryMessageEvent"/> class.
-        /// </summary>
-        /// <param name="message">Message</param>
         public BinaryMessageEvent(byte[] message)
         {
             Message = message;

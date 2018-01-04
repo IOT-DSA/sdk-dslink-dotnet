@@ -24,12 +24,6 @@ namespace DSLink.Respond
             protected set;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Respond.Response"/> class.
-        /// </summary>
-        /// <param name="link">Link instance</param>
-        /// <param name="requestID">Request identifier</param>
         public Response(DSLinkContainer link, int requestID)
         {
             _link = link;
@@ -45,7 +39,7 @@ namespace DSLink.Respond
             {
                 throw new NullReferenceException("Link is null, cannot close stream.");
             }
-            _link.Requester._requestManager.StopRequest(RequestID);
+            _link.Requester.RequestManager.StopRequest(RequestID);
             await _link.Connector.Write(new JObject
             {
                 new JProperty("responses", new JObject
@@ -60,9 +54,6 @@ namespace DSLink.Respond
         }
     }
 
-    /// <summary>
-    /// List response.
-    /// </summary>
     public class ListResponse : Response
     {
         /// <summary>
@@ -83,12 +74,6 @@ namespace DSLink.Respond
             protected set;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:DSLink.Respond.ListResponse"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
-        /// <param name="path">Path</param>
-        /// <param name="node">Node</param>
         public ListResponse(DSLinkContainer link, int requestID,
                             string path, Node node)
             : base(link, requestID)
@@ -98,9 +83,6 @@ namespace DSLink.Respond
         }
     }
 
-    /// <summary>
-    /// Invoke response.
-    /// </summary>
     public class InvokeResponse : Response
     {
         /// <summary>
@@ -137,13 +119,6 @@ namespace DSLink.Respond
         /// </summary>
         public bool HasUpdates => Updates.Count > 0;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:DSLink.Respond.InvokeResponse"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
-        /// <param name="path">Path</param>
-        /// <param name="columns">Columns</param>
-        /// <param name="updates">Updates</param>
         public InvokeResponse(DSLinkContainer link, int requestID,
                               string path, JArray columns,
                               JArray updates)

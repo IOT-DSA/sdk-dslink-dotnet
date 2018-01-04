@@ -21,10 +21,6 @@ namespace DSLink.Request
             private set;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:DSLink.Request.BaseRequest"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
         protected BaseRequest(int requestID)
         {
             RequestID = requestID;
@@ -63,24 +59,10 @@ namespace DSLink.Request
         /// </summary>
         public readonly string Path;
 
-        /// <summary>
-        /// Link container instance.
-        /// </summary>
-        private readonly DSLinkContainer _link;
-
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Request.ListRequest"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
-        /// <param name="callback">Callback</param>
-        /// <param name="path">Path</param>
-        /// <param name="link">Link</param>
-        public ListRequest(int requestID, Action<ListResponse> callback, string path, DSLinkContainer link) : base(requestID)
+        public ListRequest(int requestID, Action<ListResponse> callback, string path) : base(requestID)
         {
             Callback = callback;
             Path = path;
-            _link = link;
         }
 
         /// <summary>
@@ -119,14 +101,6 @@ namespace DSLink.Request
         /// </summary>
         public readonly Value Value;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Request.SetRequest"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
-        /// <param name="path">Path</param>
-        /// <param name="permission">Permission</param>
-        /// <param name="value">Value</param>
         public SetRequest(int requestID, string path, Permission permission, Value value) : base(requestID)
         {
             Path = path;
@@ -165,12 +139,6 @@ namespace DSLink.Request
             get;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Request.RemoveRequest"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
-        /// <param name="path">Path.</param>
         public RemoveRequest(int requestID, string path) : base(requestID)
         {
             Path = path;
@@ -237,17 +205,6 @@ namespace DSLink.Request
         /// </summary>
         public Table.Mode Mode;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Request.InvokeRequest"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
-        /// <param name="path">Path</param>
-        /// <param name="permission">Permission</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="callback">Callback</param>
-        /// <param name="link">Link</param>
-        /// <param name="columns">Columns</param>
         public InvokeRequest(int requestID, string path, Permission permission, JObject parameters,
                              Action<InvokeResponse> callback = null, DSLinkContainer link = null,
                              JArray columns = null) : base(requestID)
@@ -356,13 +313,6 @@ namespace DSLink.Request
         /// </summary>
         public readonly Action<SubscriptionUpdate> Callback;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Request.SubscribeRequest"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
-        /// <param name="paths">Paths</param>
-        /// <param name="callback">Callback</param>
         public SubscribeRequest(int requestID, JArray paths, Action<SubscriptionUpdate> callback) : base(requestID)
         {
             Paths = paths;
@@ -395,12 +345,6 @@ namespace DSLink.Request
         /// </summary>
         public readonly JArray Sids;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Request.UnsubscribeRequest"/> class.
-        /// </summary>
-        /// <param name="requestID">Request identifier</param>
-        /// <param name="sids">Subscription IDs</param>
         public UnsubscribeRequest(int requestID, JArray sids) : base(requestID)
         {
             Sids = sids;

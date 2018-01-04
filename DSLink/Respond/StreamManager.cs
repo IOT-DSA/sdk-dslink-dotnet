@@ -16,9 +16,9 @@ namespace DSLink.Respond
         public void OpenStream(int requestId, Node node)
         {
             _requestIdToPath.Add(requestId, node.Path);
-            lock (node.Streams)
+            lock (node._streams)
             {
-                node.Streams.Add(requestId);
+                node._streams.Add(requestId);
             }
         }
 
@@ -34,9 +34,9 @@ namespace DSLink.Respond
                 var node = _link.Responder.SuperRoot.Get(_requestIdToPath[requestId]);
                 if (node != null)
                 {
-                    lock (node.Streams)
+                    lock (node._streams)
                     {
-                        node.Streams.Remove(requestId);
+                        node._streams.Remove(requestId);
                     }
                 }
                 _requestIdToPath.Remove(requestId);
@@ -54,7 +54,10 @@ namespace DSLink.Respond
                 var path = _requestIdToPath[id];
                 if (path == node.Path)
                 {
-                    node.Streams.Add(id);
+                    lock (node._streams)
+                    {
+                        node._streams.Add(id);
+                    }
                 }
             }
         }

@@ -11,10 +11,14 @@ namespace DSLink.Respond
         public DSLinkResponder(DSLinkContainer link) : base()
         {
             Link = link;
-            NodeSerializer = new NodeSerializer(this);
-            SuperRoot = new Node("", null, Link);
+        }
+
+        public override void Init()
+        {
+            DiskSerializer = new DiskSerializer(this);
             SubscriptionManager = new SubscriptionManager(Link);
             StreamManager = new StreamManager(Link);
+            SuperRoot = new Node("", null, Link);
         }
 
         public override void AddNodeClass(string name, Action<Node> factory)
@@ -71,7 +75,12 @@ namespace DSLink.Respond
                 {
                     new JProperty("rid", request["rid"].Value<int>()),
                     new JProperty("stream", "open"),
-                    new JProperty("updates", SuperRoot.Get(request["path"].Value<string>()).SerializeUpdates())
+                    new JProperty(
+                        "updates",
+                        SubscriptionManager.SerializeUpdates(
+                            SuperRoot.Get(request["path"].Value<string>())
+                        )
+                    )
                 });
             }
             else
@@ -85,7 +94,8 @@ namespace DSLink.Respond
             var node = SuperRoot.Get(request["path"].Value<string>());
             if (node != null)
             {
-                if (request["permit"] == null || request["permit"].Value<string>().Equals(node.GetConfig("writable").String))
+                if (request["permit"] == null ||
+                    request["permit"].Value<string>().Equals(node.Configs.Get(ConfigType.Writable).String))
                 {
                     node.Value.Set(request["value"]);
                     node.Value.InvokeRemoteSet();
@@ -115,7 +125,15 @@ namespace DSLink.Respond
             {
                 if (request["permit"] == null || request["permit"].Value<string>().Equals(node.ActionHandler.Permission.ToString()))
                 {
-                    JArray columns = node.Columns ?? new JArray();
+                    JArray columns;
+                    if (node.Configs.Has(ConfigType.Columns))
+                    {
+                        columns = node.Configs.Get(ConfigType.Columns).JArray;
+                    }
+                    else
+                    {
+                        columns = new JArray();
+                    }
                     var permit = (request["permit"] != null) ? Permission.PermissionMap[request["permit"].Value<string>().ToLower()] : null;
                     var invokeRequest = new InvokeRequest(request["rid"].Value<int>(), request["path"].Value<string>(),
                                                           permit, request["params"].Value<JObject>(), link: Link,

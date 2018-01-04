@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace DSLink.Respond
 {
-    public class NodeSerializer
+    public class DiskSerializer
     {
         private readonly Responder _responder;
 
-        public NodeSerializer(Responder responder)
+        public DiskSerializer(Responder responder)
         {
             _responder = responder;
         }

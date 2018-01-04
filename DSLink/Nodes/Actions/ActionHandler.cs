@@ -18,11 +18,6 @@ namespace DSLink.Nodes.Actions
         /// </summary>
         public readonly Action<InvokeRequest> Function;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:DSLink.Nodes.Actions.ActionHandler"/> class.
-        /// </summary>
-        /// <param name="permission">Permission</param>
-        /// <param name="function">Function</param>
         public ActionHandler(Permission permission, Action<InvokeRequest> function)
         {
             Permission = permission;

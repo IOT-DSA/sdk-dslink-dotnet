@@ -1,113 +1,77 @@
-using System.Collections.Generic;
-using System.Threading;
-using DSLink.NET;
-using DSLink.Nodes;
+﻿using DSLink.Nodes;
 using DSLink.Nodes.Actions;
+using DSLink.Request;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using ValueType = DSLink.Nodes.ValueType;
 
 namespace DSLink.Example
 {
     public class ExampleDSLink : DSLinkContainer
     {
-        private readonly List<Value> _values = new List<Value>();
-        private int _num;
+        private readonly Dictionary<string, Value> _rngValues;
+        private readonly Random _random;
 
         public ExampleDSLink(Configuration config) : base(config)
         {
-            Responder.AddNodeClass("testAction", delegate (Node node)
+            _rngValues = new Dictionary<string, Value>();
+            _random = new Random();
+
+            Responder.AddNodeClass("rngAdd", delegate (Node node)
             {
-                node.AddParameter(new Parameter("string", ValueType.String));
-                node.AddParameter(new Parameter("int", ValueType.Number));
-                node.AddParameter(new Parameter("number", ValueType.Number));
-                node.AddColumn(new Column("success", ValueType.Boolean));
-
-                var handler = new ActionHandler(Permission.Write, async (request) =>
+                node.Configs.Set(ConfigType.DisplayName, new Value("Create RNG"));
+                node.AddParameter(new Parameter
                 {
-                    await request.UpdateTable(new Table
-                    {
-                        new Row
-                        {
-                            true
-                        }
-                    });
-                    await request.Close();
+                    Name = "rngName",
+                    ValueType = Nodes.ValueType.String
                 });
-
-                node.SetAction(handler);
+                node.SetAction(new ActionHandler(Permission.Config, _createRngAction));
             });
 
             Responder.AddNodeClass("rng", delegate (Node node)
             {
-                node.Writable = Permission.Read;
-                node.ValueType = ValueType.Number;
-                node.Value.Set(0.1);
+                node.Configs.Set(ConfigType.Writable, new Value(Permission.Read.Permit));
+                node.Configs.Set(ConfigType.ValueType, Nodes.ValueType.Number.TypeValue);
+                node.Value.Set(0);
 
-                lock (_values)
+                lock (_rngValues)
                 {
-                    _values.Add(node.Value);
+                    _rngValues.Add(node.Name, node.Value);
                 }
             });
 
-            Task.Run(async () =>
-            {
-                await Task.Delay(5000);
-                UpdateRandomNumbers();
-            });
-        }
-
-        private void UpdateRandomNumbers()
-        {
-            lock (_values)
-            {
-                foreach (var value in _values)
-                {
-                    value.Set(_num++);
-                }
-            }
-            Task.Run(() => UpdateRandomNumbers());
+            Task.Run(() => _updateRandomNumbers());
         }
 
         public override void InitializeDefaultNodes()
         {
-            Responder.SuperRoot.CreateChild("Test", "testAction").BuildNode();
+            Responder.SuperRoot.CreateChild("createRNG", "rngAdd").BuildNode();
+        }
 
-            for (var x = 1; x <= 5; x++)
+        private async void _updateRandomNumbers()
+        {
+            lock (_rngValues)
             {
-                var node = Responder.SuperRoot.CreateChild($"Container{x}").BuildNode();
-                for (var i = 1; i <= 50; i++)
+                foreach (var kv in _rngValues)
                 {
-                    node.CreateChild($"TestVal{i}", "rng").BuildNode();
+                    kv.Value.Set(_random.Next());
                 }
             }
+            await Task.Delay(100);
+            _updateRandomNumbers();
         }
 
-        private static void Main(string[] args)
+        private async void _createRngAction(InvokeRequest request)
         {
-            InitializeLink(args).Wait();
+            var rngName = request.Parameters["rngName"].Value<string>();
+            if (string.IsNullOrEmpty(rngName)) return;
+            if (Responder.SuperRoot.Children.ContainsKey(rngName)) return;
 
-            while (true)
-            {
-                Thread.Sleep(1000);
-            }
-        }
+            var newRng = Responder.SuperRoot.CreateChild(rngName, "rng").BuildNode();
 
-        public static async Task InitializeLink(string[] args)
-        {
-            NETPlatform.Initialize();
-
-            var config = new Configuration(args, "RNG", true, true)
-            {
-                //CommunicationFormat = "json",
-                //LoadNodesJson = false,
-                //LogLevel = LogLevel.Debug,
-                //BrokerUrl = "http://localhost:8090/conn"
-                BrokerUrl = "http://rnd.iot-dsa.org/conn"
-            };
-            var dslink = new ExampleDSLink(config);
-
-            await dslink.Connect();
-            await dslink.SaveNodes();
+            await request.Close();
+            await SaveNodes();
         }
     }
 }

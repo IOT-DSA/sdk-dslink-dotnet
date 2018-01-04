@@ -16,21 +16,21 @@ namespace DSLink.Tests
         };
 
         [Test]
-        public void TestNull_Created_IsNullTrue()
+        public void Null_Created_IsNullTrue()
         {
             var value = new Value();
             Assert.IsTrue(value.IsNull);
         }
 
         [Test]
-        public void TestNull_Created_IsJTokenNull()
+        public void Null_Created_IsJTokenNull()
         {
             var value = new Value();
             Assert.IsNull(value.JToken);
         }
 
         [Test]
-        public void TestNull_AfterSetNumber_IsNullFalse()
+        public void Null_AfterSetNumber_IsNullFalse()
         {
             var value = new Value();
             value.Set(123);
@@ -38,28 +38,28 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestBoolean_Created_BooleanPropertyEqualsValue()
+        public void Boolean_Created_BooleanPropertyEqualsValue()
         {
             var value = new Value(false);
             Assert.AreEqual(false, value.Boolean);
         }
 
         [Test]
-        public void TestBoolean_Created_EqualsProperType()
+        public void Boolean_Created_EqualsProperType()
         {
             var value = new Value(false);
             Assert.AreEqual(JTokenType.Boolean, value.JToken.Type);
         }
 
         [Test]
-        public void TestBoolean_Created_IsNullFalse()
+        public void Boolean_Created_IsNullFalse()
         {
             var value = new Value(false);
             Assert.IsFalse(value.IsNull);
         }
 
         [Test]
-        public void TestBoolean_AfterSet_BooleanPropertyEqualsValue()
+        public void Boolean_AfterSet_BooleanPropertyEqualsValue()
         {
             var value = new Value(false);
             value.Set(true);
@@ -67,7 +67,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestBoolean_AfterSet_EqualsProperType()
+        public void Boolean_AfterSet_EqualsProperType()
         {
             var value = new Value(false);
             value.Set(true);
@@ -75,7 +75,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestBoolean_AfterSet_IsNullFalse()
+        public void Boolean_AfterSet_IsNullFalse()
         {
             var value = new Value(false);
             value.Set(true);
@@ -83,28 +83,28 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestInt_Created_IsNullFalse()
+        public void Int_Created_IsNullFalse()
         {
             var value = new Value(123);
             Assert.IsFalse(value.IsNull);
         }
 
         [Test]
-        public void TestInt_Created_IntPropertyEqualsValue()
+        public void Int_Created_IntPropertyEqualsValue()
         {
             var value = new Value(123);
             Assert.AreEqual(123, value.Int);
         }
 
         [Test]
-        public void TestInt_Created_EqualsProperType()
+        public void Int_Created_EqualsProperType()
         {
             var value = new Value(123);
             Assert.AreEqual(JTokenType.Integer, value.JToken.Type);
         }
 
         [Test]
-        public void TestInt_AfterSet_IsNullFalse()
+        public void Int_AfterSet_IsNullFalse()
         {
             var value = new Value(123);
             value.Set(321);
@@ -112,7 +112,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestInt_AfterSet_IntPropertyEqualsValue()
+        public void Int_AfterSet_IntPropertyEqualsValue()
         {
             var value = new Value(123);
             value.Set(321);
@@ -120,7 +120,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestInt_AfterSet_EqualsProperType()
+        public void Int_AfterSet_EqualsProperType()
         {
             var value = new Value(123);
             value.Set(321);
@@ -128,28 +128,28 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestFloat_Created_IsNullFalse()
+        public void Float_Created_IsNullFalse()
         {
             var value = new Value(123.456f);
             Assert.IsFalse(value.IsNull);
         }
 
         [Test]
-        public void TestFloat_Created_FloatPropertyEqualsValue()
+        public void Float_Created_FloatPropertyEqualsValue()
         {
             var value = new Value(123.456f);
             Assert.AreEqual(123.456f, value.Float);
         }
 
         [Test]
-        public void TestFloat_Created_EqualsProperType()
+        public void Float_Created_EqualsProperType()
         {
             var value = new Value(123.456f);
             Assert.AreEqual(JTokenType.Float, value.JToken.Type);
         }
 
         [Test]
-        public void TestFloat_AfterSet_IsNullFalse()
+        public void Float_AfterSet_IsNullFalse()
         {
             var value = new Value(123.456f);
             value.Set(654.321f);
@@ -157,7 +157,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestFloat_AfterSet_FloatPropertyEqualsValue()
+        public void Float_AfterSet_FloatPropertyEqualsValue()
         {
             var value = new Value(123.456f);
             value.Set(654.321f);
@@ -165,7 +165,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestFloat_AfterSet_EqualsProperType()
+        public void Float_AfterSet_EqualsProperType()
         {
             var value = new Value(123.456f);
             value.Set(654.321f);
@@ -173,28 +173,28 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestDouble_Created_IsNullFalse()
+        public void Double_Created_IsNullFalse()
         {
             var value = new Value(123.456);
             Assert.IsFalse(value.IsNull);
         }
 
         [Test]
-        public void TestDouble_Created_DoublePropertyEqualsValue()
+        public void Double_Created_DoublePropertyEqualsValue()
         {
             var value = new Value(123.456);
             Assert.AreEqual(123.456, value.Double);
         }
 
         [Test]
-        public void TestDouble_Created_EqualsProperType()
+        public void Double_Created_EqualsProperType()
         {
             var value = new Value(123.456);
             Assert.AreEqual(JTokenType.Float, value.JToken.Type);
         }
 
         [Test]
-        public void TestDouble_AfterSet_IsNullFalse()
+        public void Double_AfterSet_IsNullFalse()
         {
             var value = new Value(123.456);
             value.Set(654.321);
@@ -202,7 +202,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestDouble_AfterSet_DoublePropertyEqualsValue()
+        public void Double_AfterSet_DoublePropertyEqualsValue()
         {
             var value = new Value(123.456);
             value.Set(654.321);
@@ -210,7 +210,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestDouble_AfterSet_EqualsProperType()
+        public void Double_AfterSet_EqualsProperType()
         {
             var value = new Value(123.456);
             value.Set(654.321);
@@ -218,27 +218,28 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestString_Created_IsNullFalse()
+        public void String_Created_IsNullFalse()
         {
             var value = new Value("123");
             Assert.IsFalse(value.IsNull);
         }
 
         [Test]
-        public void TestString_Created_StringPropertyEqualsValue()
+        public void String_Created_StringPropertyEqualsValue()
         {
             var value = new Value("123");
             Assert.AreEqual("123", value.String);
         }
 
-        public void TestString_Created_EqualsProperType()
+        [Test]
+        public void String_Created_EqualsProperType()
         {
             var value = new Value("123");
             Assert.AreEqual(JTokenType.String, value.JToken.Type);
         }
 
         [Test]
-        public void TestString_AfterSet_IsNullFalse()
+        public void String_AfterSet_IsNullFalse()
         {
             var value = new Value("123");
             value.Set("321");
@@ -246,14 +247,15 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestString_AfterSet_StringPropertyEqualsValue()
+        public void String_AfterSet_StringPropertyEqualsValue()
         {
             var value = new Value("123");
             value.Set("321");
             Assert.AreEqual("321", value.String);
         }
 
-        public void TestString_AfterSet_EqualsProperType()
+        [Test]
+        public void String_AfterSet_EqualsProperType()
         {
             var value = new Value("123");
             value.Set("321");
@@ -261,44 +263,28 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestByteArray()
-        {
-            var value = new Value(_testBytes);
-
-            Assert.IsFalse(value.IsNull);
-            Assert.AreEqual(JTokenType.Bytes, value.JToken.Type);
-            Assert.AreEqual(_testBytes, value.ByteArray);
-
-            value.Set(_testBytesReverse);
-
-            Assert.IsFalse(value.IsNull);
-            Assert.AreEqual(JTokenType.Bytes, value.JToken.Type);
-            Assert.AreEqual(_testBytesReverse, value.ByteArray);
-        }
-
-        [Test]
-        public void TestByteArray_Created_IsNullFalse()
+        public void ByteArray_Created_IsNullFalse()
         {
             var value = new Value(_testBytes);
             Assert.IsFalse(value.IsNull);
         }
 
         [Test]
-        public void TestByteArray_Created_ByteArrayPropertyEqualsValue()
+        public void ByteArray_Created_ByteArrayPropertyEqualsValue()
         {
             var value = new Value(_testBytes);
             Assert.AreEqual(_testBytes, value.ByteArray);
         }
 
         [Test]
-        public void TestByteArray_Created_EqualsProperType()
+        public void ByteArray_Created_EqualsProperType()
         {
             var value = new Value(_testBytes);
             Assert.AreEqual(JTokenType.Bytes, value.JToken.Type);
         }
 
         [Test]
-        public void TestByteArray_AfterSet_IsNullFalse()
+        public void ByteArray_AfterSet_IsNullFalse()
         {
             var value = new Value(_testBytes);
             value.Set(_testBytesReverse);
@@ -306,7 +292,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestByteArray_AfterSet_ByteArrayPropertyEqualsValue()
+        public void ByteArray_AfterSet_ByteArrayPropertyEqualsValue()
         {
             var value = new Value(_testBytes);
             value.Set(_testBytesReverse);
@@ -314,7 +300,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestByteArray_AfterSet_EqualsProperType()
+        public void ByteArray_AfterSet_EqualsProperType()
         {
             var value = new Value(_testBytes);
             value.Set(_testBytesReverse);

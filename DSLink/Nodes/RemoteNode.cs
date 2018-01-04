@@ -8,13 +8,6 @@ namespace DSLink.Nodes
     /// </summary>
     public class RemoteNode : Node
     {
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Nodes.RemoteNode"/> class.
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="parent">Parent</param>
-        /// <param name="path">Path of Node</param>
         public RemoteNode(string name, Node parent, string path) : base(name, parent, null)
         {
             Path = path;
@@ -39,7 +32,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Updates the subscribers.
         /// </summary>
-        internal override void UpdateSubscribers()
+        protected override void UpdateSubscribers()
         {
         }
 
@@ -59,21 +52,21 @@ namespace DSLink.Nodes
                     key = key.Substring(1);
                     if (key.Equals("params") && value.Type == JTokenType.Array)
                     {
-                        SetConfig(key, new Value(value.Value<JArray>()));
+                        Configs.Set(key, new Value(value.Value<JArray>()));
                     }
                     else if (key.Equals("columns") && value.Type == JTokenType.Array)
                     {
-                        SetConfig(key, new Value(value.Value<JArray>()));
+                        Configs.Set(key, new Value(value.Value<JArray>()));
                     }
                     else
                     {
-                        SetConfig(key, new Value(value.ToString()));
+                        Configs.Set(key, new Value(value.ToString()));
                     }
                 }
                 else if (key.StartsWith("@"))
                 {
                     key = key.Substring(1);
-                    SetAttribute(key, new Value(value.ToString()));
+                    Attributes.Set(key, new Value(value.ToString()));
                 }
                 else
                 {
@@ -85,11 +78,11 @@ namespace DSLink.Nodes
                         {
                             if (kp.Key.StartsWith("$"))
                             {
-                                child.SetConfig(kp.Key.Substring(1), new Value(kp.Value.ToString()));
+                                child.Configs.Set(kp.Key.Substring(1), new Value(kp.Value.ToString()));
                             }
                             else if (kp.Key.StartsWith("@"))
                             {
-                                child.SetAttribute(kp.Key.Substring(1), new Value(kp.Value.ToString()));
+                                child.Attributes.Set(kp.Key.Substring(1), new Value(kp.Value.ToString()));
                             }
                         }
                     }

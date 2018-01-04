@@ -7,7 +7,6 @@ using PCLStorage;
 using Newtonsoft.Json.Linq;
 using DSLink.Nodes;
 using System.Threading.Tasks;
-using System;
 using DSLink.Nodes.Actions;
 
 namespace DSLink.Tests
@@ -37,11 +36,12 @@ namespace DSLink.Tests
             _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
 
             _responder = new DSLinkResponder(_mockContainer.Object);
+            _responder.Init();
 
             _mockContainer.SetupGet(c => c.Responder).Returns(_responder);
 
             _responder.SuperRoot.CreateChild("testValue")
-                .SetType(Nodes.ValueType.Number)
+                .SetType(DSLink.Nodes.ValueType.Number)
                 .SetValue(123)
                 .BuildNode();
 
@@ -119,8 +119,18 @@ namespace DSLink.Tests
             });
         }
 
+        private void _setUpNodeClass()
+        {
+            _responder.AddNodeClass("testClass", (Node node) =>
+            {
+                node.Configs.Set(ConfigType.DisplayName, new Value("test"));
+                node.Attributes.Set("attr", new Value("test"));
+            });
+        }
+
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestList()
+        public async Task List()
         {
             var responses = await _listNode();
             var response = responses[0];
@@ -154,12 +164,11 @@ namespace DSLink.Tests
             Assert.AreEqual("node", testNodeUpdate["$is"].Value<string>());
             Assert.AreEqual("string", testNodeUpdate["$testString"].Value<string>());
             Assert.AreEqual(123, testNodeUpdate["$testNumber"].Value<int>());
-
-            Console.WriteLine(updates.ToString());
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestInvoke()
+        public async Task Invoke()
         {
             bool actionInvoked = false;
             _responder.SuperRoot.CreateChild("testAction")
@@ -176,8 +185,9 @@ namespace DSLink.Tests
             Assert.IsTrue(actionInvoked);
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestInvokeParameters()
+        public async Task InvokeParameters()
         {
             _responder.SuperRoot.CreateChild("testAction")
                 .SetInvokable(Permission.Write)
@@ -192,8 +202,9 @@ namespace DSLink.Tests
             await _invokeNode();
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestSubscribe()
+        public async Task Subscribe()
         {
             var requestResponses = await _subscribeToNode();
 
@@ -212,8 +223,9 @@ namespace DSLink.Tests
             Assert.AreEqual("closed", requestClose["stream"].Value<string>());
         }
 
+        // TODO: Split this into multiple tests
         [Test]
-        public async Task TestUnsubscribe()
+        public async Task Unsubscribe()
         {
             await _subscribeToNode();
             var requestResponses = await _unsubscribeFromNode();
@@ -223,6 +235,17 @@ namespace DSLink.Tests
             // Test for unsubscribe method stream close.
             Assert.AreEqual(2, requestClose["rid"].Value<int>());
             Assert.AreEqual("closed", requestClose["stream"].Value<string>());
+        }
+
+        [Test]
+        public void NodeClassAdd()
+        {
+            _setUpNodeClass();
+
+            var node = _responder.SuperRoot.CreateChild("testNodeClass", "testClass").BuildNode();
+
+            Assert.AreEqual("test", node.Configs.Get(ConfigType.DisplayName).String);
+            Assert.AreEqual("test", node.Attributes.Get("attr").String);
         }
     }
 }

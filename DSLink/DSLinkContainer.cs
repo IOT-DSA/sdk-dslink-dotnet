@@ -12,10 +12,9 @@ namespace DSLink
     public class DSLinkContainer
     {
         private readonly Task _pingTask;
-        protected Handshake ProtocolHandshake;
-        internal bool ReconnectOnFailure;
+        private Handshake _handshake;
+        private bool _reconnectOnFailure;
         private bool _isLinkInitialized;
-        private int _rid;
         private readonly Configuration _config;
         private readonly DSLinkResponder _responder;
         private readonly DSLinkRequester _requester;
@@ -27,26 +26,27 @@ namespace DSLink
         public virtual DSLinkRequester Requester => _requester;
         public virtual Connector Connector => _connector;
         public virtual BaseLogger Logger => _logger;
-        public int RequestId => ++_rid;
 
         public DSLinkContainer(Configuration config)
         {
             _config = config;
             _config._processOptions();
             _logger = BasePlatform.Current.CreateLogger("DSLink", Config.LogLevel);
-            ReconnectOnFailure = true;
+            _reconnectOnFailure = true;
             _connector = BasePlatform.Current.CreateConnector(this);
 
             if (Config.Responder)
             {
                 _responder = new DSLinkResponder(this);
+                _responder.Init();
             }
             if (Config.Requester)
             {
                 _requester = new DSLinkRequester(this);
+                _requester.Init();
             }
 
-            // Events
+            // Connector events
             _connector.OnMessage += OnStringRead;
             _connector.OnBinaryMessage += OnBinaryRead;
             _connector.OnWrite += OnStringWrite;
@@ -100,14 +100,14 @@ namespace DSLink
         {
             await Initialize();
 
-            ReconnectOnFailure = true;
-            ProtocolHandshake = new Handshake(this);
+            _reconnectOnFailure = true;
+            _handshake = new Handshake(this);
             var attemptsLeft = maxAttempts;
             uint attempts = 1;
             while (maxAttempts == 0 || attemptsLeft > 0)
             {
-                var handshakeStatus = await ProtocolHandshake.Shake();
-                if (handshakeStatus)
+                _config.RemoteEndpoint = await _handshake.Shake();
+                if (_config.RemoteEndpoint != null)
                 {
                     await Connector.Connect();
                     return Connector.ConnectionState;
@@ -118,7 +118,7 @@ namespace DSLink
                 {
                     delay = Config.MaxConnectionCooldown;
                 }
-                Logger.Warning($"Failed to connect, delaying for {delay} seconds");
+                _logger.Warning($"Failed to connect, delaying for {delay} seconds");
                 await Task.Delay(TimeSpan.FromSeconds(delay));
 
                 if (attemptsLeft > 0)
@@ -127,30 +127,30 @@ namespace DSLink
                 }
                 attempts++;
             }
-            Logger.Warning("Failed to connect within the allotted connection attempt limit.");
+            _logger.Warning("Failed to connect within the allotted connection attempt limit.");
             OnConnectionFailed();
             return ConnectionState.Disconnected;
         }
 
         public void Disconnect()
         {
-            ReconnectOnFailure = false;
+            _reconnectOnFailure = false;
             Connector.Disconnect();
         }
 
         public async Task<bool> LoadSavedNodes()
         {
-            return await Responder.NodeSerializer.DeserializeFromDisk();
+            return await Responder.DiskSerializer.DeserializeFromDisk();
         }
 
         public async Task SaveNodes()
         {
-            await Responder.NodeSerializer.SerializeToDisk();
+            await Responder.DiskSerializer.SerializeToDisk();
         }
 
-        private void OnOpen()
+        private async void OnOpen()
         {
-            Connector.Flush();
+            await Connector.Flush();
         }
 
         private async void OnClose()
@@ -161,7 +161,7 @@ namespace DSLink
                 Responder.StreamManager.ClearAll();
             }
 
-            if (ReconnectOnFailure)
+            if (_reconnectOnFailure)
             {
                 await Connect();
             }
@@ -245,17 +245,17 @@ namespace DSLink
 
         private void LogMessageString(bool sent, MessageEvent messageEvent)
         {
-            if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
+            if (_logger.ToPrint.DoesPrint(LogLevel.Debug))
             {
                 var verb = sent ? "Sent" : "Received";
                 var logString = $"Text {verb}: {messageEvent.Message}";
-                Logger.Debug(logString);
+                _logger.Debug(logString);
             }
         }
 
         private void LogMessageBytes(bool sent, BinaryMessageEvent messageEvent)
         {
-            if (Logger.ToPrint.DoesPrint(LogLevel.Debug))
+            if (_logger.ToPrint.DoesPrint(LogLevel.Debug))
             {
                 var verb = sent ? "Sent" : "Received";
                 var logString = $"Binary {verb}: ";
@@ -267,7 +267,7 @@ namespace DSLink
                 {
                     logString += "(over 5000 bytes)";
                 }
-                Logger.Debug(logString);
+                _logger.Debug(logString);
             }
         }
 
@@ -278,10 +278,9 @@ namespace DSLink
                 if (Connector.Connected())
                 {
                     // Write a blank message containing no responses/requests.
-                    Logger.Debug("Sent ping");
                     await Connector.Write(new JObject(), false);
                 }
-                // TODO: Extract the amount of time to the configuration object.
+                // Delay thirty seconds to the next ping.
                 await Task.Delay(30000);
             }
         }

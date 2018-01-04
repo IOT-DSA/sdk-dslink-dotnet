@@ -41,7 +41,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestEachBannedCharacterInName()
+        public void EachBannedCharacterInName()
         {
             foreach (char c in Node.BannedChars)
             {
@@ -53,7 +53,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestMultipleBannedCharactersInName()
+        public void MultipleBannedCharactersInName()
         {
             var multiCharTest = new string(Node.BannedChars);
             Assert.Throws<ArgumentException>(() =>
@@ -63,7 +63,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestNoBannedCharactersInName()
+        public void NoBannedCharactersInName()
         {
             var noCharTest = "TestNoBannedChars";
             Assert.DoesNotThrow(() =>
@@ -73,10 +73,10 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestSubscriberValueUpdate()
+        public void SubscriberValueUpdate()
         {
             var testValue = _superRootNode.CreateChild("TestValue")
-                .SetType(Nodes.ValueType.Number)
+                .SetType(DSLink.Nodes.ValueType.Number)
                 .SetValue(0)
                 .BuildNode();
 
@@ -96,7 +96,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestNodeTraversal()
+        public void NodeTraversal()
         {
             var testParent = _superRootNode.CreateChild("testParent").BuildNode();
             var testChild = testParent.CreateChild("testChild").BuildNode();
@@ -112,7 +112,23 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestConfigAttributeSerialization()
+        public void GetMethodWithVariousPaths()
+        {
+            var testParent = _superRootNode.CreateChild("testParent").BuildNode();
+            var testChild = testParent.CreateChild("testChild").BuildNode();
+
+            Assert.AreEqual(testParent, _superRootNode.Get("/testParent/"));
+            Assert.AreEqual(testParent, _superRootNode.Get("/testParent"));
+            Assert.AreEqual(testParent, _superRootNode.Get("testParent"));
+
+            Assert.AreEqual(testChild, _superRootNode.Get("/testParent/testChild/"));
+            Assert.AreEqual(testChild, _superRootNode.Get("/testParent/testChild"));
+            Assert.AreEqual(testChild, _superRootNode.Get("testParent/testChild/"));
+            Assert.AreEqual(testChild, _superRootNode.Get("testParent/testChild"));
+        }
+
+        [Test]
+        public void ConfigAttributeSerialization()
         {
             var testNode = _superRootNode
                 .CreateChild("testNode")
@@ -123,7 +139,7 @@ namespace DSLink.Tests
                 .BuildNode();
 
             Assert.IsTrue(
-                JToken.DeepEquals(_superRootNode.SerializeUpdates(), new JArray
+                JToken.DeepEquals(_mockSubManager.Object.SerializeUpdates(_superRootNode), new JArray
                 {
                     new JArray
                     {
@@ -147,7 +163,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestLocalSerialization()
+        public void LocalSerialization()
         {
             var testNode = _superRootNode
                 .CreateChild("testNode")
@@ -176,7 +192,7 @@ namespace DSLink.Tests
         }
 
         [Test]
-        public void TestLocalDeserialization()
+        public void LocalDeserialization()
         {
             var testObject = new JObject
             {
@@ -197,10 +213,10 @@ namespace DSLink.Tests
 
             Assert.IsNotNull(_superRootNode["testNode"]);
             var testNode = _superRootNode["testNode"];
-            Assert.AreEqual(123, testNode.GetConfig("number").Int);
-            Assert.AreEqual("123", testNode.GetConfig("string").String);
-            Assert.AreEqual(123, testNode.GetAttribute("number").Int);
-            Assert.AreEqual("123", testNode.GetAttribute("string").String);
+            Assert.AreEqual(123, testNode.Configs.Get("number").Int);
+            Assert.AreEqual("123", testNode.Configs.Get("string").String);
+            Assert.AreEqual(123, testNode.Attributes.Get("number").Int);
+            Assert.AreEqual("123", testNode.Attributes.Get("string").String);
         }
     }
 }
