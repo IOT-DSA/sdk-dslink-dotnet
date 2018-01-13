@@ -146,6 +146,10 @@ namespace DSLink.Connection
                 sb.Append("dsId=").Append(_config.DsId);
                 sb.Append("&auth=").Append(_config.Authentication);
                 sb.Append("&format=").Append(_config.CommunicationFormatUsed);
+                if (_config.HasToken)
+                {
+                    sb.Append("&token=").Append(_config.TokenParameter);
+                }
 
                 return sb.ToString();
             }

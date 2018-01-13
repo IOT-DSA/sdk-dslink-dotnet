@@ -32,12 +32,23 @@ namespace DSLink.Connection
             _httpClient = new HttpClient();
         }
 
+        private string _buildUrl()
+        {
+            var url = _link.Config.BrokerUrl;
+            url += "?dsId=" + _link.Config.DsId;
+            if (_link.Config.HasToken)
+            {
+                url += "&token=" + _link.Config.TokenParameter;
+            }
+            return url;
+        }
+
         /// <summary>
         /// Run handshake with the server.
         /// </summary>
         public async Task<RemoteEndpoint> Shake()
         {
-            _link.Logger.Info("Handshaking with " + _link.Config.BrokerUrl + "?dsId=" + _link.Config.DsId);
+            _link.Logger.Info("Handshaking with " + _buildUrl());
             HttpResponseMessage resp = null;
             try
             {
@@ -56,6 +67,7 @@ namespace DSLink.Connection
                 );
             }
 
+            _link.Logger.Debug("Handshake status code: " + resp.StatusCode.ToString());
             return null;
         }
 
@@ -64,7 +76,7 @@ namespace DSLink.Connection
         /// </summary>
         private Task<HttpResponseMessage> RunHandshake()
         {
-            return _httpClient.PostAsync(_link.Config.BrokerUrl + "?dsId=" + _link.Config.DsId, 
+            return _httpClient.PostAsync(_buildUrl(), 
                 new StringContent(GetJson().ToString()));
         }
 
