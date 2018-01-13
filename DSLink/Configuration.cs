@@ -20,6 +20,7 @@ namespace DSLink
         public readonly bool Requester;
         public readonly bool Responder;
         public bool LoadNodesJson = true;
+        public string Token = "";
         public string BrokerUrl = "http://localhost:8080/conn";
         public string KeysLocation = ".keys";
         public string CommunicationFormat = "";
@@ -30,6 +31,8 @@ namespace DSLink
         public string CommunicationFormatUsed => (string.IsNullOrEmpty(CommunicationFormat) ? RemoteEndpoint.format : CommunicationFormat);
         public byte[] SharedSecret => string.IsNullOrEmpty(RemoteEndpoint.tempKey) ? new byte[0] : KeyPair.GenerateSharedSecret(RemoteEndpoint.tempKey);
         public string DsId => Name + "-" + UrlBase64.Encode(_sha256.ComputeHash(KeyPair.EncodedPublicKey));
+        public bool HasToken => !string.IsNullOrEmpty(Token);
+        public string TokenParameter => DSAToken.CreateToken(Token, DsId);
 
         public RemoteEndpoint RemoteEndpoint
         {
@@ -74,6 +77,9 @@ namespace DSLink
             {
                 {
                     "broker=", val => { BrokerUrl = val; }
+                },
+                {
+                    "token=", val => { Token = val; }
                 },
                 {
                     "log=", val => { LogLevel = LogLevel.ParseLogLevel(val); }

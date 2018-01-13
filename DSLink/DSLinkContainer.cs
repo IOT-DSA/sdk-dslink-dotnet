@@ -118,6 +118,7 @@ namespace DSLink
                 {
                     delay = Config.MaxConnectionCooldown;
                 }
+
                 Logger.Warning($"Failed to connect, delaying for {delay} seconds");
                 await Task.Delay(TimeSpan.FromSeconds(delay));
 
