@@ -14,7 +14,7 @@ namespace DSLink.Tests
         [SetUp]
         public async Task SetUp()
         {
-            var tempPath = Utilities.GetTempDirectory();
+            var tempPath = Utilities.CreateTempDirectory();
             Console.WriteLine(tempPath);
             _tempFolder = await FileSystem.Current.GetFolderFromPathAsync(tempPath);
         }
