@@ -31,9 +31,9 @@ namespace DSLink
         {
             _config = config;
             _config._processOptions();
-            _logger = BasePlatform.Current.CreateLogger("DSLink", Config.LogLevel);
+            _logger = new ConsoleLogger("DSLink", config.LogLevel);
             _reconnectOnFailure = true;
-            _connector = BasePlatform.Current.CreateConnector(this);
+            _connector = new WebSocketConnector(_config, _logger);
 
             if (Config.Responder)
             {

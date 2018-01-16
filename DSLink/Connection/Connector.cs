@@ -172,10 +172,12 @@ namespace DSLink.Connection
         /// <summary>
         /// Disconnect from the broker.
         /// </summary>
-        public virtual void Disconnect()
+        public virtual Task Disconnect()
         {
             ConnectionState = ConnectionState.Disconnecting;
             _logger.Info("Disconnecting");
+
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -294,18 +296,20 @@ namespace DSLink.Connection
         /// Writes a string to the connector.
         /// </summary>
         /// <param name="data">String to write</param>
-        public virtual void WriteString(string data)
+        public virtual Task Write(string data)
         {
             OnWrite?.Invoke(new MessageEvent(data));
+            return Task.FromResult(false);
         }
 
         /// <summary>
         /// Writes binary to the connector.
         /// </summary>
         /// <param name="data">Binary to write</param>
-        public virtual void WriteBinary(byte[] data)
+        public virtual Task Write(byte[] data)
         {
             OnBinaryWrite?.Invoke(new BinaryMessageEvent(data));
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -414,11 +418,11 @@ namespace DSLink.Connection
         {
             if (data is string)
             {
-                WriteString(data);
+                Write(data);
             }
             else if (data is byte[])
             {
-                WriteBinary(data);
+                Write(data);
             }
             else
             {

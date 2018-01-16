@@ -1,11 +1,11 @@
-﻿using DebugLog = System.Diagnostics.Debug;
+﻿using System;
 
 namespace DSLink.Util.Logger
 {
     /// <summary>
     /// Default logger for platforms without proper logging.
     /// </summary>
-    public class DiagnosticsLogger : BaseLogger
+    public class ConsoleLogger : BaseLogger
     {
         /// <summary>
         /// Initializes a new instance of the
@@ -13,7 +13,7 @@ namespace DSLink.Util.Logger
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="toPrint">To print</param>
-        public DiagnosticsLogger(string name, LogLevel toPrint) : base(name, toPrint)
+        public ConsoleLogger(string name, LogLevel toPrint) : base(name, toPrint)
         {
         }
 
@@ -26,7 +26,7 @@ namespace DSLink.Util.Logger
         {
             if (logLevel.DoesPrint(ToPrint))
             {
-                DebugLog.WriteLine(Format(logLevel, message));
+                Console.WriteLine(Format(logLevel, message));
             }
         }
     }

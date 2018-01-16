@@ -8,7 +8,7 @@ using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
-using PCLStorage;
+using StandardStorage;
 
 namespace DSLink.Connection
 {
@@ -87,7 +87,7 @@ namespace DSLink.Connection
         private async Task LoadFromFile()
         {
             var file = await _folder.GetFileAsync(_location);
-            using (var reader = new StreamReader(await file.OpenAsync(FileAccess.Read)))
+            using (var reader = new StreamReader(await file.OpenAsync(StandardStorage.FileAccess.Read)))
             {
                 var data = reader.ReadLine();
 
@@ -136,7 +136,7 @@ namespace DSLink.Connection
             var data = Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
             var file = await _folder.CreateFileAsync(_location, CreationCollisionOption.ReplaceExisting);
 
-            using (var writer = new StreamWriter(await file.OpenAsync(FileAccess.ReadAndWrite)))
+            using (var writer = new StreamWriter(await file.OpenAsync(StandardStorage.FileAccess.ReadAndWrite)))
             {
                 writer.WriteLine(data);
             }

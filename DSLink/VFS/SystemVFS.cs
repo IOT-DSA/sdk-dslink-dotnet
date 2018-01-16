@@ -1,4 +1,4 @@
-﻿using PCLStorage;
+﻿using StandardStorage;
 using System.Threading.Tasks;
 
 namespace DSLink.VFS

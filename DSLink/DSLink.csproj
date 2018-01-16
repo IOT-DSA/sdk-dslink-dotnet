@@ -1,131 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{88591365-982E-41AF-9C02-AD8D84FBB54B}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DSLink</RootNamespace>
-    <AssemblyName>DSLink</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>Profile111</TargetFrameworkProfile>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-win+net45+wp8+win81+wpa8</PackageTargetFallback>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Configuration.cs" />
-    <Compile Include="Connection\ConnectionEvents.cs" />
-    <Compile Include="Connection\Connector.cs" />
-    <Compile Include="Connection\Handshake.cs" />
-    <Compile Include="Nodes\MetadataMap.cs" />
-    <Compile Include="Nodes\MetadataTypes.cs" />
-    <Compile Include="Request\DSLinkRequester.cs" />
-    <Compile Include="Request\RemoteSubscriptionManager.cs" />
-    <Compile Include="Request\RequestManager.cs" />
-    <Compile Include="Respond\Responder.cs" />
-    <Compile Include="Respond\DiskSerializer.cs" />
-    <Compile Include="Respond\StreamManager.cs" />
-    <Compile Include="Respond\SubscriptionManager.cs" />
-    <Compile Include="Serializer\BaseSerializer.cs" />
-    <Compile Include="Serializer\JsonSerializer.cs" />
-    <Compile Include="Serializer\SerializationManager.cs" />
-    <Compile Include="Connection\WebSocketBaseConnector.cs" />
-    <Compile Include="Connection\KeyPair.cs" />
-    <Compile Include="Mono.Options-PCL.cs" />
-    <Compile Include="Nodes\Actions\ActionHandler.cs" />
-    <Compile Include="Nodes\Actions\Column.cs" />
-    <Compile Include="Nodes\Actions\EditorType.cs" />
-    <Compile Include="Nodes\Actions\Parameter.cs" />
-    <Compile Include="Nodes\NodeFactory.cs" />
-    <Compile Include="Nodes\Permission.cs" />
-    <Compile Include="Platform\Platform.cs" />
-    <Compile Include="Util\IncrementingIndex.cs" />
-    <Compile Include="Util\JTokenUtil.cs" />
-    <Compile Include="Util\ReadOnly.cs" />
-    <Compile Include="Util\ReadOnlyList.cs" />
-    <Compile Include="Util\DSAToken.cs" />
-    <Compile Include="Util\SHA256.cs" />
-    <Compile Include="Util\TimeUtil.cs" />
-    <Compile Include="Util\UrlBase64.cs" />
-    <Compile Include="DSLinkContainer.cs" />
-    <Compile Include="Nodes\Node.cs" />
-    <Compile Include="Nodes\Value.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Util\ReadOnlyDictionary.cs" />
-    <Compile Include="Request\Requests.cs" />
-    <Compile Include="Respond\Responses.cs" />
-    <Compile Include="Respond\DSLinkResponder.cs" />
-    <Compile Include="Util\Logger\BaseLogger.cs" />
-    <Compile Include="Util\Logger\LogLevel.cs" />
-    <Compile Include="Util\Logger\DiagnosticsLogger.cs" />
-    <Compile Include="Serializer\JsonByteArrayConverter.cs" />
-    <Compile Include="Nodes\RemoteNode.cs" />
-    <Compile Include="Serializer\MsgPackSerializer.cs" />
-    <Compile Include="Serializer\Newtonsoft.MsgPack\MessagePackReader.cs" />
-    <Compile Include="Serializer\Newtonsoft.MsgPack\MessagePackWriter.cs" />
-    <Compile Include="Request\SubscriptionUpdate.cs" />
-    <Compile Include="Connection\ConnectionState.cs" />
-    <Compile Include="Nodes\ValueType.cs" />
-    <Compile Include="Nodes\ResultType.cs" />
-    <Compile Include="Nodes\Actions\Row.cs" />
-    <Compile Include="Nodes\Actions\Table.cs" />
-    <Compile Include="VFS\IVFS.cs" />
-    <Compile Include="VFS\SystemVFS.cs" />
+    <PackageReference Include="BouncyCastle.NetCore" Version="1.8.1.3" />
+    <PackageReference Include="MsgPack.Cli" Version="0.9.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="StandardStorage" Version="0.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="MsgPack, Version=0.8.0.0, Culture=neutral, PublicKeyToken=a2625990d5dc0167, processorArchitecture=MSIL">
-      <HintPath>..\packages\MsgPack.Cli.0.8.1\lib\netstandard1.1\MsgPack.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\portable-net45+win8+wp8+wpa81\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="PCLStorage, Version=1.0.2.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
-      <HintPath>..\packages\PCLStorage.1.0.2\lib\portable-net45+wp8+wpa81+win8+monoandroid+monotouch+Xamarin.iOS+Xamarin.Mac\PCLStorage.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="PCLStorage.Abstractions, Version=1.0.2.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
-      <HintPath>..\packages\PCLStorage.1.0.2\lib\portable-net45+wp8+wpa81+win8+monoandroid+monotouch+Xamarin.iOS+Xamarin.Mac\PCLStorage.Abstractions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="WebSockets.PCL, Version=1.0.0.8, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Websockets.Pcl.1.1.9\lib\portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10\WebSockets.PCL.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="crypto">
-      <HintPath>..\packages\Portable.BouncyCastle-Signed.1.7.0.2\lib\portable-net4+sl5+wp8+win8+wpa81+MonoTouch10+MonoAndroid10+xamarinmac20+xamarinios10\crypto.dll</HintPath>
-    </Reference>
+    <Folder Include="Properties\" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

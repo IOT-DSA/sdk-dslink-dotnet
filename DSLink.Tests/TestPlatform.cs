@@ -1,10 +1,10 @@
-﻿using DSLink.NET;
+﻿using DSLink.Platform;
 using Moq;
 using PCLStorage;
 
 namespace DSLink.Tests
 {
-    public class TestPlatform : NETPlatform
+    public class TestPlatform : BasePlatform
     {
         private readonly Mock<IFolder> _mockFolder;
 

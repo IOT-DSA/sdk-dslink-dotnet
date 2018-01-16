@@ -1,7 +1,7 @@
 ﻿using DSLink.Platform;
 using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
-using PCLStorage;
+using StandardStorage;
 using System;
 using System.Threading.Tasks;
 
@@ -23,7 +23,7 @@ namespace DSLink.Respond
         public async Task SerializeToDisk()
         {
             JObject obj = _responder.SuperRoot.Serialize();
-            IFolder folder = await BasePlatform.Current.GetStorageFolder();
+            IFolder folder = await _responder.Link.Config.StorageFolder;
             IFile file = await folder.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
 
             if (file != null)
@@ -47,7 +47,7 @@ namespace DSLink.Respond
         {
             try
             {
-                var folder = await BasePlatform.Current.GetStorageFolder();
+                var folder = await _responder.Link.Config.StorageFolder;
                 var file = await folder.GetFileAsync("nodes.json");
 
                 if (file != null)

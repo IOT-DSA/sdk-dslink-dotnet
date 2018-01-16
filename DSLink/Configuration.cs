@@ -8,6 +8,7 @@ using DSLink.Platform;
 using DSLink.Util;
 using DSLink.Util.Logger;
 using Mono.Options;
+using StandardStorage;
 
 namespace DSLink
 {
@@ -32,6 +33,7 @@ namespace DSLink
         public string DsId => Name + "-" + UrlBase64.Encode(_sha256.ComputeHash(KeyPair.EncodedPublicKey));
         public bool HasToken => !string.IsNullOrEmpty(Token);
         public string TokenParameter => DSAToken.CreateToken(Token, DsId);
+        public Task<IFolder> StorageFolder => FileSystem.Current.GetFolderFromPathAsync(".");
 
         public RemoteEndpoint RemoteEndpoint
         {
@@ -47,26 +49,18 @@ namespace DSLink
 
         public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false)
         {
-            if (BasePlatform.Current == null)
-            {
-                throw new Exception("Platform specific code was not initialized.");
-            }
-
             _args = args;
             _sha256 = new SHA256();
 
             Name = name;
             Requester = requester;
             Responder = responder;
-
-            if (!string.IsNullOrEmpty(BasePlatform.Current.GetCommunicationFormat()))
-                CommunicationFormat = BasePlatform.Current.GetCommunicationFormat();
         }
 
         internal async Task _initKeyPair()
         {
-            var storage = await BasePlatform.Current.GetStorageFolder();
-            KeyPair = new KeyPair(storage, KeysLocation);
+            var folder = await StorageFolder;
+            KeyPair = new KeyPair(folder, KeysLocation);
             await KeyPair.Load();
         }
 

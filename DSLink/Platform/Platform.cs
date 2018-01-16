@@ -1,6 +1,6 @@
 ﻿using DSLink.Connection;
 using DSLink.Util.Logger;
-using PCLStorage;
+using StandardStorage;
 using System;
 using System.Threading.Tasks;
 
@@ -20,7 +20,7 @@ namespace DSLink.Platform
 
         public virtual Connector CreateConnector(DSLinkContainer container)
         {
-            return new WebSocketBaseConnector(container.Config, container.Logger);
+            return new WebSocketConnector(container.Config, container.Logger);
         }
 
         public virtual IFolder GetPlatformStorageFolder()
@@ -35,7 +35,7 @@ namespace DSLink.Platform
 
         protected virtual Type GetLoggerType()
         {
-            return typeof(DiagnosticsLogger);
+            return typeof(ConsoleLogger);
         }
 
         public BaseLogger CreateLogger(string loggerName, LogLevel logLevel)

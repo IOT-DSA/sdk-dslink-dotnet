@@ -1,9 +1,11 @@
 ﻿using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using DSLink.Request;
+using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DSLink.Example
@@ -12,6 +14,29 @@ namespace DSLink.Example
     {
         private readonly Dictionary<string, Value> _rngValues;
         private readonly Random _random;
+
+        private static void Main(string[] args)
+        {
+            InitializeLink(args).Wait();
+
+            while (true)
+            {
+                Thread.Sleep(1000);
+            }
+        }
+
+        public static async Task InitializeLink(string[] args)
+        {
+            var config = new Configuration(args, "RNG", true, true)
+            {
+                LogLevel = LogLevel.Debug,
+                BrokerUrl = "http://rnd.iot-dsa.org/conn"
+            };
+            var dslink = new ExampleDSLink(config);
+
+            await dslink.Connect();
+            await dslink.SaveNodes();
+        }
 
         public ExampleDSLink(Configuration config) : base(config)
         {
