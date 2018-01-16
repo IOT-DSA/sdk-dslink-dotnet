@@ -24,10 +24,9 @@ namespace DSLink.Connection
         {
             await base.Connect();
 
-            _startWatchTask();
-
             _logger.Info("WebSocket connecting to " + WsUrl);
             await _ws.ConnectAsync(new Uri(WsUrl), CancellationToken.None);
+            _startWatchTask();
             EmitOpen();
             
             /*_webSocket.OnError += error =>
