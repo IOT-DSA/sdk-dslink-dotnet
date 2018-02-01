@@ -12,7 +12,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7F33741-D2E6-4607-BF9D-04C6B0844FB3}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		DSLink.nuspec = DSLink.nuspec
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
