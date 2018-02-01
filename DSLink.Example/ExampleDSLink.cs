@@ -29,8 +29,7 @@ namespace DSLink.Example
         {
             var config = new Configuration(args, "RNG", true, true)
             {
-                LogLevel = LogLevel.Debug,
-                BrokerUrl = "http://rnd.iot-dsa.org/conn"
+                LogLevel = LogLevel.Debug
             };
             var dslink = new ExampleDSLink(config);
 
