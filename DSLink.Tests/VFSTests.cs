@@ -27,10 +27,10 @@ namespace DSLink.Tests
         public async Task FileExists([Values(typeof(SystemVFS))] Type vfsType)
         {
             var file = Path.Combine(rootDir, "fileExistsTest");
-            var vfs = (IVFS)Activator.CreateInstance(vfsType);
+            var vfs = (IVFS)Activator.CreateInstance(vfsType, rootDir);
             using (File.Create(file))
             {
-                Assert.IsTrue(await vfs.Exists(rootDir, file));
+                Assert.IsTrue(await vfs.ExistsAsync(file));
             }
         }
 
@@ -38,8 +38,12 @@ namespace DSLink.Tests
         public async Task FileDoesNotExist([Values(typeof(SystemVFS))] Type vfsType)
         {
             var file = Path.Combine(rootDir, "fileDoesNotExistTest");
-            var vfs = (IVFS)Activator.CreateInstance(vfsType);
-            Assert.IsFalse(await vfs.Exists(rootDir, file));
+            var vfs = (IVFS)Activator.CreateInstance(vfsType, rootDir);
+            Assert.IsFalse(await vfs.ExistsAsync(file));
         }
+
+        // TODO: Write tests for CreateAsync
+        // TODO: Write tests for ReadAsync
+        // TODO: Write tests for WriteAsync
     }
 }

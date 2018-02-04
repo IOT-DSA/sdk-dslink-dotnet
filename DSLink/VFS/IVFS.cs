@@ -1,10 +1,20 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 
 namespace DSLink.VFS
 {
-    public interface IVFS
+    public abstract class IVFS
     {
-        Task<bool> Exists(string folderPath, string filePath);
-        Task WriteString(string folderPath, string filePath);
+        protected string BasePath;
+
+        public IVFS(string basePath)
+        {
+            BasePath = basePath;
+        }
+
+        public abstract Task<bool> ExistsAsync(string fileName);
+        public abstract Task CreateAsync(string fileName, bool replaceExisting);
+        public abstract Task<Stream> WriteAsync(string fileName);
+        public abstract Task<Stream> ReadAsync(string fileName);
     }
 }

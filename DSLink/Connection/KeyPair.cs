@@ -8,7 +8,6 @@ using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
-using StandardStorage;
 
 namespace DSLink.Connection
 {
@@ -28,16 +27,6 @@ namespace DSLink.Connection
         public const string Curve = "SECP256R1";
 
         /// <summary>
-        /// Location of key file to load from and save to.
-        /// </summary>
-        private readonly string _location;
-
-        /// <summary>
-        /// The storage folder for the key.
-        /// </summary>
-        private readonly IFolder _folder;
-
-        /// <summary>
         /// BouncyCastle KeyPair.
         /// </summary>
         public AsymmetricCipherKeyPair BcKeyPair;
@@ -47,60 +36,25 @@ namespace DSLink.Connection
         /// </summary>
         public byte[] EncodedPublicKey => ((ECPublicKeyParameters) BcKeyPair.Public).Q.GetEncoded();
 
-        public KeyPair(IFolder folder, string location)
-        {
-            _folder = folder;
-            _location = location;
-        }
-
         /// <summary>
-        /// Generate the KeyPair.
+        /// Generate a new BouncyCastle KeyPair.
         /// </summary>
-        public static AsymmetricCipherKeyPair Generate()
+        public void Generate()
         {
             var generator = new ECKeyPairGenerator();
             var secureRandom = new SecureRandom();
             var keyGenParams = new KeyGenerationParameters(secureRandom, KeySize);
             generator.Init(keyGenParams);
-            return generator.GenerateKeyPair();
+            BcKeyPair = generator.GenerateKeyPair();
         }
 
         /// <summary>
-        /// Load the KeyPair from the file, or generate a new one.
+        /// Used to load keypair from string provided from Save function.
         /// </summary>
-        public async Task Load()
+        /// <param name="keyContents">Data from Save function</param>
+        public void LoadFrom(string keyContents)
         {
-            var res = await _folder.CheckExistsAsync(_location);
-            switch (res)
-            {
-                case ExistenceCheckResult.FileExists:
-                    await LoadFromFile();
-                    break;
-                case ExistenceCheckResult.NotFound:
-                    await GenerateAndSave();
-                    break;
-                default:
-                    throw new IOException("Unknown error occurred while trying to load/save crypto keypair.");
-            }
-        }
-
-        private async Task LoadFromFile()
-        {
-            var file = await _folder.GetFileAsync(_location);
-            using (var reader = new StreamReader(await file.OpenAsync(StandardStorage.FileAccess.Read)))
-            {
-                var data = reader.ReadLine();
-
-                if (data != null)
-                {
-                    DeserializeKeyPair(data);
-                }
-            }
-        }
-
-        private void DeserializeKeyPair(string data)
-        {
-            var split = data.Split(' ');
+            var split = keyContents.Split(' ');
             if (split.Length != 2)
             {
                 throw new FormatException("Keys file doesn't contain proper data.");
@@ -118,28 +72,15 @@ namespace DSLink.Connection
             BcKeyPair = new AsymmetricCipherKeyPair(pubParams, privParams);
         }
 
-        private async Task GenerateAndSave()
-        {
-            var key = Generate();
-            await Save(key);
-            BcKeyPair = key;
-        }
-
         /// <summary>
-        /// Save the specified KeyPair.
+        /// Generates a string containing the private and public bytes of the
+        /// keypair.
         /// </summary>
-        /// <param name="keyPair">BouncyCastle Asymmetric KeyPair</param>
-        private async Task Save(AsymmetricCipherKeyPair keyPair)
+        public string Save()
         {
-            var privateBytes = ((ECPrivateKeyParameters) keyPair.Private).D.ToByteArray();
-            var publicBytes = ((ECPublicKeyParameters) keyPair.Public).Q.GetEncoded();
-            var data = Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
-            var file = await _folder.CreateFileAsync(_location, CreationCollisionOption.ReplaceExisting);
-
-            using (var writer = new StreamWriter(await file.OpenAsync(StandardStorage.FileAccess.ReadAndWrite)))
-            {
-                writer.WriteLine(data);
-            }
+            var privateBytes = ((ECPrivateKeyParameters) BcKeyPair.Private).D.ToByteArray();
+            var publicBytes = ((ECPublicKeyParameters)BcKeyPair.Public).Q.GetEncoded();
+            return Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
         }
 
         /// <summary>

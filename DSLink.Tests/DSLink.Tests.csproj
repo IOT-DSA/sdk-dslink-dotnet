@@ -171,10 +171,8 @@
     <Compile Include="Util\DateTimeUtilTests.cs" />
     <Compile Include="Util\IncrementingIndexTests.cs" />
     <Compile Include="ValueTests.cs" />
-    <Compile Include="TestPlatform.cs" />
     <Compile Include="NodeChildrenTests.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="RootTestsSetUp.cs" />
     <Compile Include="VFSTests.cs" />
   </ItemGroup>
   <ItemGroup>

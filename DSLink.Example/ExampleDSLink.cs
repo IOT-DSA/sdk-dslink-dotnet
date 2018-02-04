@@ -29,7 +29,6 @@ namespace DSLink.Example
         {
             var config = new Configuration(args, "RNG", true, true)
             {
-                LogLevel = LogLevel.Debug
             };
             var dslink = new ExampleDSLink(config);
 
@@ -82,7 +81,7 @@ namespace DSLink.Example
                     kv.Value.Set(_random.Next());
                 }
             }
-            await Task.Delay(100);
+            await Task.Delay(1);
             _updateRandomNumbers();
         }
 

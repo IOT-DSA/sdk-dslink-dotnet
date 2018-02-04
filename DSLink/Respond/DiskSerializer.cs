@@ -1,8 +1,7 @@
-﻿using DSLink.Platform;
-using DSLink.Util.Logger;
+﻿using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
-using StandardStorage;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace DSLink.Respond
@@ -22,18 +21,23 @@ namespace DSLink.Respond
         /// </summary>
         public async Task SerializeToDisk()
         {
-            JObject obj = _responder.SuperRoot.Serialize();
-            IFolder folder = await _responder.Link.Config.StorageFolder;
-            IFile file = await folder.CreateFileAsync("nodes.json", CreationCollisionOption.ReplaceExisting);
-
-            if (file != null)
+            var vfs = _responder.Link.Config.VFS;
+            await vfs.CreateAsync("nodes.json", true);
+            
+            using (var stream = await vfs.WriteAsync("nodes.json"))
             {
+                // Finally serialize the object after opening the file.
+                JObject obj = _responder.SuperRoot.Serialize();
                 var data = obj.ToString();
-                await file.WriteAllTextAsync(data);
-                var path = file.Path;
+
+                using (var streamWriter = new StreamWriter(stream))
+                {
+                    await streamWriter.WriteAsync(data).ConfigureAwait(false);
+                }
+
                 if (_responder.Link.Config.LogLevel.DoesPrint(LogLevel.Debug))
                 {
-                    _responder.Link.Logger.Debug($"Wrote {data} to {path}");
+                    _responder.Link.Logger.Debug($"Wrote {data} to nodes.json");
                 }
             }
         }
@@ -47,15 +51,12 @@ namespace DSLink.Respond
         {
             try
             {
-                var folder = await _responder.Link.Config.StorageFolder;
-                var file = await folder.GetFileAsync("nodes.json");
-
-                if (file != null)
+                var vfs = _responder.Link.Config.VFS;
+                using (var stream = await vfs.ReadAsync("nodes.json"))
                 {
-                    var data = await file.ReadAllTextAsync();
-
-                    if (data != null)
+                    using (var streamReader = new StreamReader(stream))
                     {
+                        var data = await streamReader.ReadToEndAsync();
                         _responder.SuperRoot.Deserialize(JObject.Parse(data));
                         return true;
                     }

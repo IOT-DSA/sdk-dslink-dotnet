@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using DSLink.Connection;
 using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
-using DSLink.Platform;
 using DSLink.Request;
 using DSLink.Respond;
 
@@ -32,6 +31,7 @@ namespace DSLink
             _config = config;
             _config._processOptions();
             _logger = new ConsoleLogger("DSLink", config.LogLevel);
+            _logger = (BaseLogger)Activator.CreateInstance(_config.LoggerType, "DSLink", _config.LogLevel);
             _reconnectOnFailure = true;
             _connector = new WebSocketConnector(_config, _logger);
 
