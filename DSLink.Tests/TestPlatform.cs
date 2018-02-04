@@ -1,6 +1,6 @@
 ﻿using DSLink.Platform;
 using Moq;
-using PCLStorage;
+using StandardStorage;
 
 namespace DSLink.Tests
 {

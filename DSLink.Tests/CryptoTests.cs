@@ -1,6 +1,6 @@
 ﻿using DSLink.Connection;
 using NUnit.Framework;
-using PCLStorage;
+using StandardStorage;
 using System;
 using System.Threading.Tasks;
 

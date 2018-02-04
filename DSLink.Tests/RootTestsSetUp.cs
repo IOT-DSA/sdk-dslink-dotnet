@@ -1,7 +1,7 @@
 ﻿using DSLink.Platform;
 using Moq;
 using NUnit.Framework;
-using PCLStorage;
+using StandardStorage;
 
 namespace DSLink.Tests
 {

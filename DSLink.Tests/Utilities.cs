@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using PCLStorage;
 
 namespace DSLink.Tests
 {
@@ -7,7 +6,7 @@ namespace DSLink.Tests
     {
         public static string CreateTempDirectory()
         {
-            string tempDirectory = PortablePath.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
             return tempDirectory;
         }
