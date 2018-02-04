@@ -166,7 +166,7 @@ namespace DSLink.Connection
             ConnectionState = ConnectionState.Connecting;
             _logger.Info("Connecting");
 
-            return Task.FromResult(false);
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace DSLink.Connection
             ConnectionState = ConnectionState.Disconnecting;
             _logger.Info("Disconnecting");
 
-            return Task.FromResult(false);
+            return Task.CompletedTask;
         }
 
         /// <summary>

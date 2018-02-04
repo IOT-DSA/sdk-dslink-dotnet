@@ -28,30 +28,18 @@ namespace DSLink.Connection
             await _ws.ConnectAsync(new Uri(WsUrl), CancellationToken.None);
             _startWatchTask();
             EmitOpen();
-            
-            /*_webSocket.OnError += error =>
-            {
-                _logger.Error("WebSocket error: " + error);
-            };
-            _webSocket.OnMessage += text =>
-            {
-                EmitMessage(new MessageEvent(text));
-            };*/
         }
 
         /// <summary>
         /// Disconnect from the WebSocket.
         /// </summary>
-        public override Task Disconnect()
+        public async override Task Disconnect()
         {
-            // TODO: Implement
-            return base.Disconnect();
+            _stopWatchTask();
+            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnecting", _tokenSource.Token);
+            _ws.Dispose();
 
-            /*if (_webSocket != null)
-            {
-                _webSocket.Close();
-                _webSocket.Dispose();
-            }*/
+            await base.Disconnect();
         }
 
         /// <summary>
@@ -79,6 +67,7 @@ namespace DSLink.Connection
         /// <param name="data">Binary data</param>
         public override Task Write(byte[] data)
         {
+            base.Write(data);
             return _ws.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, _tokenSource.Token);
         }
 
@@ -97,8 +86,6 @@ namespace DSLink.Connection
 
                     RECV:
                     var result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), token);
-
-                    Console.WriteLine("loop");
 
                     if (result == null)
                     {
@@ -136,12 +123,17 @@ namespace DSLink.Connection
 
                     if (token.IsCancellationRequested)
                     {
-                        token.ThrowIfCancellationRequested();
+                        await Disconnect();
                     }
                 }
 
                 return Task.CompletedTask;
-            });
+            }, _tokenSource.Token);
+        }
+
+        private void _stopWatchTask()
+        {
+            _tokenSource.Cancel();
         }
     }
 }
