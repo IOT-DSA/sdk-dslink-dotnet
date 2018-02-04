@@ -96,7 +96,10 @@ namespace DSLink.Connection
             var point = param.Curve.DecodePoint(decoded);
             var spec = new ECPublicKeyParameters(point, param);
             point = spec.Q.Multiply(privateKey.D);
+#pragma warning disable CS0618 // Type or member is obsolete
+            // TODO: Replacement XCoord and AffineXCoord do not give an expected result.
             var bi = point.X.ToBigInteger();
+#pragma warning restore CS0618 // Type or member is obsolete
             return Normalize(bi.ToByteArray());
         }
 

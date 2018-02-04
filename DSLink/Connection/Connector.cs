@@ -60,7 +60,9 @@ namespace DSLink.Connection
                 _enableQueue = value;
                 if (!value)
                 {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                     Flush();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }
             get
@@ -318,7 +320,9 @@ namespace DSLink.Connection
         protected virtual void EmitOpen()
         {
             OnOpen?.Invoke();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             Flush();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
 ﻿using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using DSLink.Request;
-using DSLink.Util.Logger;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
