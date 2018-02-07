@@ -1,4 +1,4 @@
-using DSLink.Util.Logger;
+using DSLink.Logger;
 using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;

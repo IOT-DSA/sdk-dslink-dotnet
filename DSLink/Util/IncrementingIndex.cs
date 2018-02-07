@@ -12,7 +12,7 @@
         }
 
         /// <summary>
-        /// Return the Current value, and increment it afterwards.
+        /// Return the current value, and increment it afterwards.
         /// </summary>
         public int Next
         {
@@ -29,7 +29,7 @@
 
         public IncrementingIndex(int startingValue)
         {
-            Current = 1;
+            Current = startingValue;
         }
     }
 }

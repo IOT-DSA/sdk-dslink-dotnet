@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSLink.Connection;
+using DSLink.Logger;
 using DSLink.Util;
-using DSLink.Util.Logger;
 using DSLink.VFS;
 using Mono.Options;
 
@@ -36,7 +36,7 @@ namespace DSLink
         public byte[] SharedSecret => string.IsNullOrEmpty(RemoteEndpoint.tempKey) ? new byte[0] : KeyPair.GenerateSharedSecret(RemoteEndpoint.tempKey);
         public string DsId => Name + "-" + UrlBase64.Encode(_sha256.ComputeHash(KeyPair.EncodedPublicKey));
         public bool HasToken => !string.IsNullOrEmpty(Token);
-        public string TokenParameter => DSAToken.CreateToken(Token, DsId);
+        public string TokenParameter => Connection.Token.CreateToken(Token, DsId);
         public IVFS VFS
         {
             get

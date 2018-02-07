@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Text;
+using DSLink.Util;
 
-namespace DSLink.Util
+namespace DSLink.Connection
 {
-    public static class DSAToken
+    public static class Token
     {
         private static SHA256 _sha256 = new SHA256();
 

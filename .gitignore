@@ -235,4 +235,5 @@ _Pvt_Extensions
 .fake/
 
 # .NET SDK
+.keys
 nodes.json

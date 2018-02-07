@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DSLink.Util.Logger
+namespace DSLink.Logger
 {
     public class LogLevel
     {
@@ -26,12 +26,6 @@ namespace DSLink.Util.Logger
         /// </summary>
         public readonly string Name;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Util.Logger.LogLevel"/> class.
-        /// </summary>
-        /// <param name="level">Level</param>
-        /// <param name="name">Name</param>
         private LogLevel(int level, string name)
         {
             Level = level;
@@ -68,4 +62,3 @@ namespace DSLink.Util.Logger
         }
     }
 }
-

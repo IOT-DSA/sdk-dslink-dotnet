@@ -1,4 +1,4 @@
-﻿using DSLink.Util.Logger;
+﻿using DSLink.Logger;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;

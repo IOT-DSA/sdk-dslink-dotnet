@@ -2,7 +2,7 @@ using Org.BouncyCastle.Crypto.Digests;
 
 namespace DSLink.Util
 {
-    internal class SHA256
+    class SHA256
     {
         public byte[] ComputeHash(byte[] data)
         {

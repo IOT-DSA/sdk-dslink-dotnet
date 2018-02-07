@@ -19,6 +19,6 @@
     <PackageReference Include="StandardStorage" Version="0.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <Folder Include="Logger\" />
   </ItemGroup>
 </Project>

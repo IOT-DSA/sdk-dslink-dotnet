@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using DSLink.Util;
+using DSLink.Connection;
 using System;
 using FluentAssertions;
 using System.Text;

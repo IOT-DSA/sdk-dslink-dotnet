@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System;
+using Newtonsoft.Json.Linq;
 
 namespace DSLink.Util
 {
-    public static class JTokenUtil
+    public static class UtilExtensions
     {
         public static dynamic ToDynamic(this JToken jtoken)
         {
@@ -21,6 +22,11 @@ namespace DSLink.Util
                 default:
                     return null;
             }
+        }
+
+        public static string ToIso8601(this DateTime dateTime)
+        {
+            return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
         }
     }
 }

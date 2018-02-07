@@ -1,18 +1,12 @@
 ﻿using System;
 
-namespace DSLink.Util.Logger
+namespace DSLink.Logger
 {
     /// <summary>
-    /// Default logger for platforms without proper logging.
+    /// Default logger for platforms that support using System.Console.WriteLine.
     /// </summary>
     public class ConsoleLogger : BaseLogger
     {
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Util.Logger.DiagnosticsLogger"/> class.
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="toPrint">To print</param>
         public ConsoleLogger(string name, LogLevel toPrint) : base(name, toPrint)
         {
         }

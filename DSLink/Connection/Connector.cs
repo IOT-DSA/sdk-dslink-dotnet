@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using DSLink.Util.Logger;
+using DSLink.Logger;
 using DSLink.Serializer;
 using DSLink.Util;
 

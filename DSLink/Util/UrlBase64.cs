@@ -2,7 +2,7 @@ using System;
 
 namespace DSLink.Util
 {
-    internal class UrlBase64
+    class UrlBase64
     {
         public static string Encode(byte[] data)
         {
