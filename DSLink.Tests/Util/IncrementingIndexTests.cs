@@ -1,4 +1,4 @@
-﻿using DSLink.Connection;
+﻿using DSLink.Util;
 using NUnit.Framework;
 
 namespace DSLink.Tests.Util
