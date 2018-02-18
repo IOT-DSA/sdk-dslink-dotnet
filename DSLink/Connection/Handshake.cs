@@ -59,16 +59,12 @@ namespace DSLink.Connection
                 _link.Logger.Warning(e.Message);
             }
 
-            if (resp != null && resp.IsSuccessStatusCode)
-            {
-                _link.Logger.Info("Handshake successful");
-                return JsonConvert.DeserializeObject<RemoteEndpoint>(
-                    await resp.Content.ReadAsStringAsync()
-                );
-            }
-
-            _link.Logger.Debug("Handshake status code: " + resp.StatusCode.ToString());
-            return null;
+            if (resp == null || !resp.IsSuccessStatusCode) return null;
+            
+            _link.Logger.Info("Handshake successful");
+            return JsonConvert.DeserializeObject<RemoteEndpoint>(
+                await resp.Content.ReadAsStringAsync()
+            );
         }
 
         /// <summary>
