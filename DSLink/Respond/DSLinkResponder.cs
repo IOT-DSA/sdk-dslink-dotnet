@@ -67,25 +67,38 @@ namespace DSLink.Respond
 
         private void ListMethod(JArray responses, JObject request)
         {
-            var node = SuperRoot.Get(request["path"].Value<string>());
+            var requestId = request["rid"].Value<int>();
+            var value = request["path"].Value<string>();
+
+            var node = SuperRoot.Get(value);
             if (node != null)
             {
-                StreamManager.OpenStream(request["rid"].Value<int>(), node);
+                StreamManager.OpenStream(requestId, node);
                 responses.Add(new JObject
                 {
-                    new JProperty("rid", request["rid"].Value<int>()),
+                    new JProperty("rid", requestId),
                     new JProperty("stream", "open"),
                     new JProperty(
                         "updates",
                         SubscriptionManager.SerializeUpdates(
-                            SuperRoot.Get(request["path"].Value<string>())
+                            SuperRoot.Get(value)
                         )
                     )
                 });
             }
             else
             {
-                StreamManager.OpenStreamLater(request["rid"].Value<int>(), request["path"].Value<string>());
+                responses.Add(new JObject
+                {
+                    new JProperty("rid", requestId),
+                    new JProperty("stream", "open"),
+                    new JProperty(
+                        "updates",
+                        SubscriptionManager.SerializeUpdates(
+                            new Node("", null, null)
+                        )
+                    )
+                });
             }
         }
 

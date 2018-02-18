@@ -193,7 +193,7 @@ namespace DSLink
                 response["ack"] = message["msg"].Value<int>();
             }
 
-            bool write = false;
+            var write = false;
 
             if (message["requests"] != null)
             {
