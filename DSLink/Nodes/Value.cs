@@ -37,7 +37,7 @@ namespace DSLink.Nodes
             get
             {
                 if (!_lastUpdated.HasValue) return null;
-                return TimeUtil.ToIso8601(_lastUpdated.Value);
+                return _lastUpdated.Value.ToIso8601();
             }
         }
 

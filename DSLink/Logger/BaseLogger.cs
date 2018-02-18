@@ -1,28 +1,22 @@
 ﻿using System;
 
-namespace DSLink.Util.Logger
+namespace DSLink.Logger
 {
     /// <summary>
-    /// Base logger.
+    /// Interface to implement a platform-specific Logger.
     /// </summary>
     public abstract class BaseLogger
     {
         /// <summary>
-        /// Name of the logger.
+        /// Display name of the logger.
         /// </summary>
         protected readonly string Name;
 
         /// <summary>
-        /// LogLevel to actually print for.
+        /// Highest level of log to print.
         /// </summary>
         public readonly LogLevel ToPrint;
 
-        /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="T:DSLink.Util.Logger.BaseLogger"/> class.
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="toPrint">To print</param>
         protected BaseLogger(string name, LogLevel toPrint)
         {
             Name = name;

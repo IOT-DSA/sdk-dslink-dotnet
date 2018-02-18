@@ -1,4 +1,4 @@
-﻿using DSLink.Util;
+﻿using DSLink.Connection;
 using NUnit.Framework;
 
 namespace DSLink.Tests
@@ -11,7 +11,7 @@ namespace DSLink.Tests
         {
             var token = "RMtO6mEJmUlJfoWfofiLgjguUEpuIzWP3sXeoBNSbLIVumlw";
             var dsId = "test-wjN6iQTk7TOXZbHHkQDH1T2zfrPcphTxchiPvTgzbww";
-            var tokenHash = DSAToken.CreateToken(token, dsId);
+            var tokenHash = Token.CreateToken(token, dsId);
 
             Assert.AreEqual("RMtO6mEJmUlJfoWfegkDI-jCG-4J2Ke1L26hX_63vHlq9zsRJbFUWWIgE8U", tokenHash);
         }

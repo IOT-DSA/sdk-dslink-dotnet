@@ -238,4 +238,5 @@ _Pvt_Extensions
 .idea/
 
 # .NET SDK
+.keys
 nodes.json

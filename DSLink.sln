@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{FE63D2B0-7717-4BEF-9D7B-6154DF1D7B5B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSLink", "DSLink\DSLink.csproj", "{88591365-982E-41AF-9C02-AD8D84FBB54B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink", "DSLink\DSLink.csproj", "{88591365-982E-41AF-9C02-AD8D84FBB54B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7F33741-D2E6-4607-BF9D-04C6B0844FB3}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink.Tests", "DSLink.Tests\DSLink.Tests.csproj", "{D39148FB-B64A-47B9-AF45-0EDC2967034F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSLink.Example", "DSLink.Example\DSLink.Example.csproj", "{A3C3697A-DD0D-471E-BAB7-2F38F0E94A9A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSLink.Example", "DSLink.Example\DSLink.Example.csproj", "{A3C3697A-DD0D-471E-BAB7-2F38F0E94A9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
