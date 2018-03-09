@@ -218,29 +218,33 @@ namespace DSLink.Request
         private async Task ProcessRequestUpdates(JObject response, int rid)
         {
             var request = RequestManager.GetRequest(rid);
-            if (request is ListRequest)
+            
+            switch (request)
             {
-                var listRequest = request as ListRequest;
-                string name = listRequest.Path.Split('/').Last();
-                var node = new RemoteNode(name, null, listRequest.Path);
-                node.FromSerialized(response["updates"].Value<JArray>());
-                await Task.Run(() => listRequest.Callback(new ListResponse(_link, listRequest.RequestID,
-                                                                           listRequest.Path, node)));
-            }
-            else if (request is SetRequest)
-            {
-                RequestManager.StopRequest(request.RequestID);
-            }
-            else if (request is RemoveRequest)
-            {
-                RequestManager.StopRequest(request.RequestID);
-            }
-            else if (request is InvokeRequest)
-            {
-                var invokeRequest = request as InvokeRequest;
-                await Task.Run(() => invokeRequest.Callback(new InvokeResponse(_link, invokeRequest.RequestID,
-                                                                               invokeRequest.Path, response["columns"].Value<JArray>(),
-                                                                               response["updates"].Value<JArray>())));
+                case ListRequest _:
+                    var listRequest = (ListRequest) request;
+                    var name = listRequest.Path.Split('/').Last();
+                    var node = new RemoteNode(name, null, listRequest.Path);
+                    node.FromSerialized(response["updates"].Value<JArray>());
+                    await Task.Run(() => listRequest.Callback(new ListResponse(_link, rid, listRequest.Path, node)));
+                    break;
+                case SetRequest _:
+                    RequestManager.StopRequest(rid);
+                    break;
+                case RemoveRequest _:
+                    RequestManager.StopRequest(rid);
+                    break;
+                case InvokeRequest _:
+                    var invokeRequest = (InvokeRequest) request;
+                    var path = invokeRequest.Path;
+                    var columns = response.GetValue("columns") != null ? response["columns"].Value<JArray>() : new JArray();
+                    var updates = response.GetValue("updates") != null ? response["updates"].Value<JArray>() : new JArray();
+                
+                    await Task.Run(() =>
+                    {
+                        invokeRequest?.Callback(new InvokeResponse(_link, rid, path, columns, updates));
+                    });
+                    break;
             }
         }
     }
