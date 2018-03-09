@@ -234,6 +234,9 @@ _Pvt_Extensions
 # FAKE - F# Make
 .fake/
 
+# IntelliJ IDEA
+.idea/
+
 # .NET SDK
 .keys
 nodes.json
