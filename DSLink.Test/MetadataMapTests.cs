@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
-namespace DSLink.Tests
+namespace DSLink.Test
 {
     public class MetadataMapTests
     {

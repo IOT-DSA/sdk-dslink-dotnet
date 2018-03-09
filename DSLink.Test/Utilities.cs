@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace DSLink.Tests
+namespace DSLink.Test
 {
     public static class Utilities
     {

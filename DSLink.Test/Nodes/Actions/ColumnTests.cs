@@ -2,7 +2,7 @@
 using DSLink.Nodes.Actions;
 using NUnit.Framework;
 
-namespace DSLink.Tests.Nodes.Actions
+namespace DSLink.Test.Nodes.Actions
 {
     public class ColumnTests
     {

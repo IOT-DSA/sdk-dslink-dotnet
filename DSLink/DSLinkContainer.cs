@@ -10,7 +10,7 @@ namespace DSLink
 {
     public class DSLinkContainer
     {
-        private readonly Task _pingTask;
+        private Task _pingTask;
         private Handshake _handshake;
         private bool _reconnectOnFailure;
         private bool _isLinkInitialized;
@@ -57,8 +57,6 @@ namespace DSLink
             // Overridable events for DSLink writers
             _connector.OnOpen += OnConnectionOpen;
             _connector.OnClose += OnConnectionClosed;
-
-            _pingTask = Task.Factory.StartNew(OnPingTaskElapsed);
         }
 
         /// <summary>
@@ -74,6 +72,7 @@ namespace DSLink
             _isLinkInitialized = true;
 
             await _config._initKeyPair();
+            _pingTask = Task.Factory.StartNew(OnPingTaskElapsed);
 
             if (Config.Responder)
             {
@@ -290,7 +289,8 @@ namespace DSLink
                     // Write a blank message containing no responses/requests.
                     await Connector.Write(new JObject(), false);
                 }
-                // Delay thirty seconds to the next ping.
+                
+                // Delay thirty seconds until the next ping.
                 await Task.Delay(30000);
             }
         }

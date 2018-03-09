@@ -9,7 +9,7 @@ using DSLink.Nodes;
 using System.Threading.Tasks;
 using DSLink.Nodes.Actions;
 
-namespace DSLink.Tests
+namespace DSLink.Test
 {
     [TestFixture]
     public class ResponderTests
@@ -18,6 +18,7 @@ namespace DSLink.Tests
         private DSLinkResponder _responder;
         private Mock<IFolder> _mockFolder;
         private Mock<DSLinkContainer> _mockContainer;
+        private Mock<SubscriptionManager> _mockSubManager;
         private Mock<Connector> _mockConnector;
 
         [SetUp]
@@ -36,9 +37,8 @@ namespace DSLink.Tests
             _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
 
             _responder = new DSLinkResponder(_mockContainer.Object);
-            _responder.Init();
-
             _mockContainer.SetupGet(c => c.Responder).Returns(_responder);
+            _responder.Init();
 
             _responder.SuperRoot.CreateChild("testValue")
                 .SetType(DSLink.Nodes.ValueType.Number)

@@ -4,7 +4,7 @@ using System.IO;
 using DSLink.VFS;
 using System.Threading.Tasks;
 
-namespace DSLink.Tests
+namespace DSLink.Test
 {
     [TestFixture]
     public class VFSTests

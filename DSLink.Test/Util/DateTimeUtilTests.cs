@@ -4,7 +4,7 @@ using System;
 using FluentAssertions;
 using System.Text;
 
-namespace DSLink.Tests.Util
+namespace DSLink.Test.Util
 {
     [TestFixture]
     public class DateTimeUtilTests

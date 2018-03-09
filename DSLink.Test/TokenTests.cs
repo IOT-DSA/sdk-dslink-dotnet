@@ -1,7 +1,7 @@
 ﻿using DSLink.Connection;
 using NUnit.Framework;
 
-namespace DSLink.Tests
+namespace DSLink.Test
 {
     [TestFixture]
     public class TokenTests

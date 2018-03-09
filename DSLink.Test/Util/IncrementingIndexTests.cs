@@ -1,7 +1,7 @@
 ﻿using DSLink.Util;
 using NUnit.Framework;
 
-namespace DSLink.Tests.Util
+namespace DSLink.Test.Util
 {
     [TestFixture]
     public class IncrementingIndexTests

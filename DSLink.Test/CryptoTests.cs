@@ -4,7 +4,7 @@ using StandardStorage;
 using System;
 using System.Threading.Tasks;
 
-namespace DSLink.Tests
+namespace DSLink.Test
 {
     [TestFixture]
     public class CryptoTests

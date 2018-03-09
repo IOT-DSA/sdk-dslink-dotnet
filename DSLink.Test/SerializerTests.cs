@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using System;
 
-namespace DSLink.Tests
+namespace DSLink.Test
 {
     [TestFixture]
     public class SerializerTests

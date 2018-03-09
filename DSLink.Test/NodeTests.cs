@@ -8,7 +8,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace DSLink.Tests
+namespace DSLink.Test
 {
     [TestFixture]
     public class NodeTests
@@ -29,15 +29,16 @@ namespace DSLink.Tests
             );
             _mockResponder = new Mock<Responder>();
             _mockSubManager = new Mock<SubscriptionManager>(_mockContainer.Object);
-            _superRootNode = new Node("", null, _mockContainer.Object);
 
             _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
             _mockContainer.SetupGet(c => c.Responder).Returns(_mockResponder.Object);
             _mockResponder.SetupGet(r => r.SuperRoot).Returns(_superRootNode);
             _mockResponder.SetupGet(r => r.SubscriptionManager).Returns(_mockSubManager.Object);
-
+            
             _mockConnector.Setup(c => c.AddValueUpdateResponse(It.IsAny<JToken>()))
                 .Returns(Task.FromResult(false));
+            
+            _superRootNode = new Node("", null, _mockContainer.Object);
         }
 
         [Test]
