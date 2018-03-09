@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DSLink\DSLink.csproj">
+      <Project>{88591365-982E-41AF-9C02-AD8D84FBB54B}</Project>
+      <Name>DSLink</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
