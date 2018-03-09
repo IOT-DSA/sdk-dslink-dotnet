@@ -140,11 +140,21 @@ namespace DSLink
 
         public async Task<bool> LoadSavedNodes()
         {
+            if (_responder == null)
+            {
+                throw new DSAException(this, "Responder is not enabled.");
+            }
+            
             return await Responder.DiskSerializer.DeserializeFromDisk();
         }
 
         public async Task SaveNodes()
         {
+            if (_responder == null)
+            {
+                throw new DSAException(this, "Responder is not enabled.");
+            }
+            
             await Responder.DiskSerializer.SerializeToDisk();
         }
 
