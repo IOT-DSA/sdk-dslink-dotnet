@@ -33,11 +33,13 @@ namespace DSLink.Connection
         /// <summary>
         /// Disconnect from the WebSocket.
         /// </summary>
-        public async override Task Disconnect()
+        public override async Task Disconnect()
         {
             _stopWatchTask();
             await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnecting", _tokenSource.Token);
             _ws.Dispose();
+
+            EmitClose();
 
             await base.Disconnect();
         }
@@ -80,7 +82,6 @@ namespace DSLink.Connection
                 while (_ws.State == WebSocketState.Open)
                 {
                     var buffer = new byte[1024];
-                    var bufferUsed = 0;
                     var bytes = new List<byte>();
                     var str = "";
 
@@ -92,7 +93,7 @@ namespace DSLink.Connection
                         goto RECV;
                     }
 
-                    bufferUsed = result.Count;
+                    var bufferUsed = result.Count;
 
                     switch (result.MessageType)
                     {

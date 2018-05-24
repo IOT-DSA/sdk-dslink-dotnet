@@ -1,4 +1,5 @@
 using System;
+using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -256,7 +257,16 @@ namespace DSLink.Connection
                 data.Remove("responses");
             }
 
-            WriteData(DataSerializer.Serialize(data));
+            try
+            {
+                await WriteData(DataSerializer.Serialize(data));
+            }
+            catch (WebSocketException e)
+            {
+                _logger.Warning("Failed to send message, reconnecting.");
+                _logger.Warning(e.StackTrace);
+                await Disconnect();
+            }
         }
 
         /// <summary>
@@ -418,19 +428,15 @@ namespace DSLink.Connection
         /// Write data to the connection.
         /// </summary>
         /// <param name="data">String or Binary data</param>
-        private void WriteData(dynamic data)
+        private Task WriteData(dynamic data)
         {
-            if (data is string)
+            switch (data)
             {
-                Write(data);
-            }
-            else if (data is byte[])
-            {
-                Write(data);
-            }
-            else
-            {
-                throw new FormatException($"Cannot send message of type {data.Type}");
+                case string _:
+                case byte[] _:
+                    return Write(data);
+                default:
+                    throw new FormatException($"Cannot send message of type {data.Type}");
             }
         }
     }
