@@ -11,13 +11,15 @@ namespace DSLink.Connection
     public class WebSocketConnector : Connector
     {
         private readonly ClientWebSocket _ws;
-        private readonly CancellationTokenSource _tokenSource;
+        private readonly CancellationTokenSource _wsTokenSource;
+        private readonly SemaphoreSlim _wsSendSemaphore;
 
         public WebSocketConnector(Configuration config, BaseLogger logger)
             : base(config, logger)
         {
             _ws = new ClientWebSocket();
-            _tokenSource = new CancellationTokenSource();
+            _wsTokenSource = new CancellationTokenSource();
+            _wsSendSemaphore = new SemaphoreSlim(1, 1);
         }
 
         public override async Task Connect()
@@ -26,7 +28,7 @@ namespace DSLink.Connection
 
             _logger.Info("WebSocket connecting to " + WsUrl);
             await _ws.ConnectAsync(new Uri(WsUrl), CancellationToken.None);
-            _startWatchTask();
+            _startReceiveTask();
             EmitOpen();
         }
 
@@ -35,10 +37,9 @@ namespace DSLink.Connection
         /// </summary>
         public override async Task Disconnect()
         {
-            _stopWatchTask();
-            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnecting", _tokenSource.Token);
+            _stopWebSocketTasks();
+            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnecting", _wsTokenSource.Token);
             _ws.Dispose();
-
             EmitClose();
 
             await base.Disconnect();
@@ -73,24 +74,33 @@ namespace DSLink.Connection
             return _sendSegment(new ArraySegment<byte>(data), WebSocketMessageType.Binary);
         }
 
-        private Task _sendSegment(ArraySegment<byte> segment, WebSocketMessageType msgType)
+        private async Task _sendSegment(ArraySegment<byte> segment, WebSocketMessageType msgType)
         {
+            // Acquire sending lock.
+            await _wsSendSemaphore.WaitAsync();
             try
             {
-                return _ws.SendAsync(segment, msgType, true, _tokenSource.Token);
+                // Attempt send.
+                await _ws.SendAsync(segment, msgType, true, _wsTokenSource.Token);
             }
             catch
             {
+                // Failed, log warning and disconnect.
                 _logger.Warning("SendAsync call failed. Disconnecting from WebSocket.");
-                return Disconnect();
+                await Disconnect();
+            }
+            finally
+            {
+                // Release sending lock.
+                _wsSendSemaphore.Release();
             }
         }
 
-        private void _startWatchTask()
+        private void _startReceiveTask()
         {
             Task.Run(async () =>
             {
-                var token = _tokenSource.Token;
+                var token = _wsTokenSource.Token;
 
                 while (_ws.State == WebSocketState.Open)
                 {
@@ -142,12 +152,12 @@ namespace DSLink.Connection
                 }
 
                 return Task.CompletedTask;
-            }, _tokenSource.Token);
+            }, _wsTokenSource.Token);
         }
-
-        private void _stopWatchTask()
+        
+        private void _stopWebSocketTasks()
         {
-            _tokenSource.Cancel();
+            _wsTokenSource.Cancel();
         }
     }
 }
