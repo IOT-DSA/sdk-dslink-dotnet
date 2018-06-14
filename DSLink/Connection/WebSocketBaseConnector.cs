@@ -60,7 +60,7 @@ namespace DSLink.Connection
         {
             base.Write(data);
             var bytes = Encoding.UTF8.GetBytes(data);
-            return _ws.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, _tokenSource.Token);
+            return _sendSegment(new ArraySegment<byte>(bytes), WebSocketMessageType.Text);
         }
 
         /// <summary>
@@ -70,7 +70,20 @@ namespace DSLink.Connection
         public override Task Write(byte[] data)
         {
             base.Write(data);
-            return _ws.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, _tokenSource.Token);
+            return _sendSegment(new ArraySegment<byte>(data), WebSocketMessageType.Binary);
+        }
+
+        private Task _sendSegment(ArraySegment<byte> segment, WebSocketMessageType msgType)
+        {
+            try
+            {
+                return _ws.SendAsync(segment, msgType, true, _tokenSource.Token);
+            }
+            catch
+            {
+                _logger.Warning("SendAsync call failed. Disconnecting from WebSocket.");
+                return Disconnect();
+            }
         }
 
         private void _startWatchTask()
