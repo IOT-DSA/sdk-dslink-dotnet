@@ -72,7 +72,9 @@ namespace DSLink
             _isLinkInitialized = true;
 
             await _config._initKeyPair();
-            _pingTask = Task.Factory.StartNew(OnPingTaskElapsed);
+
+            _pingTask = new Task(OnPingTaskElapsed);
+            _pingTask.Start();
 
             if (Config.Responder)
             {
