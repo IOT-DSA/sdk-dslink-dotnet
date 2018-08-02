@@ -30,7 +30,7 @@ namespace DSLink.Nodes
         public event Action<Value> OnRemoteSet;
 
         /// <summary>
-        /// Gets last updated time in the ISO 8601 format that DSA uses.
+        /// Provides the last updated time in ISO 8601 format.
         /// </summary>
         public string LastUpdated
         {
@@ -189,6 +189,11 @@ namespace DSLink.Nodes
         {
             _lastUpdated = DateTime.Now;
             OnSet?.Invoke(this);
+        }
+
+        public void SetLastUpdated(DateTime dateTime)
+        {
+            _lastUpdated = dateTime;
         }
 
         /// <summary>
