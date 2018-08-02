@@ -191,6 +191,10 @@ namespace DSLink.Nodes
             OnSet?.Invoke(this);
         }
 
+        /// <summary>
+        /// Change the last updated timestamp from the default creation time.
+        /// </summary>
+        /// <param name="dateTime">New time</param>
         public void SetLastUpdated(DateTime dateTime)
         {
             _lastUpdated = dateTime;
