@@ -14,13 +14,13 @@ namespace DSLink.Nodes
         {
             _node = node;
             _node.Building = true;
+            _node.InitializeClass();
         }
 
         public Node BuildNode()
         {
             _node.Building = false;
             _node.Parent.AddChild(_node);
-            _node.InitializeClass();
             return _node;
         }
 
