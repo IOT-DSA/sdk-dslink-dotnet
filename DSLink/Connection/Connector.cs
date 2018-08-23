@@ -1,5 +1,4 @@
 using System;
-using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -261,7 +260,7 @@ namespace DSLink.Connection
             {
                 await WriteData(DataSerializer.Serialize(data));
             }
-            catch (WebSocketException e)
+            catch (Exception e)
             {
                 _logger.Warning("Failed to send message, reconnecting.");
                 _logger.Warning(e.StackTrace);
