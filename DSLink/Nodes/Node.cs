@@ -534,11 +534,12 @@ namespace DSLink.Nodes
             var indexOfFirstSlash = path.IndexOf('/');
             var child = indexOfFirstSlash == -1 ? path : path.Substring(0, path.IndexOf('/'));
             path = path.TrimStart(child.ToCharArray());
-            try
+            
+            if (Children.TryGetValue(path, out Node childNode))
             {
-                return Children[child].Get(path);
+                return childNode;
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return null;
             }
