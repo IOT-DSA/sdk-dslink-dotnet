@@ -13,6 +13,7 @@
     public class ConfigType : BaseType
     {
         public static readonly ConfigType DisplayName = new ConfigType("name");
+        public static readonly ConfigType Hidden = new ConfigType("hidden");
         public static readonly ConfigType ClassName = new ConfigType("is");
         public static readonly ConfigType ValueType = new ConfigType("type");
         public static readonly ConfigType Result = new ConfigType("result");
