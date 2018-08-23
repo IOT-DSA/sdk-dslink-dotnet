@@ -29,9 +29,9 @@ namespace DSLink.Respond
 
         public void CloseStream(int requestId)
         {
-            try
+            if (_requestIdToPath.TryGetValue(requestId, out string path))
             {
-                var node = _link.Responder.SuperRoot.Get(_requestIdToPath[requestId]);
+                var node = _link.Responder.SuperRoot.Get(path);
                 if (node != null)
                 {
                     lock (node._streams)
@@ -41,7 +41,7 @@ namespace DSLink.Respond
                 }
                 _requestIdToPath.Remove(requestId);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 _link.Logger.Debug($"Failed to Close: unknown request id or node for {requestId}");
             }
