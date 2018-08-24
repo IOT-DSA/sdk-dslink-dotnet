@@ -535,9 +535,9 @@ namespace DSLink.Nodes
             var child = indexOfFirstSlash == -1 ? path : path.Substring(0, path.IndexOf('/'));
             path = path.TrimStart(child.ToCharArray());
             
-            if (Children.TryGetValue(path, out Node childNode))
+            if (Children.TryGetValue(child, out Node childNode))
             {
-                return childNode;
+                return childNode.Get(path);
             }
             else
             {
