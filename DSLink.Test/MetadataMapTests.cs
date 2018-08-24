@@ -45,6 +45,24 @@ namespace DSLink.Test
         }
 
         [Test]
+        public void MetadataGetIndexer_WithStringKey()
+        {
+            _metadataMap = new MetadataMap("");
+            _metadataMap.Set("test", new Value("val"));
+
+            Assert.AreEqual("val", _metadataMap["test"].String);
+        }
+
+        [Test]
+        public void MetadataGetIndexer_WithBaseTypeKey()
+        {
+            _metadataMap = new MetadataMap("");
+            _metadataMap.Set(ConfigType.ClassName, new Value("val"));
+
+            Assert.AreEqual("val", _metadataMap[ConfigType.ClassName].String);
+        }
+
+        [Test]
         public void MetadataHas_WithStringKey()
         {
             _metadataMap = new MetadataMap("");

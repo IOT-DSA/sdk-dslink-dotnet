@@ -9,7 +9,7 @@ namespace DSLink.Nodes
     public class MetadataMap : IEnumerable<KeyValuePair<string, Value>>
     {
         private Dictionary<string, Value> _metadataDictionary = new Dictionary<string, Value>();
-        private string _prefix;
+        private readonly string _prefix;
 
         public event OnSetEventHandler OnSet;
         public int Count => _metadataDictionary.Count;
@@ -17,6 +17,22 @@ namespace DSLink.Nodes
         public MetadataMap(string prefix)
         {
             _prefix = prefix;
+        }
+
+        public Value this[string key]
+        {
+            get
+            {
+                return Get(key);
+            }
+        }
+
+        public Value this[BaseType baseType]
+        {
+            get
+            {
+                return Get(baseType);
+            }
         }
 
         public void Set(string key, Value value)
@@ -32,7 +48,11 @@ namespace DSLink.Nodes
 
         public Value Get(string key)
         {
-            if (!_metadataDictionary.ContainsKey(_prefix + key)) return null;
+            if (!_metadataDictionary.ContainsKey(_prefix + key))
+            {
+                return null;
+            }
+
             return _metadataDictionary[_prefix + key];
         }
 
