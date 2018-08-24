@@ -237,6 +237,9 @@ _Pvt_Extensions
 # IntelliJ IDEA
 .idea/
 
+# Visual Studio - Ours
+*/Properties/
+
 # .NET SDK
 .keys
 nodes.json
