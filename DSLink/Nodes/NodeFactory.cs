@@ -58,6 +58,12 @@ namespace DSLink.Nodes
             return this;
         }
 
+        public NodeFactory SetHidden(bool hidden)
+        {
+            SetConfig(ConfigType.Hidden, new Value(hidden));
+            return this;
+        }
+
         public NodeFactory SetClassName(string className)
         {
             SetConfig(ConfigType.ClassName, new Value(className));
