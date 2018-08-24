@@ -100,6 +100,12 @@ namespace DSLink.Nodes
             return this;
         }
 
+        public NodeFactory SetUserObject(object userObject)
+        {
+            _node.UserObject = userObject;
+            return this;
+        }
+
         public NodeFactory SetType(ValueType valueType)
         {
             SetConfig(ConfigType.ValueType, valueType.TypeValue);

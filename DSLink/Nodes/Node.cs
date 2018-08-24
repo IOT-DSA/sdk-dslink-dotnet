@@ -92,9 +92,18 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// Node is serializable
+        /// Indicates whether the Node is serialized into the 
+        /// nodes.json file which restores the state during
+        /// future start-up of the DSLink.
         /// </summary>
         public bool Serializable = true;
+
+        /// <summary>
+        /// User-defined object to help link third party code
+        /// to a DSA Node. This will be persisted if this Node
+        /// is cloned.
+        /// </summary>
+        public object UserObject = null;
 
         /// <summary>
         /// Node is still being created via NodeFactory
@@ -546,13 +555,20 @@ namespace DSLink.Nodes
         }
 
         /// <summary>
-        /// Clones this node.
+        /// Create a clone of this Node.
+        /// This will create an exact copy of the Node which includes:
+        /// - Configs
+        /// - Attributes
+        /// - Value
+        /// - UserObject
+        /// - Children (and they will include ALL of the above properties)
         /// </summary>
         /// <returns>A new Node instance that is exactly the same as this node.</returns>
         public Node Clone()
         {
             var node = new Node(Name, Parent, _link, Configs.Get(ConfigType.ClassName).String);
             node.Deserialize(node.Serialize());
+            node.UserObject = UserObject;
             return node;
         }
 
