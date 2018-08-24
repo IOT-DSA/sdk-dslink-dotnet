@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace DSLink.Nodes
@@ -42,10 +43,7 @@ namespace DSLink.Nodes
         public static ValueType MakeEnum(params object[] values)
         {
             var sb = new StringBuilder("enum[");
-            foreach (var val in values)
-            {
-                sb.Append(val).Append(',');
-            }
+            sb.Append(string.Join(",", values));
             sb.Append(']');
             return new ValueType(sb.ToString());
         }
