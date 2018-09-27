@@ -1,21 +1,22 @@
-using DSLink.Logger;
 using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DSLink.Logging;
 
 namespace DSLink.Connection
 {
     public class WebSocketConnector : Connector
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+
         private readonly ClientWebSocket _ws;
         private readonly CancellationTokenSource _wsTokenSource;
         private readonly SemaphoreSlim _wsSendSemaphore;
 
-        public WebSocketConnector(Configuration config, BaseLogger logger)
-            : base(config, logger)
+        public WebSocketConnector(Configuration config) : base(config)
         {
             _ws = new ClientWebSocket();
             _wsTokenSource = new CancellationTokenSource();
@@ -26,7 +27,7 @@ namespace DSLink.Connection
         {
             await base.Connect();
 
-            _logger.Info("WebSocket connecting to " + WsUrl);
+            Logger.Info("WebSocket connecting to " + WsUrl);
             await _ws.ConnectAsync(new Uri(WsUrl), CancellationToken.None);
             _startReceiveTask();
             EmitOpen();
@@ -86,7 +87,7 @@ namespace DSLink.Connection
             catch
             {
                 // Failed, log warning and disconnect.
-                _logger.Warning("SendAsync call failed. Disconnecting from WebSocket.");
+                Logger.Warn("SendAsync call failed. Disconnecting from WebSocket.");
                 await Disconnect();
             }
             finally

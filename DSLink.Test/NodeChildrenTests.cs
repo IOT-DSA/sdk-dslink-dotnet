@@ -19,12 +19,13 @@ namespace DSLink.Test
         [SetUp]
         public void SetUp()
         {
-            var config = new Configuration(new List<string>(), "Test");
+            var config = new Configuration("Test");
 
             _mockContainer = new Mock<DSLinkContainer>(config);
             _mockConnector = new Mock<Connector>(
-                _mockContainer.Object.Config,
-                _mockContainer.Object.Logger
+                _mockContainer.Object.Config
+                //,
+                //_mockContainer.Object.Logger
             );
             _mockResponder = new Mock<Responder>();
             _mockSubManager = new Mock<SubscriptionManager>(_mockContainer.Object);

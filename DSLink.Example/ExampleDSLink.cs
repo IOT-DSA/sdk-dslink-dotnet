@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
+using CommandLine;
+using System.IO;
 
 namespace DSLink.Example
 {
@@ -16,27 +19,49 @@ namespace DSLink.Example
 
         private static void Main(string[] args)
         {
-            InitializeLink(args).Wait();
+            var results = Parser.Default.ParseArguments<CommandLineArguments>(args)
+                 .WithParsed( cmdLineOptions =>
+                 {
+                     //Init the logging engine
+                     InitializeLogging(cmdLineOptions);
+
+                     //Construct a link Configuration
+                     var config = new Configuration(cmdLineOptions.LinkName, true, true);
+                     
+                     //Construct our custom link
+                     var dslink = new ExampleDSLink(config, cmdLineOptions);
+
+                     InitializeLink(dslink).Wait();
+                 })
+                 .WithNotParsed(errors => {
+                     Environment.Exit(-1);
+                 });
 
             while (true)
             {
                 Thread.Sleep(1000);
             }
         }
-
-        public static async Task InitializeLink(string[] args)
+        
+        public static async Task InitializeLink(ExampleDSLink dsLink)
         {
-            var config = new Configuration(args, "RNG", true, true)
-            {
-            };
-            var dslink = new ExampleDSLink(config);
-
-            await dslink.Connect();
-            await dslink.SaveNodes();
+            await dsLink.Connect();
+            await dsLink.SaveNodes();
         }
 
-        public ExampleDSLink(Configuration config) : base(config)
+        public ExampleDSLink(Configuration config, CommandLineArguments cmdLineOptions) : base(config)
         {
+            //Perform any configuration overrides from command line options
+            if (cmdLineOptions.BrokerUrl != null) {
+                config.BrokerUrl = cmdLineOptions.BrokerUrl;
+            }
+            if (cmdLineOptions.Token != null) {
+                config.Token = cmdLineOptions.Token;
+            }
+            if (cmdLineOptions.NodesFileName != null) {
+                config.NodesFilename = cmdLineOptions.NodesFileName;
+            }
+            
             _rngValues = new Dictionary<string, Value>();
             _random = new Random();
 
@@ -83,7 +108,7 @@ namespace DSLink.Example
             await Task.Delay(1);
             _updateRandomNumbers();
         }
-
+    
         private async void _createRngAction(InvokeRequest request)
         {
             var rngName = request.Parameters["rngName"].Value<string>();
@@ -94,6 +119,45 @@ namespace DSLink.Example
 
             await request.Close();
             await SaveNodes();
+        }
+
+        /// <summary>
+        /// This method initializes the logging engine.  In this case Serilog is used, but you
+        /// may use a variety of logging engines so long as they are compatible with
+        /// Liblog (the interface used by the DSLink SDK)
+        /// </summary>
+        /// <param name="cmdLineOptions"></param>
+        private static void InitializeLogging(CommandLineArguments cmdLineOptions)
+        {
+            if (cmdLineOptions.LogFileFolder != null && !cmdLineOptions.LogFileFolder.EndsWith(Path.DirectorySeparatorChar)) {
+                throw new ArgumentException($"Specified LogFileFolder must end with '{Path.DirectorySeparatorChar}'");
+            }
+
+            var logConfig = new LoggerConfiguration();
+            switch (cmdLineOptions.LogLevel) {
+                case LogLevel.Debug:
+                    logConfig.MinimumLevel.Debug();
+                    break;
+
+                case LogLevel.Info:
+                    logConfig.MinimumLevel.Information();
+                    break;
+
+                case LogLevel.Warning:
+                    logConfig.MinimumLevel.Warning();
+                    break;
+
+                case LogLevel.Error:
+                    logConfig.MinimumLevel.Error();
+                    break;
+            }
+
+            logConfig.WriteTo.Console(outputTemplate: "{Timestamp:MM/dd/yyyy HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}");
+            logConfig.WriteTo.Logger(lc => {
+                lc.WriteTo.RollingFile(cmdLineOptions.LogFileFolder + "log-{Date}.txt", retainedFileCountLimit: 3);
+
+            });
+            Log.Logger = logConfig.CreateLogger();
         }
     }
 }

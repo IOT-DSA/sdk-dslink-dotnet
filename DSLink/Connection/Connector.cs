@@ -2,16 +2,17 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using DSLink.Logger;
 using DSLink.Serializer;
 using DSLink.Util;
+using DSLink.Logging;
 
 namespace DSLink.Connection
 {
     public abstract class Connector
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+
         private BaseSerializer _serializer;
-        protected readonly BaseLogger _logger;
         protected readonly Configuration _config;
         private readonly IncrementingIndex _msgId;
 
@@ -112,23 +113,22 @@ namespace DSLink.Connection
         /// </summary>
         public event Action<BinaryMessageEvent> OnBinaryMessage;
 
-        protected Connector(Configuration config, BaseLogger logger)
+        protected Connector(Configuration config)
         {
             _config = config;
-            _logger = logger;
             ConnectionState = ConnectionState.Disconnected;
             _msgId = new IncrementingIndex();
 
             OnOpen += () =>
             {
                 ConnectionState = ConnectionState.Connected;
-                _logger.Info($"Connected to {WsUrl}");
+                Logger.Info($"Connected to {WsUrl}");
             };
 
             OnClose += () =>
             {
                 ConnectionState = ConnectionState.Disconnected;
-                _logger.Info("Disconnected");
+                Logger.Info("Disconnected");
             };
         }
 
@@ -166,7 +166,7 @@ namespace DSLink.Connection
                 Serializers.Types[_config.CommunicationFormatUsed]
             );
             ConnectionState = ConnectionState.Connecting;
-            _logger.Info("Connecting");
+            Logger.Info("Connecting");
 
             return Task.CompletedTask;
         }
@@ -177,7 +177,7 @@ namespace DSLink.Connection
         public virtual Task Disconnect()
         {
             ConnectionState = ConnectionState.Disconnecting;
-            _logger.Info("Disconnecting");
+            Logger.Info("Disconnecting");
 
             return Task.CompletedTask;
         }
@@ -262,8 +262,8 @@ namespace DSLink.Connection
             }
             catch (Exception e)
             {
-                _logger.Warning("Failed to send message, reconnecting.");
-                _logger.Warning(e.StackTrace);
+                Logger.Warn("Failed to send message, reconnecting.");
+                Logger.Warn(e.StackTrace);
                 await Disconnect();
             }
         }
@@ -370,7 +370,7 @@ namespace DSLink.Connection
             {
                 return;
             }
-            _logger.Debug("Flushing connection message queue");
+            Logger.Debug("Flushing connection message queue");
             JObject _queueToFlush = null;
             lock (_queueLock)
             {

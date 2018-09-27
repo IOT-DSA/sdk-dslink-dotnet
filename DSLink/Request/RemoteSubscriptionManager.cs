@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using DSLink.Util;
+using DSLink.Logging;
 
 namespace DSLink.Request
 {
     public class RemoteSubscriptionManager
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
         private readonly DSLinkContainer _link;
         private readonly Dictionary<string, Subscription> _subscriptions;
         private readonly Dictionary<int, string> _subIdToPath;
@@ -99,7 +101,7 @@ namespace DSLink.Request
         {
             if (!_realSubIdToPath.ContainsKey(subId))
             {
-                _link.Logger.Debug(string.Format("Remote sid {0} was not found in subscription manager", subId));
+                Logger.Debug(string.Format("Remote sid {0} was not found in subscription manager", subId));
                 return;
             }
             foreach (var i in _subscriptions[_realSubIdToPath[subId]].VirtualSubs)

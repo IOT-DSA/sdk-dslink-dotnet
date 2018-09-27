@@ -1,13 +1,14 @@
-﻿using DSLink.Logger;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using DSLink.Logging;
 
 namespace DSLink.Respond
 {
     public class DiskSerializer
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
         private readonly Responder _responder;
 
         public DiskSerializer(Responder responder)
@@ -21,10 +22,12 @@ namespace DSLink.Respond
         /// </summary>
         public async Task SerializeToDisk()
         {
+            var nodesFileName = _responder.Link.Config.NodesFilename;
+
             var vfs = _responder.Link.Config.VFS;
-            await vfs.CreateAsync("nodes.json", true);
+            await vfs.CreateAsync(nodesFileName, true);
             
-            using (var stream = await vfs.WriteAsync("nodes.json"))
+            using (var stream = await vfs.WriteAsync(nodesFileName))
             {
                 // Finally serialize the object after opening the file.
                 JObject obj = _responder.SuperRoot.Serialize();
@@ -34,10 +37,9 @@ namespace DSLink.Respond
                 {
                     await streamWriter.WriteAsync(data).ConfigureAwait(false);
                 }
-
-                if (_responder.Link.Config.LogLevel.DoesPrint(LogLevel.Debug))
+                if (Logger.IsDebugEnabled())  
                 {
-                    _responder.Link.Logger.Debug($"Wrote {data} to nodes.json");
+                    Logger.Debug($"Wrote {data} to " + nodesFileName);
                 }
             }
         }
@@ -49,10 +51,11 @@ namespace DSLink.Respond
         /// <returns>True on success</returns>
         public async Task<bool> DeserializeFromDisk()
         {
-            try
-            {
+            var nodesFileName = _responder.Link.Config.NodesFilename;
+
+            try {
                 var vfs = _responder.Link.Config.VFS;
-                using (var stream = await vfs.ReadAsync("nodes.json"))
+                using (var stream = await vfs.ReadAsync(nodesFileName))
                 {
                     using (var streamReader = new StreamReader(stream))
                     {
@@ -64,9 +67,9 @@ namespace DSLink.Respond
             }
             catch (Exception e)
             {
-                _responder.Link.Logger.Warning("Failed to load nodes.json");
-                _responder.Link.Logger.Warning(e.Message);
-                _responder.Link.Logger.Warning(e.StackTrace);
+                Logger.Warn("Failed to load " + nodesFileName);
+                Logger.Warn(e.Message);
+                Logger.Warn(e.StackTrace);
                 _responder.SuperRoot.ResetNode();
             }
 

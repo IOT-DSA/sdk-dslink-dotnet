@@ -22,10 +22,11 @@ namespace DSLink.Test
         [SetUp]
         public void SetUp()
         {
-            _mockContainer = new Mock<DSLinkContainer>(new Configuration(new List<string>(), "Test"));
+            _mockContainer = new Mock<DSLinkContainer>(new Configuration("Test"));
             _mockConnector = new Mock<Connector>(
-                _mockContainer.Object.Config,
-                _mockContainer.Object.Logger
+                _mockContainer.Object.Config
+                //,
+                //_mockContainer.Object.Logger
             );
             _mockResponder = new Mock<Responder>();
             _mockSubManager = new Mock<SubscriptionManager>(_mockContainer.Object);

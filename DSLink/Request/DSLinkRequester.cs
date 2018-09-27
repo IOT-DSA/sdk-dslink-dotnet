@@ -5,6 +5,7 @@ using DSLink.Nodes;
 using DSLink.Respond;
 using Newtonsoft.Json.Linq;
 using DSLink.Util;
+using DSLink.Logging;
 
 namespace DSLink.Request
 {
@@ -12,8 +13,10 @@ namespace DSLink.Request
     /// The requester module of a DSLink gives the ability access to
     /// outer data on the broker.
     /// </summary>
-    public partial class DSLinkRequester
+    public class DSLinkRequester
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+
         private readonly DSLinkContainer _link;
         internal readonly IncrementingIndex _requestId;
 
@@ -162,7 +165,7 @@ namespace DSLink.Request
         {
             if (response["rid"] == null || response["rid"].Type != JTokenType.Integer)
             {
-                _link.Logger.Warning("Incoming request has invalid or null request ID.");
+                Logger.Warn("Incoming request has invalid or null request ID.");
                 return;
             }
 

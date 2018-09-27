@@ -1,35 +1,30 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSLink.Connection;
-using DSLink.Logger;
 using DSLink.Util;
 using DSLink.VFS;
-using Mono.Options;
 
 namespace DSLink
 {
     public class Configuration
     {
-        private readonly IEnumerable<string> _args;
         private readonly SHA256 _sha256;
         private IVFS _vfs;
 
         public readonly string Name;
+        public string NodesFilename="nodes.json";
         public readonly bool Requester;
         public readonly bool Responder;
         public bool LoadNodesJson = true;
         public string Token = "";
         public string BrokerUrl = "http://localhost:8080/conn";
         public string CommunicationFormat = "";
-        public LogLevel LogLevel = LogLevel.Info;
         public uint MaxConnectionCooldown = 60;
         public string StorageFolderPath = ".";
         public Type VFSType = typeof(SystemVFS);
-        public Type LoggerType = typeof(ConsoleLogger);
 
         public string Authentication => UrlBase64.Encode(_sha256.ComputeHash(Encoding.UTF8.GetBytes(RemoteEndpoint.salt).Concat(SharedSecret).ToArray()));
         public string CommunicationFormatUsed => (string.IsNullOrEmpty(CommunicationFormat) ? RemoteEndpoint.format : CommunicationFormat);
@@ -65,12 +60,11 @@ namespace DSLink
             internal set;
         }
 
-        public Configuration(IEnumerable<string> args, string name, bool requester = false, bool responder = false)
+        public Configuration(string linkName, bool requester = false, bool responder = false)
         {
-            _args = args;
             _sha256 = new SHA256();
 
-            Name = name;
+            Name = linkName;
             Requester = requester;
             Responder = responder;
         }
@@ -100,23 +94,6 @@ namespace DSLink
                     stream.WriteLine(keyContents);
                 }
             }
-        }
-
-        internal void _processOptions()
-        {
-            var options = new OptionSet
-            {
-                {
-                    "broker=", val => { BrokerUrl = val; }
-                },
-                {
-                    "token=", val => { Token = val; }
-                },
-                {
-                    "log=", val => { LogLevel = LogLevel.ParseLogLevel(val); }
-                }
-            };
-            options.Parse(_args);
         }
     }
 }

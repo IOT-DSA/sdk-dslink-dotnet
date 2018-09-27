@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using DSLink.Nodes;
+using DSLink.Logging;
 
 namespace DSLink.Respond
 {
     public class StreamManager
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
         private readonly Dictionary<int, string> _requestIdToPath = new Dictionary<int, string>();
         private readonly DSLinkContainer _link;
 
@@ -43,7 +45,7 @@ namespace DSLink.Respond
             }
             else
             {
-                _link.Logger.Debug($"Failed to Close: unknown request id or node for {requestId}");
+                Logger.Debug($"Failed to Close: unknown request id or node for {requestId}");
             }
         }
 

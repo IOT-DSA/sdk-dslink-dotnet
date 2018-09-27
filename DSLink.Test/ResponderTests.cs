@@ -18,7 +18,6 @@ namespace DSLink.Test
         private DSLinkResponder _responder;
         private Mock<IFolder> _mockFolder;
         private Mock<DSLinkContainer> _mockContainer;
-        private Mock<SubscriptionManager> _mockSubManager;
         private Mock<Connector> _mockConnector;
 
         [SetUp]
@@ -26,12 +25,13 @@ namespace DSLink.Test
         {
             _mockFolder = new Mock<IFolder>();
 
-            _config = new Configuration(new List<string>(), "Test", responder: true);
+            _config = new Configuration("Test", responder: true);
 
-            _mockContainer = new Mock<DSLinkContainer>(new Configuration(new List<string>(), "Test"));
+            _mockContainer = new Mock<DSLinkContainer>(new Configuration("Test"));
             _mockConnector = new Mock<Connector>(
-                _mockContainer.Object.Config,
-                _mockContainer.Object.Logger
+                _mockContainer.Object.Config
+                //,
+                //_mockContainer.Object.Logger
             );
 
             _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);

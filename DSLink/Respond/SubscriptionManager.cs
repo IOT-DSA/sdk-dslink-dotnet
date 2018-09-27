@@ -2,11 +2,13 @@
 using DSLink.Nodes;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using DSLink.Logging;
 
 namespace DSLink.Respond
 {
     public class SubscriptionManager
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
         private readonly Dictionary<int, Node> _subscriptionToNode;
         private readonly DSLinkContainer _link;
 
@@ -37,7 +39,7 @@ namespace DSLink.Respond
             }
             catch (KeyNotFoundException)
             {
-                _link.Logger.Debug($"Failed to Unsubscribe: unknown subscription id {sid}");
+                Logger.Debug($"Failed to Unsubscribe: unknown subscription id {sid}");
             }
         }
 

@@ -6,11 +6,14 @@ using DSLink.Serializer;
 using DSLink.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using DSLink.Logging;
 
 namespace DSLink.Connection
 {
     public class Handshake
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+
         /// <summary>
         /// DSA Version.
         /// </summary>
@@ -48,7 +51,7 @@ namespace DSLink.Connection
         /// </summary>
         public async Task<RemoteEndpoint> Shake()
         {
-            _link.Logger.Info("Handshaking with " + _buildUrl());
+            Logger.Info("Handshaking with " + _buildUrl());
             HttpResponseMessage resp = null;
             try
             {
@@ -56,12 +59,12 @@ namespace DSLink.Connection
             }
             catch (Exception e)
             {
-                _link.Logger.Warning(e.Message);
+                Logger.Warn(e.Message);
             }
 
             if (resp == null || !resp.IsSuccessStatusCode) return null;
             
-            _link.Logger.Info("Handshake successful");
+            Logger.Info("Handshake successful");
             return JsonConvert.DeserializeObject<RemoteEndpoint>(
                 await resp.Content.ReadAsStringAsync()
             );

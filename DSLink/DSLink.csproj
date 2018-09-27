@@ -13,12 +13,13 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="LibLog" Version="5.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="MsgPack.Cli" Version="0.9.2" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="StandardStorage" Version="0.1.1" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.4" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Logger\" />
   </ItemGroup>
 </Project>
