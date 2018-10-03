@@ -13,6 +13,7 @@ namespace DSLink.Example
 {
     public enum LogLevel
     {
+        Unspecified = -1,
         Info,
         Debug,
         Warning,
@@ -26,14 +27,14 @@ namespace DSLink.Example
             HelpText = "The connection to the DSA Broker")]
         public string BrokerUrl { get; set; }
 
-        [Option('n', "name",
+        [Option('n', "name", 
             Required = true,
             HelpText = "The display name of the DSLink within the Broker")]
         public string LinkName { get; set; }
 
         [Option('l', "log",
             Required = false,
-            Default = LogLevel.Info,
+            Default = LogLevel.Unspecified,
             HelpText = "The log level for log messages")]
         public LogLevel LogLevel { get; set; }
 
@@ -54,7 +55,7 @@ namespace DSLink.Example
 
         [Option('k', "key",
             Required = false,
-            HelpText = "The security key information for the connection to the Broker")]
+            HelpText = "The path for the stored key")]
         public string Key { get; set; }
 
         [Option('d', "dslink-json",
