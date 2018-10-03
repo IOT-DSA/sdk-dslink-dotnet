@@ -56,7 +56,7 @@ namespace DSLink.Example
         [Option('k', "key",
             Required = false,
             HelpText = "The path for the stored key")]
-        public string Key { get; set; }
+        public string KeysFolder { get; set; }
 
         [Option('d', "dslink-json",
            Required = false,

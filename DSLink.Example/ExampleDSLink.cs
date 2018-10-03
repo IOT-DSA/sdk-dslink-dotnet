@@ -65,7 +65,10 @@ namespace DSLink.Example
             if (cmdLineOptions.NodesFileName != null) {
                 config.NodesFilename = cmdLineOptions.NodesFileName;
             }
-            
+            if (cmdLineOptions.KeysFolder != null) {
+                config.KeysFolder = cmdLineOptions.KeysFolder;
+            }
+
             _rngValues = new Dictionary<string, Value>();
             _random = new Random();
 
@@ -225,7 +228,7 @@ namespace DSLink.Example
             cmdLineOptionsDslinkJson.BrokerUrl = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "broker", cmdLineOptions.BrokerUrl);
             cmdLineOptionsDslinkJson.LinkName = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "name", cmdLineOptions.LinkName);
             cmdLineOptionsDslinkJson.LogFileFolder = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "log-file", cmdLineOptions.LogFileFolder);
-            cmdLineOptionsDslinkJson.Key = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "key", cmdLineOptions.Key);
+            cmdLineOptionsDslinkJson.KeysFolder = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "key", cmdLineOptions.KeysFolder);
             cmdLineOptionsDslinkJson.NodesFileName = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "nodes", cmdLineOptions.NodesFileName);
             cmdLineOptionsDslinkJson.Token = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "token", cmdLineOptions.Token);
             cmdLineOptionsDslinkJson.LogLevel = GetDsLinkLogLevel(dsLinkJsonConfig, cmdLineOptions.LogLevel);
