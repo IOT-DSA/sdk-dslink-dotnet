@@ -16,6 +16,21 @@ namespace DSLink
 
         public readonly string Name;
         public string NodesFilename="nodes.json";
+        private string _keysFolder = "";
+        public string KeysFolder
+        {
+            get
+            {
+                return _keysFolder;
+            }
+            set
+            {
+                if (value != null && !value.EndsWith(Path.DirectorySeparatorChar.ToString())) {
+                    throw new ArgumentException($"Specified KeysFolder must end with '{Path.DirectorySeparatorChar}'");
+                }
+                _keysFolder = value;
+            }
+        }
         public readonly bool Requester;
         public readonly bool Responder;
         public bool LoadNodesJson = true;
@@ -71,7 +86,7 @@ namespace DSLink
 
         internal async Task _initKeyPair()
         {
-            const string KEYS_FILENAME = ".keys";
+            string KEYS_FILENAME = KeysFolder + ".keys";
 
             KeyPair = new KeyPair();
 
