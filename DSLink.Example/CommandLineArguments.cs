@@ -55,7 +55,7 @@ namespace DSLink.Example
 
         [Option('k', "key",
             Required = false,
-            HelpText = "The security key information for the connection to the Broker")]
+            HelpText = "The path for the stored key")]
         public string Key { get; set; }
 
         [Option('d', "dslink-json",
