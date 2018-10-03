@@ -10,6 +10,7 @@ using Serilog;
 using CommandLine;
 using System.IO;
 
+
 namespace DSLink.Example
 {
     public class ExampleDSLink : DSLinkContainer
@@ -17,11 +18,14 @@ namespace DSLink.Example
         private readonly Dictionary<string, Value> _rngValues;
         private readonly Random _random;
 
+       
         private static void Main(string[] args)
         {
             var results = Parser.Default.ParseArguments<CommandLineArguments>(args)
                  .WithParsed( cmdLineOptions =>
                  {
+                     cmdLineOptions = ProcessDSLinkJson(cmdLineOptions);
+
                      //Init the logging engine
                      InitializeLogging(cmdLineOptions);
 
@@ -121,6 +125,7 @@ namespace DSLink.Example
             await SaveNodes();
         }
 
+        #region Initialize Logging
         /// <summary>
         /// This method initializes the logging engine.  In this case Serilog is used, but you
         /// may use a variety of logging engines so long as they are compatible with
@@ -139,6 +144,7 @@ namespace DSLink.Example
                     logConfig.MinimumLevel.Debug();
                     break;
 
+                case LogLevel.Unspecified:
                 case LogLevel.Info:
                     logConfig.MinimumLevel.Information();
                     break;
@@ -159,5 +165,109 @@ namespace DSLink.Example
             });
             Log.Logger = logConfig.CreateLogger();
         }
+        #endregion
+
+        #region dslink-json file processing
+        /// <summary>
+        /// This method will return an instance of CommandLineArguments build with the following logic rules.
+        /// The file dslink.json can be utilized to specifiy command line arguments.  These live within the config block
+        /// of the file.  Here is an example:
+        ///         ...
+        ///         "configs" : {
+        ///                 "broker" : {
+        ///                     "type": "url",
+        ///                     "value":  "mybroker",
+        ///                     "default": "http:localhost:8080\conn"
+        ///                 },
+        ///              }
+        /// 
+        /// The code in this method considers only the attribute's name ("broker") and value ("mybroker") in this example).
+        /// "type" and "default" are not used.
+        /// 
+        /// The receives an instance of CommandLineArguments previously built from the parser.  If the dslink-json paramater
+        /// is not null the code will use the value specified rather than the default value of "dslink.json" for the file
+        /// to read containing the information.
+        /// 
+        /// Options specified on the command line wins out over those specified in the file.
+        /// 
+        /// </summary>
+        /// <param name="cmdLineOptions"></param>
+        /// <returns></returns>
+        private static CommandLineArguments ProcessDSLinkJson(CommandLineArguments cmdLineOptions)
+        {
+            bool errorIfNotFound = false;
+            string fileName = "dslink.json";
+
+            //If filename is specified then error if it is not found
+            if (!String.IsNullOrEmpty(cmdLineOptions.DSLinkJsonFilename)) {
+                errorIfNotFound = true;
+                fileName = cmdLineOptions.DSLinkJsonFilename;
+            }
+
+            string fileData = "";
+            if (File.Exists(fileName)) {
+                fileData = File.ReadAllText(fileName);
+            }
+            else {
+                if (errorIfNotFound == true) {
+                    throw new ArgumentException($"Specified dslink-json file <{fileName}> was not found");
+                }
+                else {
+                    return cmdLineOptions;
+                }
+            }
+
+            JObject dslinkJson = JObject.Parse(fileData);
+            var dsLinkJsonConfig = dslinkJson["configs"];
+
+            var cmdLineOptionsDslinkJson = new CommandLineArguments();
+
+            cmdLineOptionsDslinkJson.BrokerUrl = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "broker", cmdLineOptions.BrokerUrl);
+            cmdLineOptionsDslinkJson.LinkName = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "name", cmdLineOptions.LinkName);
+            cmdLineOptionsDslinkJson.LogFileFolder = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "log-file", cmdLineOptions.LogFileFolder);
+            cmdLineOptionsDslinkJson.Key = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "key", cmdLineOptions.Key);
+            cmdLineOptionsDslinkJson.NodesFileName = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "nodes", cmdLineOptions.NodesFileName);
+            cmdLineOptionsDslinkJson.Token = GetDsLinkStringValueForAttributeName(dsLinkJsonConfig, "token", cmdLineOptions.Token);
+            cmdLineOptionsDslinkJson.LogLevel = GetDsLinkLogLevel(dsLinkJsonConfig, cmdLineOptions.LogLevel);
+
+            return cmdLineOptionsDslinkJson;
+        }
+
+        private static LogLevel GetDsLinkLogLevel(JToken configObj, LogLevel logLevel)
+        {
+            if (logLevel != LogLevel.Unspecified) {
+                return logLevel;
+            }
+
+            string testString = "";
+            try {
+                testString = configObj["log"]["value"].ToString();
+            }
+            catch { };
+
+            LogLevel useLogLevel = LogLevel.Info;
+            if(!Enum.TryParse(testString, out useLogLevel)) {
+                throw new ArgumentException("Invalid 'value' specified for 'log' value in specified dslink-json file.");
+            }
+
+            return useLogLevel;
+        }
+
+        private static string GetDsLinkStringValueForAttributeName(JToken configObj, string attributeName, string cmdLineValue)
+        {
+            //use cmdLineValue if specified else attempt to use the one from the dslink-json
+            if (cmdLineValue != null) {
+                return cmdLineValue;
+            }
+
+            try {
+                return configObj[attributeName]["value"].ToString();
+            }
+            catch {
+                return null;
+            }
+        }
+
+        #endregion processing
     }
 }
