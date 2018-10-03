@@ -210,11 +210,35 @@ namespace DSLink.Request
             JObject objectUpdate = update;
             int sid = objectUpdate["sid"].Value<int>();
             JToken value = objectUpdate["value"];
-            string ts = objectUpdate["ts"].Value<string>();
-            int count = objectUpdate["count"].Value<int>();
-            int sum = objectUpdate["sum"].Value<int>();
-            int min = objectUpdate["min"].Value<int>();
-            int max = objectUpdate["max"].Value<int>();
+            string ts = null;
+            int count = 0;
+            double sum = 0, min = 0, max = 0;
+
+            if (objectUpdate.TryGetValue("ts", out var timeStampToken))
+            {
+                ts = timeStampToken?.Value<string>();
+            }
+
+            if (objectUpdate.TryGetValue("count", out var countToken))
+            {
+                count = countToken.Value<int>();
+            }
+
+            if (objectUpdate.TryGetValue("sum", out var sumToken))
+            {
+                sum = sumToken.Value<double>();
+            }
+
+            if (objectUpdate.TryGetValue("min", out var minToken))
+            {
+                sum = minToken.Value<double>();
+            }
+
+            if (objectUpdate.TryGetValue("max", out var maxToken))
+            {
+                sum = maxToken.Value<double>();
+            }
+
             RemoteSubscriptionManager.InvokeSubscriptionUpdate(sid, new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
         }
 
