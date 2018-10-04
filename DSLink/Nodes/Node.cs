@@ -379,17 +379,18 @@ namespace DSLink.Nodes
             }
             UpdateSubscribers();
         }
-
-        //smm work in progress
+        /// <summary>
+        /// Removes all child nodes
+        /// </summary>
         public void RemoveAllChildren()
         {
             lock(_children) {
                 lock(_removedChildren) {
                     foreach(var key in _children.Keys) {
                         _removedChildren.Add(_children[key]);
-                        _children.Remove(key);
                     }
                 }
+                _children.Clear();
             }
             UpdateSubscribers();
         }

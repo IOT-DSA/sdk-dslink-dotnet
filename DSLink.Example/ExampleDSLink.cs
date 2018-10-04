@@ -40,12 +40,9 @@ namespace DSLink.Example
                      Environment.Exit(-1);
                  });
 
-            while (true)
-            {
+            while (true) {
                 Thread.Sleep(1000);
             }
-
-           
         }
         
         public static async Task InitializeLink(ExampleDSLink dsLink)
