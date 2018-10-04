@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <Content Include="bin\Debug\netcoreapp2.0\mydslink.json" />
-    <Content Include="bin\Debug\netcoreapp2.0\dslink.json" />
+    <Content Include="bin\Debug\netcoreapp2.0\xxdslink.json" />
   </ItemGroup>
 
   <ItemGroup>

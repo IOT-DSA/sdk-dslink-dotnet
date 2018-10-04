@@ -380,6 +380,20 @@ namespace DSLink.Nodes
             UpdateSubscribers();
         }
 
+        //smm work in progress
+        public void RemoveAllChildren()
+        {
+            lock(_children) {
+                lock(_removedChildren) {
+                    foreach(var key in _children.Keys) {
+                        _removedChildren.Add(_children[key]);
+                        _children.Remove(key);
+                    }
+                }
+            }
+            UpdateSubscribers();
+        }
+
         /// <summary>
         /// Remove this Node from its parent.
         /// </summary>
