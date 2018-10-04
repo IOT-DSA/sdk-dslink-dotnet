@@ -17,7 +17,6 @@ namespace DSLink.Example
     {
         private readonly Dictionary<string, Value> _rngValues;
         private readonly Random _random;
-
        
         private static void Main(string[] args)
         {
@@ -41,8 +40,7 @@ namespace DSLink.Example
                      Environment.Exit(-1);
                  });
 
-            while (true)
-            {
+            while (true) {
                 Thread.Sleep(1000);
             }
         }
@@ -210,6 +208,7 @@ namespace DSLink.Example
             string fileData = "";
             if (File.Exists(fileName)) {
                 fileData = File.ReadAllText(fileName);
+                Console.WriteLine($"Will use a combination of options specified from the command line and those specified in {fileName}");
             }
             else {
                 if (errorIfNotFound == true) {
@@ -250,7 +249,7 @@ namespace DSLink.Example
 
             LogLevel useLogLevel = LogLevel.Info;
             if(!Enum.TryParse(testString, out useLogLevel)) {
-                throw new ArgumentException("Invalid 'value' specified for 'log' value in specified dslink-json file.");
+                throw new ArgumentException("Invalid 'value' specified for 'log' value in dslink-json file");
             }
 
             return useLogLevel;

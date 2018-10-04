@@ -42,6 +42,23 @@ namespace DSLink.Test
             _superRootNode = new Node("", null, _mockContainer.Object);
         }
 
+        [Test] 
+        public void RemoveAllChildren()
+        {
+            var nodeA = _superRootNode.CreateChild("A").BuildNode();
+            nodeA.CreateChild("1").BuildNode();
+            nodeA.CreateChild("2").BuildNode();
+            nodeA.CreateChild("3").BuildNode();
+            var node4 = nodeA.CreateChild("4").BuildNode();
+            node4.CreateChild("4a").BuildNode();
+            node4.CreateChild("4b").BuildNode();
+            node4.CreateChild("4c").BuildNode();
+
+            nodeA.RemoveAllChildren();
+
+            Assert.IsEmpty(nodeA.Children);
+        }
+
         [Test]
         public void EachBannedCharacterInName()
         {

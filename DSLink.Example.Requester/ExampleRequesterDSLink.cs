@@ -166,6 +166,7 @@ namespace DSLink.Example.Requester
             string fileData = "";
             if (File.Exists(fileName)) {
                 fileData = File.ReadAllText(fileName);
+                Console.WriteLine($"Will use a combination of options specified from the command line and those specified in {fileName}");
             }
             else {
                 if (errorIfNotFound == true) {
@@ -206,7 +207,7 @@ namespace DSLink.Example.Requester
 
             LogLevel useLogLevel = LogLevel.Info;
             if (!Enum.TryParse(testString, out useLogLevel)) {
-                throw new ArgumentException("Invalid 'value' specified for 'log' value in specified dslink-json file.");
+                throw new ArgumentException("Invalid 'value' specified for 'log' value in dslink-json file.");
             }
 
             return useLogLevel;
