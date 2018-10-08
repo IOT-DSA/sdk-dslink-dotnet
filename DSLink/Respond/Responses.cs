@@ -118,6 +118,14 @@ namespace DSLink.Respond
         }
 
         /// <summary>
+        /// Error from the Response.
+        /// </summary>
+        public JObject Error
+        {
+            get;
+        }
+
+        /// <summary>
         /// True when Columns is neither true or 0.
         /// </summary>
         public bool HasColumns => Columns != null && Columns.Count > 0;
@@ -129,13 +137,14 @@ namespace DSLink.Respond
 
         public InvokeResponse(DSLinkContainer link, int requestID,
                               string path, JArray columns,
-                              JArray updates, JObject meta)
+                              JArray updates, JObject meta, JObject error)
             : base(link, requestID)
         {
             Path = path;
             Columns = columns;
             Updates = updates;
             Meta = meta;
+            Error = error;
         }
     }
 }

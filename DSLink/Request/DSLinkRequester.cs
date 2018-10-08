@@ -267,10 +267,11 @@ namespace DSLink.Request
                     var columns = response.GetValue("columns") != null ? response["columns"].Value<JArray>() : new JArray();
                     var updates = response.GetValue("updates") != null ? response["updates"].Value<JArray>() : new JArray();
                     var meta = response.GetValue("meta") != null ? response["meta"].Value<JObject>() : new JObject();
-                
+                    var error = response.GetValue("error") != null ? response["error"].Value<JObject>() : new JObject();
+
                     await Task.Run(() =>
                     {
-                        invokeRequest?.Callback(new InvokeResponse(_link, rid, path, columns, updates, meta));
+                        invokeRequest?.Callback(new InvokeResponse(_link, rid, path, columns, updates, meta, error));
                     });
                     break;
             }
