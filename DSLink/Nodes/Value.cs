@@ -81,11 +81,6 @@ namespace DSLink.Nodes
             Set(val);
         }
 
-        public Value(TimeSpan val)
-        {
-            Set(val);
-        }
-
         public void Set(string val, bool force = false)
         {
             if (val.StartsWith("\x1B" + "bytes:") || val.StartsWith("\\u001bbytes:"))
@@ -159,17 +154,6 @@ namespace DSLink.Nodes
 			SetValue();
 		}
 
-        public void Set(TimeSpan val, bool force = false)
-        {
-            if (!force && _val != null && _val.Value<TimeSpan>() == val)
-            {
-                return;
-            }
-
-            _val = val;
-            SetValue();
-        }
-
         public void Set(JToken jtoken)
         {
             _val = jtoken;
@@ -190,8 +174,7 @@ namespace DSLink.Nodes
         public float Float => _val.Value<float>();
         public double Double => _val.Value<double>();
         public byte[] ByteArray => _val.Value<byte[]>();
-        public JArray JArray => _val.Value<JArray>();
-        public TimeSpan time => _val.Value<TimeSpan>();
+        public JArray JArray => _val.Value<JArray>();        
 
         /// <summary>
         /// Determines whether the value is null
