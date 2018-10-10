@@ -103,52 +103,60 @@ namespace DSLink.Connection
             {
                 var token = _wsTokenSource.Token;
 
-                while (_ws.State == WebSocketState.Open)
+                // If cancelled, disconnect and get out
+                if (token.IsCancellationRequested)
                 {
-                    var buffer = new byte[1024];
-                    var bytes = new List<byte>();
-                    var str = "";
-
-                    RECV:
-                    var result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), token);
-
-                    if (result == null)
+                    await Disconnect();
+                }
+                else
+                {
+                    while (_ws.State == WebSocketState.Open)
                     {
-                        goto RECV;
-                    }
+                        var buffer = new byte[1024];
+                        var bytes = new List<byte>();
+                        var str = "";
 
-                    var bufferUsed = result.Count;
-
-                    switch (result.MessageType)
-                    {
-                        case WebSocketMessageType.Close:
-                            await Disconnect();
-                            break;
-                        case WebSocketMessageType.Text:
+                        // First read all the message bytes
+                        WebSocketMessageType messageType = WebSocketMessageType.Close;
+                        bool endOfMessage = false;
+                        do
+                        {
+                            try
                             {
+                                var result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), token);
+                                if (result != null)
+                                {
+                                    endOfMessage = result.EndOfMessage;
+                                    var newBytes = new byte[result.Count];
+                                    Array.Copy(buffer, newBytes, result.Count);
+                                    bytes.AddRange(newBytes);
+                                    messageType = result.MessageType;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error(e, "Exception processing message from web socket.");
+                                endOfMessage = true;
+                            }
+
+                        } while (!endOfMessage && _ws.State == WebSocketState.Open);
+
+                        // Now process the message
+                        switch (messageType)
+                        {
+                            case WebSocketMessageType.Close:
+                                await Disconnect();
+                                break;
+                            case WebSocketMessageType.Text:
                                 str += Encoding.UTF8.GetString(buffer).TrimEnd('\0');
-                                if (!result.EndOfMessage)
-                                    goto RECV;
                                 EmitMessage(new MessageEvent(str));
-                            }
-                            break;
-                        case WebSocketMessageType.Binary:
-                            {
-                                var newBytes = new byte[bufferUsed];
-                                Array.Copy(buffer, newBytes, bufferUsed);
-                                bytes.AddRange(newBytes);
-                                if (!result.EndOfMessage)
-                                    goto RECV;
+                                break;
+                            case WebSocketMessageType.Binary:
                                 EmitBinaryMessage(new BinaryMessageEvent(bytes.ToArray()));
-                            }
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    if (token.IsCancellationRequested)
-                    {
-                        await Disconnect();
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
                     }
                 }
 
