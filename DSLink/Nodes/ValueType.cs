@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace DSLink.Nodes
@@ -13,6 +12,8 @@ namespace DSLink.Nodes
         public static readonly ValueType Array = new ValueType("array");
         public static readonly ValueType Dynamic = new ValueType("dynamic");
         public static readonly ValueType Binary = new ValueType("binary");
+        public static readonly ValueType Time = new ValueType("time");
+        public static readonly ValueType Date = new ValueType("date");
 
         public static readonly Dictionary<string, ValueType> Types = new Dictionary<string, ValueType>
         {
@@ -22,7 +23,9 @@ namespace DSLink.Nodes
             {Map.Type, Map},
             {Array.Type, Array},
             {Dynamic.Type, Dynamic},
-            {Binary.Type, Binary}
+            {Binary.Type, Binary},
+            {Time.Type, Time},
+            {Date.Type, Date}
         };
 
         public readonly string Type;
