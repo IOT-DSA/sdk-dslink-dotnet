@@ -154,6 +154,12 @@ namespace DSLink.Nodes
 			SetValue();
 		}
 
+        public void Set(DateTime val, bool force = false)
+        {
+            _val = val.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+            SetValue();
+        }
+
         public void Set(JToken jtoken)
         {
             _val = jtoken;
