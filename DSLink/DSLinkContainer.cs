@@ -215,11 +215,7 @@ namespace DSLink
 
             if (message["responses"] != null)
             {
-                var requests = await Requester.ProcessResponses(message["responses"].Value<JArray>());
-                if (requests.Count > 0)
-                {
-                    response["requests"] = requests;
-                }
+                await Requester.ProcessResponses(message["responses"].Value<JArray>());
                 write = true;
             }
 

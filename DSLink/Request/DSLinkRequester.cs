@@ -149,16 +149,12 @@ namespace DSLink.Request
             await RemoteSubscriptionManager.Unsubscribe(subId);
         }
 
-        internal async Task<JArray> ProcessResponses(JArray responses)
-        {
-            var requests = new JArray();
-
+        internal async Task ProcessResponses(JArray responses)
+        {            
             foreach (JObject response in responses)
             {
                 await ProcessResponse(response);
             }
-
-            return requests;
         }
 
         private async Task ProcessResponse(JObject response)
