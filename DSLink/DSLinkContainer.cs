@@ -19,7 +19,7 @@ namespace DSLink
         private readonly Configuration _config;
         private readonly DSLinkResponder _responder;
         private readonly DSLinkRequester _requester;
-        private readonly Connector _connector;
+        private Connector _connector;
 
         public Configuration Config => _config;
         public virtual Responder Responder => _responder;
@@ -29,8 +29,8 @@ namespace DSLink
         public DSLinkContainer(Configuration config)
         {
             _config = config;
-            _reconnectOnFailure = true;
-            _connector = new WebSocketConnector(_config);
+
+            InitConnector();
 
             if (Config.Responder)
             {
@@ -42,18 +42,6 @@ namespace DSLink
                 _requester = new DSLinkRequester(this);
                 _requester.Init();
             }
-
-            // Connector events
-            _connector.OnMessage += OnStringRead;
-            _connector.OnBinaryMessage += OnBinaryRead;
-            _connector.OnWrite += OnStringWrite;
-            _connector.OnBinaryWrite += OnBinaryWrite;
-            _connector.OnOpen += OnOpen;
-            _connector.OnClose += OnClose;
-
-            // Overridable events for DSLink writers
-            _connector.OnOpen += OnConnectionOpen;
-            _connector.OnClose += OnConnectionClosed;
         }
 
         /// <summary>
@@ -131,7 +119,7 @@ namespace DSLink
         }
 
         public void Disconnect()
-        {
+        {            
             _reconnectOnFailure = false;
             Connector.Disconnect();
         }
@@ -170,8 +158,10 @@ namespace DSLink
             }
 
             if (_reconnectOnFailure)
-            {
+            {                
+                InitConnector();
                 await Connect();
+                OnConnectorReconnected();
             }
         }
 
@@ -186,12 +176,18 @@ namespace DSLink
         /// Override when you need to do something after connection closes.
         /// </summary>
         protected virtual void OnConnectionClosed() {}
-
+        
         /// <summary>
         /// Called when the connection fails to connect to the broker.
         /// Override when you need to detect a failure to connect.
         /// </summary>
         protected virtual void OnConnectionFailed() {}
+
+        /// <summary>
+        /// Called when the connection reconnects to the broker.
+        /// Override when you need to resubscribe.
+        /// </summary>
+        protected virtual void OnConnectorReconnected() {}
 
         private async Task OnMessage(JObject message)
         {
@@ -223,6 +219,24 @@ namespace DSLink
             {
                 await Connector.Write(response);
             }
+        }
+
+        private void InitConnector()
+        {
+            _reconnectOnFailure = true;
+            _connector = new WebSocketConnector(_config);
+
+            // Connector events
+            _connector.OnMessage += OnStringRead;
+            _connector.OnBinaryMessage += OnBinaryRead;
+            _connector.OnWrite += OnStringWrite;
+            _connector.OnBinaryWrite += OnBinaryWrite;
+            _connector.OnOpen += OnOpen;
+            _connector.OnClose += OnClose;
+
+            // Overridable events for DSLink writers
+            _connector.OnOpen += OnConnectionOpen;
+            _connector.OnClose += OnConnectionClosed;
         }
 
         private async void OnStringRead(MessageEvent messageEvent)

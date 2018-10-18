@@ -25,12 +25,28 @@ namespace DSLink.Connection
 
         public override async Task Connect()
         {
-            await base.Connect();
+            if (_ws.State != WebSocketState.Open && _ws.State != WebSocketState.Connecting)
+            {
+                try
+                {
+                    await base.Connect();
 
-            Logger.Info("WebSocket connecting to " + WsUrl);
-            await _ws.ConnectAsync(new Uri(WsUrl), CancellationToken.None);
-            _startReceiveTask();
-            EmitOpen();
+                    Logger.Info("WebSocket connecting to " + WsUrl);
+
+                    await _ws.ConnectAsync(new Uri(WsUrl), CancellationToken.None);
+                    _startReceiveTask();
+                    EmitOpen();
+
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Error connecting to websocket");
+                }
+            }
+            else
+            {
+                Logger.Warn($"WebSocket already {Enum.GetName(typeof(WebSocketState), _ws.State)}");
+            }
         }
 
         /// <summary>
@@ -39,8 +55,12 @@ namespace DSLink.Connection
         public override async Task Disconnect()
         {
             _stopWebSocketTasks();
-            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnecting", _wsTokenSource.Token);
-            _ws.Dispose();
+
+            if (_ws.State == WebSocketState.Open || _ws.State == WebSocketState.CloseReceived || _ws.State == WebSocketState.CloseSent)
+            {
+                await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnecting", _wsTokenSource.Token);                
+            }          
+            
             EmitClose();
 
             await base.Disconnect();
@@ -77,23 +97,32 @@ namespace DSLink.Connection
 
         private async Task _sendSegment(ArraySegment<byte> segment, WebSocketMessageType msgType)
         {
-            // Acquire sending lock.
-            await _wsSendSemaphore.WaitAsync();
-            try
+            if (_ws.State == WebSocketState.Open)
             {
-                // Attempt send.
-                await _ws.SendAsync(segment, msgType, true, _wsTokenSource.Token);
+                // Acquire sending lock.
+                await _wsSendSemaphore.WaitAsync();
+                try
+                {
+                    // Attempt send.
+                    await _ws.SendAsync(segment, msgType, true, _wsTokenSource.Token);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Exception sending segment.");
+
+                    // Failed, log warning and disconnect.
+                    Logger.Warn("SendAsync call failed. Disconnecting from WebSocket.");
+                    await Disconnect();
+                }
+                finally
+                {
+                    // Release sending lock.
+                    _wsSendSemaphore.Release();
+                }
             }
-            catch
+            else
             {
-                // Failed, log warning and disconnect.
-                Logger.Warn("SendAsync call failed. Disconnecting from WebSocket.");
-                await Disconnect();
-            }
-            finally
-            {
-                // Release sending lock.
-                _wsSendSemaphore.Release();
+                Logger.Warn("SendAsync call failed - connection not open");
             }
         }
 
