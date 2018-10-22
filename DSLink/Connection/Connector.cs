@@ -16,7 +16,20 @@ namespace DSLink.Connection
         protected readonly Configuration _config;
         private readonly IncrementingIndex _msgId;
 
-        public BaseSerializer DataSerializer => _serializer;
+        public BaseSerializer DataSerializer
+        {
+            get
+            {
+                if (_serializer == null && _config != null)
+                {
+                    _serializer = (BaseSerializer)Activator.CreateInstance(
+                        Serializers.Types[_config.CommunicationFormatUsed]
+                    );
+                }
+
+                return _serializer;
+            }
+        }
 
         public ConnectionState ConnectionState
         {
@@ -162,9 +175,6 @@ namespace DSLink.Connection
         /// </summary>
         public virtual Task Connect()
         {
-            _serializer = (BaseSerializer) Activator.CreateInstance(
-                Serializers.Types[_config.CommunicationFormatUsed]
-            );
             ConnectionState = ConnectionState.Connecting;
             Logger.Info("Connecting");
 
@@ -258,12 +268,11 @@ namespace DSLink.Connection
 
             try
             {
-                await WriteData(DataSerializer.Serialize(data));
+                await WriteData(DataSerializer.Serialize(data));                
             }
             catch (Exception e)
             {
-                Logger.Warn("Failed to send message, reconnecting.");
-                Logger.Warn(e.StackTrace);
+                Logger.Error(e, "Failed to send message, reconnecting.");                
                 await Disconnect();
             }
         }

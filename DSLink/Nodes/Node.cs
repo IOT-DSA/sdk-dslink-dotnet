@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DSLink.Nodes.Actions;
 using DSLink.Util;
 using Newtonsoft.Json.Linq;
+using DSLink.Logging;
 
 namespace DSLink.Nodes
 {
@@ -12,6 +13,8 @@ namespace DSLink.Nodes
     /// </summary>
     public class Node
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+
         /// <summary>
         /// Set of banned characters from DSA names.
         /// </summary>
@@ -430,18 +433,25 @@ namespace DSLink.Nodes
 
             lock (_subscribers)
             {
-                foreach (var sid in _subscribers)
+                for (int i = 0; i < _subscribers.Count; i++)
                 {
                     tasks.Add(_link.Connector.AddValueUpdateResponse(new JArray
                     {
-                        sid,
+                        _subscribers[i],
                         value.JToken,
                         value.LastUpdated
                     }));
                 }
             }
 
-            await Task.WhenAll(tasks);
+            try
+            {
+                await Task.WhenAll(tasks);
+            }
+            catch (OperationCanceledException ocex)
+            {
+                Logger.Warn($"OperationCanceledException raised - moving on. details = {ocex.ToString()}");
+            }
         }
 
         /// <summary>
