@@ -30,7 +30,7 @@ namespace DSLink.Nodes
         public event Action<Value> OnRemoteSet;
 
         /// <summary>
-        /// Provides the last updated time in ISO 8601 format.
+        /// Gets last updated time in the ISO 8601 format that DSA uses.
         /// </summary>
         public string LastUpdated
         {
@@ -44,44 +44,45 @@ namespace DSLink.Nodes
         public Value()
         {
             _val = null;
+            _lastUpdated = null;
         }
 
-        public Value(string val)
+        public Value(string val, DateTime? ts = null)
         {
-            Set(val);
+            Set(val, false, ts);
         }
 
-        public Value(bool val)
+        public Value(bool val, DateTime? ts = null)
         {
-            Set(val);
+            Set(val, false, ts);
         }
 
-        public Value(int val)
+        public Value(int val, DateTime? ts = null)
         {
-            Set(val);
+            Set(val, false, ts);
         }
 
-        public Value(double val)
+        public Value(double val, DateTime? ts = null)
         {
-            Set(val);
+            Set(val, false, ts);
         }
 
-        public Value(float val)
+        public Value(float val, DateTime? ts = null)
         {
-            Set(val);
+            Set(val, false, ts);
         }
 
-		public Value(byte[] val)
-		{
-			Set(val);
-		}
-
-        public Value(JToken val)
+        public Value(byte[] val, DateTime? ts = null)
         {
-            Set(val);
+            Set(val, false, ts);
         }
 
-        public void Set(string val, bool force = false)
+        public Value(JToken val, DateTime? ts = null)
+        {
+            Set(val, false, ts);
+        }
+
+        public void Set(string val, bool force = false, DateTime? ts = null)
         {
             if (val.StartsWith("\x1B" + "bytes:") || val.StartsWith("\\u001bbytes:"))
             {
@@ -95,11 +96,12 @@ namespace DSLink.Nodes
                     return;
                 }
                 _val = val;
+                _lastUpdated = ts;
             }
             SetValue();
         }
 
-        public void Set(bool val, bool force = false)
+        public void Set(bool val, bool force = false, DateTime? ts = null)
         {
             if (!force && _val != null && _val.Value<bool>() == val)
             {
@@ -107,10 +109,11 @@ namespace DSLink.Nodes
             }
 
             _val = val;
+            _lastUpdated = ts;
             SetValue();
         }
 
-        public void Set(int val, bool force = false)
+        public void Set(int val, bool force = false, DateTime? ts = null)
         {
             if (!force && _val != null && _val.Value<int>() == val)
             {
@@ -118,10 +121,11 @@ namespace DSLink.Nodes
             }
 
             _val = val;
+            _lastUpdated = ts;
             SetValue();
         }
 
-        public void Set(double val, bool force = false)
+        public void Set(double val, bool force = false, DateTime? ts = null)
         {
             if (!force && _val != null && _val.Value<double>().Equals(val))
             {
@@ -129,10 +133,11 @@ namespace DSLink.Nodes
             }
 
             _val = val;
+            _lastUpdated = ts;
             SetValue();
         }
 
-        public void Set(float val, bool force = false)
+        public void Set(float val, bool force = false, DateTime? ts = null)
         {
             if (!force && _val != null && _val.Value<float>().Equals(val))
             {
@@ -140,29 +145,33 @@ namespace DSLink.Nodes
             }
 
             _val = val;
+            _lastUpdated = ts;
             SetValue();
         }
 
-		public void Set(byte[] val, bool force = false)
-		{
+        public void Set(byte[] val, bool force = false, DateTime? ts = null)
+        {
             if (!force && _val != null && _val.Value<byte[]>() == val)
             {
                 return;
             }
 
             _val = val;
-			SetValue();
-		}
-
-        public void Set(DateTime val, bool force = false)
-        {
-            _val = val.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+            _lastUpdated = ts;
             SetValue();
         }
 
-        public void Set(JToken jtoken)
+        public void Set(DateTime val, bool force = false, DateTime? ts = null)
+        {
+            _val = val.ToIso8601();
+            _lastUpdated = ts;
+            SetValue();
+        }
+
+        public void Set(JToken jtoken, bool force = false, DateTime? ts = null)
         {
             _val = jtoken;
+            _lastUpdated = ts;
             SetValue();
         }
 
@@ -180,7 +189,7 @@ namespace DSLink.Nodes
         public float Float => _val.Value<float>();
         public double Double => _val.Value<double>();
         public byte[] ByteArray => _val.Value<byte[]>();
-        public JArray JArray => _val.Value<JArray>();        
+        public JArray JArray => _val.Value<JArray>();
 
         /// <summary>
         /// Determines whether the value is null
@@ -193,17 +202,9 @@ namespace DSLink.Nodes
         /// </summary>
         private void SetValue()
         {
-            _lastUpdated = DateTime.Now;
+            if (!_lastUpdated.HasValue)
+                _lastUpdated = DateTime.Now;
             OnSet?.Invoke(this);
-        }
-
-        /// <summary>
-        /// Change the last updated timestamp from the default creation time.
-        /// </summary>
-        /// <param name="dateTime">New time</param>
-        public void SetLastUpdated(DateTime dateTime)
-        {
-            _lastUpdated = dateTime;
         }
 
         /// <summary>
