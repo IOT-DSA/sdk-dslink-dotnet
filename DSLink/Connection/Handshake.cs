@@ -92,7 +92,7 @@ namespace DSLink.Connection
                 {"isResponder", _link.Config.Responder},
                 {"linkData", new JObject()},
                 {"version", _dsaVersion},
-                {"formats", new JArray(Serializers.Types.Keys.ToArray())},
+                {"formats", new JArray(_link.Config.DisableMsgpack ? Serializers.Json.Keys.ToArray() : Serializers.Types.Keys.ToArray())},
                 {"enableWebSocketCompression", _link.Connector.SupportsCompression}
             };
         }
