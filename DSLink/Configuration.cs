@@ -34,6 +34,7 @@ namespace DSLink
         public readonly bool Requester;
         public readonly bool Responder;
         public bool LoadNodesJson = true;
+        public bool DisableMsgpack = false;
         public string Token = "";
         public string BrokerUrl = "http://localhost:8080/conn";
         public string CommunicationFormat = "";

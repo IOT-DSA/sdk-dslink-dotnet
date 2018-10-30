@@ -10,5 +10,10 @@ namespace DSLink.Serializer
             {"msgpack", typeof(MsgPackSerializer)},
             {"json", typeof(JsonSerializer)}
         };
+
+        public static readonly Dictionary<string, Type> Json = new Dictionary<string, Type>()
+        {            
+            {"json", typeof(JsonSerializer)}
+        };
     }
 }
