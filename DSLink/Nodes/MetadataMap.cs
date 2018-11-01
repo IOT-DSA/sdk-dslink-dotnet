@@ -1,6 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Collections;
+using System.Security;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using System;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace DSLink.Nodes
 {
@@ -44,6 +50,44 @@ namespace DSLink.Nodes
         public void Set(BaseType key, Value value)
         {
             Set(key.String, value);
+        }
+
+        public void SetEncrypted(string key, Value value, SecureString password, byte[] salt)
+        {
+            try
+            {
+                var pwdBytes = Util.Encryption.GetByteArrayFromSecureString(password);
+                var serializedValue = JsonConvert.SerializeObject(value);
+                //var valBytes = Util.Encryption.ObjectToByteArray(serializedValue);                
+                var valBytes = Encoding.Default.GetBytes(serializedValue);
+                var encValBytes = Util.Encryption.AESEncryptBytes(valBytes, pwdBytes, salt);
+                var encValue = new Value(encValBytes);
+                Set(key, encValue);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Exception setting encrypted value: ex = {ex.ToString()}");
+            }
+        }
+
+        public Value GetEncrypted(string key, SecureString password, byte[] salt)
+        {
+            if (!_metadataDictionary.ContainsKey(_prefix + key))
+            {
+                return null;
+            }
+            
+            var encBytes = _metadataDictionary[_prefix + key].ByteArray;
+            var decBytes = Util.Encryption.AESDecryptBytes(encBytes, Util.Encryption.GetByteArrayFromSecureString(password), salt);
+            var decValueString = Encoding.Default.GetString(decBytes);
+            var jo = JsonConvert.DeserializeObject<JObject>(decValueString);
+
+            var value = jo["Value"].ToString();
+            DateTime ts;
+            DateTime.TryParse(jo["LastUpdated"].ToString(), out ts);
+
+            var val = new Value(value, ts);
+            return val;
         }
 
         public Value Get(string key)
