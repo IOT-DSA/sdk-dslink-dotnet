@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using DSLink.Util;
 using Newtonsoft.Json.Linq;
 
@@ -7,7 +8,7 @@ namespace DSLink.Nodes
     /// <summary>
     /// Represents a Value.
     /// </summary>
-    public class Value
+    public class Value:ISerializable
     {
         /// <summary>
         /// Represents the value that this class is containing.
@@ -78,6 +79,11 @@ namespace DSLink.Nodes
         }
 
         public Value(JToken val, DateTime? ts = null)
+        {
+            Set(val, false, ts);
+        }
+
+        public Value(DateTime val, DateTime? ts = null)
         {
             Set(val, false, ts);
         }
@@ -190,6 +196,7 @@ namespace DSLink.Nodes
         public double Double => _val.Value<double>();
         public byte[] ByteArray => _val.Value<byte[]>();
         public JArray JArray => _val.Value<JArray>();
+        public DateTime DateTime => _val.Value<DateTime>();
 
         /// <summary>
         /// Determines whether the value is null
@@ -214,6 +221,12 @@ namespace DSLink.Nodes
         internal void InvokeRemoteSet()
         {
             OnRemoteSet?.Invoke(this);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Value", _val);
+            info.AddValue("LastUpdated", _lastUpdated);
         }
     }
 }
