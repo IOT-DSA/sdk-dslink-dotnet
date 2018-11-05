@@ -1,5 +1,6 @@
 using DSLink.Nodes.Actions;
 using Newtonsoft.Json.Linq;
+using System.Security;
 
 namespace DSLink.Nodes
 {
@@ -39,6 +40,17 @@ namespace DSLink.Nodes
         public NodeFactory SetConfig(BaseType type, Value value)
         {
             return SetConfig(type.String, value);
+        }
+
+        public NodeFactory SetEncryptedConfig(string name, Value value, SecureString password, byte[] salt)
+        {
+            _node.Configs.SetEncrypted(name, value, password, salt);
+            return this;
+        }
+
+        public NodeFactory SetEncryptedConfig(BaseType type, Value value, SecureString password, byte[] salt)
+        {
+            return SetEncryptedConfig(type.String, value, password, salt);
         }
 
         public NodeFactory SetAttribute(string name, Value value)

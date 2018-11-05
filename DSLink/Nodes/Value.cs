@@ -196,6 +196,7 @@ namespace DSLink.Nodes
         public double Double => _val.Value<double>();
         public byte[] ByteArray => _val.Value<byte[]>();
         public JArray JArray => _val.Value<JArray>();
+        public DateTime DateTime => _val.Value<DateTime>();
 
         /// <summary>
         /// Determines whether the value is null

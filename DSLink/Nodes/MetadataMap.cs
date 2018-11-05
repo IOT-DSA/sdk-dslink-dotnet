@@ -54,20 +54,12 @@ namespace DSLink.Nodes
 
         public void SetEncrypted(string key, Value value, SecureString password, byte[] salt)
         {
-            try
-            {
-                var pwdBytes = Util.Encryption.GetByteArrayFromSecureString(password);
-                var serializedValue = JsonConvert.SerializeObject(value);
-                //var valBytes = Util.Encryption.ObjectToByteArray(serializedValue);                
-                var valBytes = Encoding.Default.GetBytes(serializedValue);
-                var encValBytes = Util.Encryption.AESEncryptBytes(valBytes, pwdBytes, salt);
-                var encValue = new Value(encValBytes);
-                Set(key, encValue);
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine($"Exception setting encrypted value: ex = {ex.ToString()}");
-            }
+            var pwdBytes = Util.Encryption.GetByteArrayFromSecureString(password);
+            var serializedValue = JsonConvert.SerializeObject(value);
+            var valBytes = Encoding.Default.GetBytes(serializedValue);
+            var encValBytes = Util.Encryption.AESEncryptBytes(valBytes, pwdBytes, salt);
+            var encValue = new Value(encValBytes);
+            Set(key, encValue);
         }
 
         public Value GetEncrypted(string key, SecureString password, byte[] salt)
@@ -76,7 +68,7 @@ namespace DSLink.Nodes
             {
                 return null;
             }
-            
+
             var encBytes = _metadataDictionary[_prefix + key].ByteArray;
             var decBytes = Util.Encryption.AESDecryptBytes(encBytes, Util.Encryption.GetByteArrayFromSecureString(password), salt);
             var decValueString = Encoding.Default.GetString(decBytes);
