@@ -35,14 +35,14 @@ namespace DSLink.Test
             _mockContainer.SetupGet(c => c.Responder).Returns(_mockResponder.Object);
             _mockResponder.SetupGet(r => r.SuperRoot).Returns(_superRootNode);
             _mockResponder.SetupGet(r => r.SubscriptionManager).Returns(_mockSubManager.Object);
-            
+
             _mockConnector.Setup(c => c.AddValueUpdateResponse(It.IsAny<JToken>()))
                 .Returns(Task.FromResult(false));
-            
+
             _superRootNode = new Node("", null, _mockContainer.Object);
         }
 
-        [Test] 
+        [Test]
         public void RemoveAllChildren()
         {
             var nodeA = _superRootNode.CreateChild("A").BuildNode();
@@ -64,10 +64,7 @@ namespace DSLink.Test
         {
             foreach (char c in Node.BannedChars)
             {
-                Assert.Throws<ArgumentException>(() =>
-                {
-                    _superRootNode.CreateChild($"Test{c}").BuildNode();
-                });
+                Assert.Throws<ArgumentException>(() => { _superRootNode.CreateChild($"Test{c}").BuildNode(); });
             }
         }
 
@@ -75,20 +72,14 @@ namespace DSLink.Test
         public void MultipleBannedCharactersInName()
         {
             var multiCharTest = new string(Node.BannedChars);
-            Assert.Throws<ArgumentException>(() =>
-            {
-                _superRootNode.CreateChild(multiCharTest).BuildNode();
-            });
+            Assert.Throws<ArgumentException>(() => { _superRootNode.CreateChild(multiCharTest).BuildNode(); });
         }
 
         [Test]
         public void NoBannedCharactersInName()
         {
             var noCharTest = "TestNoBannedChars";
-            Assert.DoesNotThrow(() =>
-            {
-                _superRootNode.CreateChild(noCharTest).BuildNode();
-            });
+            Assert.DoesNotThrow(() => { _superRootNode.CreateChild(noCharTest).BuildNode(); });
         }
 
         [Test]

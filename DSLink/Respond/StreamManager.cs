@@ -7,6 +7,7 @@ namespace DSLink.Respond
     public class StreamManager
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+
         private readonly Dictionary<int, string> _requestIdToPath = new Dictionary<int, string>();
         private readonly DSLinkContainer _link;
 
@@ -41,6 +42,7 @@ namespace DSLink.Respond
                         node._streams.Remove(requestId);
                     }
                 }
+
                 _requestIdToPath.Remove(requestId);
             }
             else
@@ -54,16 +56,18 @@ namespace DSLink.Respond
             foreach (var id in _requestIdToPath.Keys)
             {
                 var path = _requestIdToPath[id];
-                if (path == node.Path)
+                if (path != node.Path)
                 {
-                    lock (node._streams)
-                    {
-                        node._streams.Add(id);
-                    }
+                    continue;
+                }
+
+                lock (node._streams)
+                {
+                    node._streams.Add(id);
                 }
             }
         }
-                 
+
         internal void ClearAll()
         {
             _requestIdToPath.Clear();

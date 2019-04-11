@@ -6,9 +6,9 @@ using Newtonsoft.Json.Linq;
 
 namespace DSLink.Respond
 {
-    public class DSLinkResponder : Responder
+    public sealed class DSLinkResponder : Responder
     {
-        public DSLinkResponder(DSLinkContainer link) : base()
+        public DSLinkResponder(DSLinkContainer link)
         {
             Link = link;
         }
@@ -62,6 +62,7 @@ namespace DSLink.Respond
                         throw new ArgumentException($"Method {request["method"].Value<string>()} not implemented");
                 }
             }
+
             return responses;
         }
 
@@ -136,7 +137,8 @@ namespace DSLink.Respond
             var node = SuperRoot.Get(request["path"].Value<string>());
             if (node?.ActionHandler != null)
             {
-                if (request["permit"] == null || request["permit"].Value<string>().Equals(node.ActionHandler.Permission.ToString()))
+                if (request["permit"] == null ||
+                    request["permit"].Value<string>().Equals(node.ActionHandler.Permission.ToString()))
                 {
                     JArray columns;
                     if (node.Configs.Has(ConfigType.Columns))
@@ -147,10 +149,13 @@ namespace DSLink.Respond
                     {
                         columns = new JArray();
                     }
-                    var permit = (request["permit"] != null) ? Permission.PermissionMap[request["permit"].Value<string>().ToLower()] : null;
+
+                    var permit = request["permit"] != null
+                        ? Permission.PermissionMap[request["permit"].Value<string>().ToLower()]
+                        : null;
                     var invokeRequest = new InvokeRequest(request["rid"].Value<int>(), request["path"].Value<string>(),
-                                                          permit, request["params"].Value<JObject>(), link: Link,
-                                                          columns: columns);
+                        permit, request["params"].Value<JObject>(), link: Link,
+                        columns: columns);
                     await Task.Run(() => node.ActionHandler.Function.Invoke(invokeRequest));
                 }
             }
@@ -182,6 +187,7 @@ namespace DSLink.Respond
                     })
                 });
             }
+
             responses.Add(new JObject
             {
                 new JProperty("rid", request["rid"].Value<int>()),
@@ -195,6 +201,7 @@ namespace DSLink.Respond
             {
                 SubscriptionManager.Unsubscribe(sid.Value<int>());
             }
+
             responses.Add(new JObject
             {
                 new JProperty("rid", request["rid"].Value<int>()),

@@ -10,13 +10,13 @@ namespace DSLink.Util
 {
     public static class Encryption
     {
-        public const int AES256KeySize = 256;
+        private const int Aes256KeySize = 256;
 
         public static byte[] RandomByteArray(int length)
         {
-            byte[] result = new byte[length];
+            var result = new byte[length];
 
-            using (RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider())
+            using (var provider = new RNGCryptoServiceProvider())
             {
                 provider.GetBytes(result);
                 return result;
@@ -25,8 +25,7 @@ namespace DSLink.Util
 
         public static byte[] AESEncryptBytes(byte[] clear, byte[] password, byte[] salt)
         {
-
-            byte[] encrypted = null;
+            byte[] encrypted;
 
             var key = GenerateKey(password, salt);
 
@@ -35,15 +34,15 @@ namespace DSLink.Util
 
             using (Aes aes = new AesManaged())
             {
-                aes.KeySize = AES256KeySize;
+                aes.KeySize = Aes256KeySize;
                 aes.Key = key.GetBytes(aes.KeySize / 8);
                 aes.IV = key.GetBytes(aes.BlockSize / 8);
                 aes.Padding = PaddingMode.PKCS7;
                 aes.Mode = CipherMode.CBC;
 
-                using (MemoryStream ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
-                    using (CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                    using (var cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
                     {
                         cs.Write(clear, 0, clear.Length);
                         cs.Close();
@@ -69,7 +68,7 @@ namespace DSLink.Util
 
             using (Aes aes = new AesManaged())
             {
-                aes.KeySize = AES256KeySize;
+                aes.KeySize = Aes256KeySize;
                 aes.Key = key.GetBytes(aes.KeySize / 8);
                 aes.IV = key.GetBytes(aes.BlockSize / 8);
                 aes.Padding = PaddingMode.PKCS7;
@@ -94,14 +93,14 @@ namespace DSLink.Util
 
         public static bool CheckPassword(byte[] password, byte[] salt, byte[] key)
         {
-            using (Rfc2898DeriveBytes r = GenerateKey(password, salt))
+            using (var r = GenerateKey(password, salt))
             {
-                byte[] newKey = r.GetBytes(AES256KeySize / 8);
+                var newKey = r.GetBytes(Aes256KeySize / 8);
                 return newKey.SequenceEqual(key);
             }
         }
 
-        public static Rfc2898DeriveBytes GenerateKey(byte[] password, byte[] salt)
+        private static Rfc2898DeriveBytes GenerateKey(byte[] password, byte[] salt)
         {
             return new Rfc2898DeriveBytes(password, salt, 52768);
         }
@@ -115,10 +114,7 @@ namespace DSLink.Util
 
             encoding = encoding ?? Encoding.UTF8;
 
-            IntPtr unmanagedString = IntPtr.Zero;
-
-            unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(secureString);
-
+            var unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(secureString);
             var retBytes = encoding.GetBytes(Marshal.PtrToStringUni(unmanagedString));
 
             return retBytes;

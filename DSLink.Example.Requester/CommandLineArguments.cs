@@ -1,5 +1,4 @@
-﻿
-/// <summary>
+﻿/// <summary>
 /// This class represents the complete of set of all possible command line options
 /// used not only by DSLink SDK but the calling program itself
 /// 
@@ -40,12 +39,13 @@ namespace DSLink.Example
 
         [Option('f', "log-file",
             Required = false,
-            HelpText = "The folder ending with the Path.DirectorySeparatorChar specifying the location for log files to be written")]
+            HelpText =
+                "The folder ending with the Path.DirectorySeparatorChar specifying the location for log files to be written")]
         public string LogFileFolder { get; set; }
 
         [Option('o', "nodes",
-          Required = false,
-          HelpText = "The filename containing the DSLink nodes")]
+            Required = false,
+            HelpText = "The filename containing the DSLink nodes")]
         public string NodesFileName { get; set; }
 
         [Option('t', "token",
@@ -59,8 +59,8 @@ namespace DSLink.Example
         public string KeysFolder { get; set; }
 
         [Option('d', "dslink-json",
-           Required = false,
-           HelpText = "The alternate filename containing the contents of dslink.json")]
+            Required = false,
+            HelpText = "The alternate filename containing the contents of dslink.json")]
         public string DSLinkJsonFilename { get; set; }
     }
 }

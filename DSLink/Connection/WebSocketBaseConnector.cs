@@ -36,7 +36,6 @@ namespace DSLink.Connection
                     await _ws.ConnectAsync(new Uri(WsUrl), CancellationToken.None);
                     _startReceiveTask();
                     EmitOpen();
-
                 }
                 catch (Exception ex)
                 {
@@ -56,11 +55,12 @@ namespace DSLink.Connection
         {
             _stopWebSocketTasks();
 
-            if (_ws.State == WebSocketState.Open || _ws.State == WebSocketState.CloseReceived || _ws.State == WebSocketState.CloseSent)
+            if (_ws.State == WebSocketState.Open || _ws.State == WebSocketState.CloseReceived ||
+                _ws.State == WebSocketState.CloseSent)
             {
-                await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnecting", _wsTokenSource.Token);                
-            }          
-            
+                await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnecting", _wsTokenSource.Token);
+            }
+
             EmitClose();
 
             await base.Disconnect();
@@ -167,7 +167,6 @@ namespace DSLink.Connection
                                 Logger.Error(e, "Exception processing message from web socket.");
                                 endOfMessage = true;
                             }
-
                         } while (!endOfMessage && _ws.State == WebSocketState.Open);
 
                         // Now process the message
@@ -192,7 +191,7 @@ namespace DSLink.Connection
                 return Task.CompletedTask;
             }, _wsTokenSource.Token);
         }
-        
+
         private void _stopWebSocketTasks()
         {
             _wsTokenSource.Cancel();

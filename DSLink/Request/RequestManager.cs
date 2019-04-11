@@ -13,22 +13,22 @@ namespace DSLink.Request
 
         public void StartRequest(BaseRequest request)
         {
-            _requests.Add(request.RequestID, request);
+            _requests.Add(request.RequestId, request);
         }
 
-        public void StopRequest(int requestID)
+        public void StopRequest(int requestId)
         {
-            _requests.Remove(requestID);
+            _requests.Remove(requestId);
         }
 
-        public bool RequestPending(int requestID)
+        public bool RequestPending(int requestId)
         {
-            return _requests.ContainsKey(requestID);
+            return _requests.ContainsKey(requestId);
         }
 
-        public BaseRequest GetRequest(int requestID)
+        public BaseRequest GetRequest(int requestId)
         {
-            return _requests[requestID];
+            return _requests[requestId];
         }
     }
 }

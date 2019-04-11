@@ -18,7 +18,8 @@ namespace DSLink.Nodes
         /// <summary>
         /// Set of banned characters from DSA names.
         /// </summary>
-        public static readonly char[] BannedChars = {
+        public static readonly char[] BannedChars =
+        {
             '%', '.', '/', '\\', '?', '*', ':', '|', '<', '>', '$', '@', ',', '\'', '"'
         };
 
@@ -49,14 +50,8 @@ namespace DSLink.Nodes
         /// </summary>
         public string Path
         {
-            get
-            {
-                return _path;
-            }
-            protected set
-            {
-                _path = value.TrimEnd('/');
-            }
+            get { return _path; }
+            protected set { _path = value.TrimEnd('/'); }
         }
 
         /// <summary>
@@ -88,11 +83,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Node action
         /// </summary>
-        public ActionHandler ActionHandler
-        {
-            get;
-            protected set;
-        }
+        public ActionHandler ActionHandler { get; protected set; }
 
         /// <summary>
         /// Indicates whether the Node is serialized into the 
@@ -103,8 +94,7 @@ namespace DSLink.Nodes
 
         /// <summary>
         /// User-defined object to help link third party code
-        /// to a DSA Node. This will be persisted if this Node
-        /// is cloned.
+        /// to a DSA Node.
         /// </summary>
         public object UserObject = null;
 
@@ -165,6 +155,7 @@ namespace DSLink.Nodes
                     {
                         return Get(name);
                     }
+
                     return _children[name];
                 }
             }
@@ -183,6 +174,7 @@ namespace DSLink.Nodes
             {
                 throw new ArgumentException("Name must not be null.");
             }
+
             ClassName = className;
             Parent = parent;
             _children = new Dictionary<string, Node>();
@@ -210,6 +202,7 @@ namespace DSLink.Nodes
                 {
                     throw new ArgumentException("name");
                 }
+
                 Name = name;
                 Path = (parent.Path.Equals("/") ? "" : parent.Path) + "/" + name;
             }
@@ -236,6 +229,7 @@ namespace DSLink.Nodes
             {
                 return;
             }
+
             _initializedClass = true;
             if (_link.Responder.NodeClasses.ContainsKey(ClassName) &&
                 (!PrivateConfigs.Has("nodeClassInit") || PrivateConfigs.Get("nodeClassInit").Boolean == false))
@@ -281,6 +275,7 @@ namespace DSLink.Nodes
             {
                 throw new ArgumentException("Invalid character(s) in Node name.");
             }
+
             Node child = new Node(name, this, _link, className);
             return new NodeFactory(child);
         }
@@ -308,8 +303,10 @@ namespace DSLink.Nodes
                 {
                     throw new ArgumentException($"Child already exists at {child.Path}");
                 }
+
                 _children.Add(child.Name, child);
             }
+
             UpdateSubscribers();
         }
 
@@ -323,6 +320,7 @@ namespace DSLink.Nodes
             {
                 Configs.Set(ConfigType.Parameters, new Value(new JArray()));
             }
+
             var parameters = Configs.Get(ConfigType.Parameters).JArray;
             foreach (JToken token in parameters)
             {
@@ -331,6 +329,7 @@ namespace DSLink.Nodes
                     throw new Exception($"Parameter {parameter.Name} already exists on {_path}");
                 }
             }
+
             parameters.Add(parameter);
         }
 
@@ -344,6 +343,7 @@ namespace DSLink.Nodes
             {
                 Configs.Set(ConfigType.Columns, new Value(new JArray()));
             }
+
             var columns = Configs.Get(ConfigType.Columns).JArray;
             foreach (JToken token in columns)
             {
@@ -352,6 +352,7 @@ namespace DSLink.Nodes
                     throw new Exception($"Column {column.Name} already exists on {_path}");
                 }
             }
+
             columns.Add(column);
         }
 
@@ -378,23 +379,31 @@ namespace DSLink.Nodes
                 {
                     _removedChildren.Add(_children[name]);
                 }
+
                 _children.Remove(name);
             }
+
             UpdateSubscribers();
         }
+
         /// <summary>
         /// Removes all child nodes
         /// </summary>
         public void RemoveAllChildren()
         {
-            lock(_children) {
-                lock(_removedChildren) {
-                    foreach(var key in _children.Keys) {
+            lock (_children)
+            {
+                lock (_removedChildren)
+                {
+                    foreach (var key in _children.Keys)
+                    {
                         _removedChildren.Add(_children[key]);
                     }
                 }
+
                 _children.Clear();
             }
+
             UpdateSubscribers();
         }
 
@@ -420,6 +429,7 @@ namespace DSLink.Nodes
             {
                 Get(path).RemoveConfigAttribute(path);
             }
+
             UpdateSubscribers();
         }
 
@@ -529,7 +539,7 @@ namespace DSLink.Nodes
                 else if (prop.Value is JObject)
                 {
                     string name = prop.Key;
-                    
+
                     if (!Children.ContainsKey(name))
                     {
                         string className;
@@ -541,6 +551,7 @@ namespace DSLink.Nodes
                         {
                             className = "node";
                         }
+
                         var builder = CreateChild(name, className);
                         builder.Deserialize((JObject) prop.Value);
                         builder.BuildNode();
@@ -564,37 +575,18 @@ namespace DSLink.Nodes
             {
                 return this;
             }
+
             path = path.TrimStart('/');
             var indexOfFirstSlash = path.IndexOf('/');
             var child = indexOfFirstSlash == -1 ? path : path.Substring(0, path.IndexOf('/'));
             path = path.TrimStart(child.ToCharArray());
-            
+
             if (Children.TryGetValue(child, out Node childNode))
             {
                 return childNode.Get(path);
             }
-            else
-            {
-                return null;
-            }
-        }
 
-        /// <summary>
-        /// Create a clone of this Node.
-        /// This will create an exact copy of the Node which includes:
-        /// - Configs
-        /// - Attributes
-        /// - Value
-        /// - UserObject
-        /// - Children (and they will include ALL of the above properties)
-        /// </summary>
-        /// <returns>A new Node instance that is exactly the same as this node.</returns>
-        public Node Clone()
-        {
-            var node = new Node(Name, Parent, _link, Configs.Get(ConfigType.ClassName).String);
-            node.Deserialize(node.Serialize());
-            node.UserObject = UserObject;
-            return node;
+            return null;
         }
 
         protected virtual async void UpdateSubscribers()

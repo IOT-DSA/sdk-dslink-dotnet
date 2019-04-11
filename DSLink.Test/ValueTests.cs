@@ -7,11 +7,13 @@ namespace DSLink.Test
     [TestFixture]
     public class ValueTests
     {
-        private static readonly byte[] _testBytes = {
+        private static readonly byte[] _testBytes =
+        {
             0x01, 0x02, 0x03, 0x04, 0x05
         };
 
-        private static readonly byte[] _testBytesReverse = {
+        private static readonly byte[] _testBytesReverse =
+        {
             0x05, 0x04, 0x03, 0x02, 0x01
         };
 

@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DSLink.Nodes
 {
+    /// <inheritdoc />
     /// <summary>
     /// Represents a remote Node that isn't on our Node tree.
     /// </summary>
@@ -71,8 +72,7 @@ namespace DSLink.Nodes
                 else
                 {
                     var child = new RemoteNode(key, this, Path + "/" + key);
-                    var jObject = value as JObject;
-                    if (jObject != null)
+                    if (value is JObject jObject)
                     {
                         foreach (var kp in jObject)
                         {
@@ -86,6 +86,7 @@ namespace DSLink.Nodes
                             }
                         }
                     }
+
                     AddChild(child);
                 }
             }

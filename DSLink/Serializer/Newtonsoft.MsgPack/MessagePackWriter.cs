@@ -29,6 +29,7 @@
     of the authors and should not be interpreted as representing official policies, 
     either expressed or implied, of the FreeBSD Project.
 */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -204,7 +205,7 @@ namespace Newtonsoft.Msgpack
         {
             if (value is BigInteger)
             {
-                WriteBigInteger((BigInteger)value);
+                WriteBigInteger((BigInteger) value);
                 SetWriteState(JsonToken.Integer, value);
             }
             else
@@ -427,10 +428,7 @@ namespace Newtonsoft.Msgpack
 
             public MsgpackToken Parent
             {
-                get
-                {
-                    return mParent;
-                }
+                get { return mParent; }
             }
 
             public abstract void AddChild(string propertyName, MsgpackToken child);
@@ -451,10 +449,7 @@ namespace Newtonsoft.Msgpack
 
             public ICollection<MsgpackProperty> Children
             {
-                get
-                {
-                    return mChildren;
-                }
+                get { return mChildren; }
             }
 
             public override void AddChild(string propertyName, MsgpackToken child)
@@ -499,10 +494,7 @@ namespace Newtonsoft.Msgpack
 
             public ICollection<MsgpackToken> Children
             {
-                get
-                {
-                    return mChildren;
-                }
+                get { return mChildren; }
             }
 
             public override void AddChild(string propertyName, MsgpackToken child)
@@ -533,10 +525,7 @@ namespace Newtonsoft.Msgpack
 
             public T Value
             {
-                get
-                {
-                    return mValue;
-                }
+                get { return mValue; }
             }
 
             public override void AddChild(string propertyName, MsgpackToken child)

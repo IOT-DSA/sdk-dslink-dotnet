@@ -8,14 +8,6 @@ namespace DSLink.Serializer
     public abstract class BaseSerializer
     {
         /// <summary>
-        /// True if the connection used requires binary stream support.
-        /// </summary>
-        bool RequiresBinaryStream
-        {
-            get;
-        }
-
-        /// <summary>
         /// Serialize the specified data.
         /// </summary>
         /// <param name="data">Data to serialize in serialization object form.</param>

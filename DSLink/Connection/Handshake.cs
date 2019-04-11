@@ -17,7 +17,7 @@ namespace DSLink.Connection
         /// <summary>
         /// DSA Version.
         /// </summary>
-        private const string _dsaVersion = "1.1.2";
+        private const string DsaVersion = "1.1.2";
 
         /// <summary>
         /// Instance of link container.
@@ -43,6 +43,7 @@ namespace DSLink.Connection
             {
                 url += "&token=" + _link.Config.TokenParameter;
             }
+
             return url;
         }
 
@@ -63,7 +64,7 @@ namespace DSLink.Connection
             }
 
             if (resp == null || !resp.IsSuccessStatusCode) return null;
-            
+
             Logger.Info("Handshake successful");
             return JsonConvert.DeserializeObject<RemoteEndpoint>(
                 await resp.Content.ReadAsStringAsync()
@@ -75,7 +76,7 @@ namespace DSLink.Connection
         /// </summary>
         private Task<HttpResponseMessage> RunHandshake()
         {
-            return _httpClient.PostAsync(_buildUrl(), 
+            return _httpClient.PostAsync(_buildUrl(),
                 new StringContent(GetJson().ToString()));
         }
 
@@ -91,8 +92,13 @@ namespace DSLink.Connection
                 {"isRequester", _link.Config.Requester},
                 {"isResponder", _link.Config.Responder},
                 {"linkData", new JObject()},
-                {"version", _dsaVersion},
-                {"formats", new JArray(_link.Config.DisableMsgpack ? Serializers.Json.Keys.ToArray() : Serializers.Types.Keys.ToArray())},
+                {"version", DsaVersion},
+                {
+                    "formats",
+                    new JArray(_link.Config.DisableMsgpack
+                        ? Serializers.Json.Keys.ToArray()
+                        : Serializers.Types.Keys.ToArray())
+                },
                 {"enableWebSocketCompression", _link.Connector.SupportsCompression}
             };
         }

@@ -13,7 +13,6 @@ namespace DSLink.Serializer
     public class MsgPackSerializer : BaseSerializer
     {
         private readonly JSONSerializer _serializer;
-        public bool RequiresBinaryStream => true;
 
         public MsgPackSerializer()
         {

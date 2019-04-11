@@ -16,7 +16,9 @@ namespace DSLink.Test
             new JProperty("msg", 123),
             new JProperty("ack", 62)
         };
+
         private static readonly string _simpleMsgAck_Json_Expected = "{\"msg\":123,\"ack\":62}";
+
         private static readonly byte[] _simpleMsgAck_MsgPack_Expected =
         {
             0x82, 0xA3, 0x6D, 0x73, 0x67, 0x7B, 0xA3, 0x61, 0x63, 0x6B, 0x3E
@@ -36,7 +38,10 @@ namespace DSLink.Test
                 }
             })
         };
-        private static readonly string _listRequest_Json_Expected = "{\"msg\":123,\"ack\":62,\"requests\":[{\"rid\":1,\"method\":\"list\",\"path\":\"/test\"}]}";
+
+        private static readonly string _listRequest_Json_Expected =
+            "{\"msg\":123,\"ack\":62,\"requests\":[{\"rid\":1,\"method\":\"list\",\"path\":\"/test\"}]}";
+
         private static readonly byte[] _listRequest_MsgPack_Expected =
         {
             0x83, 0xA3, 0x6D, 0x73, 0x67, 0x7B, 0xA3, 0x61, 0x63, 0x6B,
@@ -60,14 +65,17 @@ namespace DSLink.Test
                         new JArray
                         {
                             0,
-                            new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 },
+                            new byte[] {0x00, 0x01, 0x02, 0x03, 0x04, 0x05},
                             "2014-11-27T09:11.000-08:00"
                         }
                     })
                 }
             })
         };
-        private static readonly string _binaryUpdate_Json_Expected = "{\"msg\":123,\"ack\":62,\"responses\":[{\"rid\":0,\"updates\":[[0,\"\\u001bbytes:AAECAwQF\",\"2014-11-27T09:11.000-08:00\"]]}]}";
+
+        private static readonly string _binaryUpdate_Json_Expected =
+            "{\"msg\":123,\"ack\":62,\"responses\":[{\"rid\":0,\"updates\":[[0,\"\\u001bbytes:AAECAwQF\",\"2014-11-27T09:11.000-08:00\"]]}]}";
+
         private static readonly byte[] _binaryUpdate_MsgPack_Expected =
         {
             0x83, 0xA3, 0x6D, 0x73, 0x67, 0x7B, 0xA3, 0x61, 0x63, 0x6B,

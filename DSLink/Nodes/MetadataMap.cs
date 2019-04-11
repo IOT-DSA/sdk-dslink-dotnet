@@ -14,7 +14,7 @@ namespace DSLink.Nodes
 
     public class MetadataMap : IEnumerable<KeyValuePair<string, Value>>
     {
-        private Dictionary<string, Value> _metadataDictionary = new Dictionary<string, Value>();
+        private readonly Dictionary<string, Value> _metadataDictionary = new Dictionary<string, Value>();
         private readonly string _prefix;
 
         public event OnSetEventHandler OnSet;
@@ -25,21 +25,9 @@ namespace DSLink.Nodes
             _prefix = prefix;
         }
 
-        public Value this[string key]
-        {
-            get
-            {
-                return Get(key);
-            }
-        }
+        public Value this[string key] => Get(key);
 
-        public Value this[BaseType baseType]
-        {
-            get
-            {
-                return Get(baseType);
-            }
-        }
+        public Value this[BaseType baseType] => Get(baseType);
 
         public void Set(string key, Value value)
         {
@@ -70,7 +58,8 @@ namespace DSLink.Nodes
             }
 
             var encBytes = _metadataDictionary[_prefix + key].ByteArray;
-            var decBytes = Util.Encryption.AESDecryptBytes(encBytes, Util.Encryption.GetByteArrayFromSecureString(password), salt);
+            var decBytes = Util.Encryption.AESDecryptBytes(encBytes,
+                Util.Encryption.GetByteArrayFromSecureString(password), salt);
             var decValueString = Encoding.Default.GetString(decBytes);
             var jo = JsonConvert.DeserializeObject<JObject>(decValueString);
 
@@ -140,12 +129,12 @@ namespace DSLink.Nodes
 
         public IEnumerator<KeyValuePair<string, Value>> GetEnumerator()
         {
-            return ((IEnumerable<KeyValuePair<string, Value>>)_metadataDictionary).GetEnumerator();
+            return ((IEnumerable<KeyValuePair<string, Value>>) _metadataDictionary).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<KeyValuePair<string, Value>>)_metadataDictionary).GetEnumerator();
+            return ((IEnumerable<KeyValuePair<string, Value>>) _metadataDictionary).GetEnumerator();
         }
     }
 }

@@ -8,37 +8,17 @@ namespace DSLink.Respond
 {
     public abstract class Responder
     {
-        internal IDictionary<string, Action<Node>> NodeClasses;
+        internal readonly IDictionary<string, Action<Node>> NodeClasses;
 
-        internal virtual DSLinkContainer Link
-        {
-            get;
-            set;
-        }
+        internal virtual DSLinkContainer Link { get; set; }
 
-        public virtual Node SuperRoot
-        {
-            get;
-            protected set;
-        }
+        public virtual Node SuperRoot { get; protected set; }
 
-        public virtual SubscriptionManager SubscriptionManager
-        {
-            get;
-            protected set;
-        }
+        public virtual SubscriptionManager SubscriptionManager { get; protected set; }
 
-        public virtual StreamManager StreamManager
-        {
-            get;
-            protected set;
-        }
+        public virtual StreamManager StreamManager { get; protected set; }
 
-        public virtual DiskSerializer DiskSerializer
-        {
-            get;
-            protected set;
-        }
+        public virtual DiskSerializer DiskSerializer { get; protected set; }
 
         public Responder()
         {

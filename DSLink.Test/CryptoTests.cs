@@ -12,6 +12,7 @@ namespace DSLink.Test
         private const string KnownSavedKeyPair =
             "AIjwCSLDZGF5G7BoncWBsBzIrAGhNNC+OJMbVm4Xirau " +
             "BGSjQgTqbifSDbVIgOyh8T6cI+GJ0WwCksKK+l3sWF0THm5QpeCfzmj8iYmdgC185c30zAdHg8DB5+Pf/fU6QV4=";
+
         private IFolder _tempFolder;
 
         [SetUp]
@@ -33,7 +34,7 @@ namespace DSLink.Test
         {
             var keyPair = new KeyPair();
             keyPair.Generate();
-            
+
             Assert.NotNull(keyPair.EncodedPublicKey);
             Assert.NotNull(keyPair.Save());
         }
@@ -57,7 +58,7 @@ namespace DSLink.Test
         {
             var keyPair = new KeyPair();
             keyPair.LoadFrom(KnownSavedKeyPair);
-            
+
             Assert.AreEqual(KnownSavedKeyPair, keyPair.Save());
         }
     }

@@ -18,16 +18,12 @@ namespace DSLink.Respond
         /// <summary>
         /// Request identifier for request.
         /// </summary>
-        public int RequestID
-        {
-            get;
-            protected set;
-        }
+        private readonly int _requestId;
 
-        public Response(DSLinkContainer link, int requestID)
+        protected Response(DSLinkContainer link, int requestId)
         {
             _link = link;
-            RequestID = requestID;
+            _requestId = requestId;
         }
 
         /// <summary>
@@ -39,14 +35,15 @@ namespace DSLink.Respond
             {
                 throw new NullReferenceException("Link is null, cannot close stream.");
             }
-            _link.Requester.RequestManager.StopRequest(RequestID);
+
+            _link.Requester.RequestManager.StopRequest(_requestId);
             await _link.Connector.Write(new JObject
             {
                 new JProperty("responses", new JObject
                 {
                     new JObject
                     {
-                        new JProperty("rid", RequestID),
+                        new JProperty("rid", _requestId),
                         new JProperty("stream", "closed")
                     }
                 })
@@ -59,24 +56,16 @@ namespace DSLink.Respond
         /// <summary>
         /// Path of the list request.
         /// </summary>
-        public string Path
-        {
-            get;
-            protected set;
-        }
+        public readonly string Path;
 
         /// <summary>
         /// Node of the list request.
         /// </summary>
-        public Node Node
-        {
-            get;
-            protected set;
-        }
+        public readonly Node Node;
 
-        public ListResponse(DSLinkContainer link, int requestID,
-                            string path, Node node)
-            : base(link, requestID)
+        public ListResponse(DSLinkContainer link, int requestId,
+            string path, Node node)
+            : base(link, requestId)
         {
             Path = path;
             Node = node;
@@ -88,42 +77,27 @@ namespace DSLink.Respond
         /// <summary>
         /// Path of the Node.
         /// </summary>
-        public string Path
-        {
-            get;
-        }
+        public readonly string Path;
 
         /// <summary>
         /// Columns from Response.
         /// </summary>
-        public JArray Columns
-        {
-            get;
-        }
+        public readonly JArray Columns;
 
         /// <summary>
         /// Updates from Response.
         /// </summary>
-        public JArray Updates
-        {
-            get;
-        }
+        public readonly JArray Updates;
 
         /// <summary>
         /// Metadata from the Response.
         /// </summary>
-        public JObject Meta
-        {
-            get;
-        }
+        public readonly JObject Meta;
 
         /// <summary>
         /// Error from the Response.
         /// </summary>
-        public JObject Error
-        {
-            get;
-        }
+        public readonly JObject Error;
 
         /// <summary>
         /// True when Columns is neither true or 0.
@@ -135,10 +109,10 @@ namespace DSLink.Respond
         /// </summary>
         public bool HasUpdates => Updates.Count > 0;
 
-        public InvokeResponse(DSLinkContainer link, int requestID,
-                              string path, JArray columns,
-                              JArray updates, JObject meta, JObject error)
-            : base(link, requestID)
+        public InvokeResponse(DSLinkContainer link, int requestId,
+            string path, JArray columns,
+            JArray updates, JObject meta, JObject error)
+            : base(link, requestId)
         {
             Path = path;
             Columns = columns;

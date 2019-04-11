@@ -22,7 +22,7 @@ namespace DSLink.Connection
             {
                 if (_serializer == null && _config != null)
                 {
-                    _serializer = (BaseSerializer)Activator.CreateInstance(
+                    _serializer = (BaseSerializer) Activator.CreateInstance(
                         Serializers.Types[_config.CommunicationFormatUsed]
                     );
                 }
@@ -31,11 +31,7 @@ namespace DSLink.Connection
             }
         }
 
-        public ConnectionState ConnectionState
-        {
-            private set;
-            get;
-        }
+        public ConnectionState ConnectionState { private set; get; }
 
         /// <summary>
         /// Queue object for queueing up data when the WebSocket is either closed
@@ -212,7 +208,7 @@ namespace DSLink.Connection
                     {
                         _queue = new JObject
                         {
-                            new JProperty("msg", _msgId.Next),
+                            new JProperty("msg", _msgId.CurrentAndIncrement),
                             new JProperty("responses", new JArray()),
                             new JProperty("requests", new JArray())
                         };
@@ -222,7 +218,7 @@ namespace DSLink.Connection
                     {
                         foreach (var resp in data["responses"].Value<JArray>())
                         {
-                            ((JArray)_queue["responses"]).Add(resp);
+                            ((JArray) _queue["responses"]).Add(resp);
                         }
                     }
 
@@ -230,7 +226,7 @@ namespace DSLink.Connection
                     {
                         foreach (var req in data["requests"].Value<JArray>())
                         {
-                            ((JArray)_queue["requests"]).Add(req);
+                            ((JArray) _queue["requests"]).Add(req);
                         }
                     }
 
@@ -245,6 +241,7 @@ namespace DSLink.Connection
                         _hasQueueEvent = true;
                     }
                 }
+
                 if (_hasQueueEvent)
                 {
                     await TriggerQueueFlush();
@@ -253,7 +250,7 @@ namespace DSLink.Connection
 
             if (data["msg"] == null)
             {
-                data["msg"] = _msgId.Next;
+                data["msg"] = _msgId.CurrentAndIncrement;
             }
 
             if (data["requests"] != null && data["requests"].Value<JArray>().Count == 0)
@@ -268,11 +265,11 @@ namespace DSLink.Connection
 
             try
             {
-                await WriteData(DataSerializer.Serialize(data));                
+                await WriteData(DataSerializer.Serialize(data));
             }
             catch (Exception e)
             {
-                Logger.Error(e, "Failed to send message, reconnecting.");                
+                Logger.Error(e, "Failed to send message, reconnecting.");
                 await Disconnect();
             }
         }
@@ -302,12 +299,12 @@ namespace DSLink.Connection
                 var response = new JObject
                 {
                     {"rid", 0},
-                    {"updates", new JArray { update }}
+                    {"updates", new JArray {update}}
                 };
 
                 await Write(new JObject
                 {
-                    {"responses", new JArray { response }}
+                    {"responses", new JArray {response}}
                 });
             }
         }
@@ -379,6 +376,7 @@ namespace DSLink.Connection
             {
                 return;
             }
+
             Logger.Debug("Flushing connection message queue");
             JObject _queueToFlush = null;
             lock (_queueLock)
@@ -418,6 +416,7 @@ namespace DSLink.Connection
                     _subscriptionValueQueue = new JArray();
                 }
             }
+
             if (_queueToFlush != null)
             {
                 await Write(_queueToFlush, false);

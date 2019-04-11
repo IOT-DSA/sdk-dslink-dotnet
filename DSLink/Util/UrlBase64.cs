@@ -2,7 +2,7 @@ using System;
 
 namespace DSLink.Util
 {
-    class UrlBase64
+    internal static class UrlBase64
     {
         public static string Encode(byte[] data)
         {
@@ -11,7 +11,8 @@ namespace DSLink.Util
 
         public static byte[] Decode(string data)
         {
-            return Convert.FromBase64String(data.Replace('-', '+').Replace('_', '/').PadRight(data.Length + (4 - data.Length % 4) % 4, '='));
+            return Convert.FromBase64String(data.Replace('-', '+').Replace('_', '/')
+                .PadRight(data.Length + (4 - data.Length % 4) % 4, '='));
         }
     }
 }

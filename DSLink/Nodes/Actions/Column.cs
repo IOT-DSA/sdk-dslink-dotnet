@@ -12,14 +12,8 @@ namespace DSLink.Nodes.Actions
         /// </summary>
         public string Name
         {
-            get
-            {
-                return this["name"].Value<string>();
-            }
-            set
-            {
-                this["name"] = value;
-            }
+            get { return this["name"].Value<string>(); }
+            set { this["name"] = value; }
         }
 
         /// <summary>
@@ -27,18 +21,13 @@ namespace DSLink.Nodes.Actions
         /// </summary>
         public ValueType ValueType
         {
-            get
-            {
-                return ValueType.FromString(this["type"].Value<string>());
-            }
-            set
-            {
-                this["type"] = value.Type;
-            }
+            get { return ValueType.FromString(this["type"].Value<string>()); }
+            set { this["type"] = value.Type; }
         }
 
         public Column()
-        {}
+        {
+        }
 
         public Column(string name, ValueType type)
         {

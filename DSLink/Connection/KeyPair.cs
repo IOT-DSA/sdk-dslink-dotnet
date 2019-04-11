@@ -17,22 +17,22 @@ namespace DSLink.Connection
         /// <summary>
         /// Key size.
         /// </summary>
-        public const int KeySize = 256;
+        private const int KeySize = 256;
 
         /// <summary>
         /// Curve type, prime256v1.
         /// </summary>
-        public const string Curve = "SECP256R1";
+        private const string Curve = "SECP256R1";
 
         /// <summary>
         /// BouncyCastle KeyPair.
         /// </summary>
-        public AsymmetricCipherKeyPair BcKeyPair;
+        private AsymmetricCipherKeyPair _bcKeyPair;
 
         /// <summary>
         /// Gets the encoded public key.
         /// </summary>
-        public byte[] EncodedPublicKey => ((ECPublicKeyParameters) BcKeyPair.Public).Q.GetEncoded();
+        public byte[] EncodedPublicKey => ((ECPublicKeyParameters) _bcKeyPair.Public).Q.GetEncoded();
 
         /// <summary>
         /// Generate a new BouncyCastle KeyPair.
@@ -43,7 +43,7 @@ namespace DSLink.Connection
             var secureRandom = new SecureRandom();
             var keyGenParams = new KeyGenerationParameters(secureRandom, KeySize);
             generator.Init(keyGenParams);
-            BcKeyPair = generator.GenerateKeyPair();
+            _bcKeyPair = generator.GenerateKeyPair();
         }
 
         /// <summary>
@@ -65,9 +65,9 @@ namespace DSLink.Connection
             var pubParams = new ECPublicKeyParameters(point, ecp);
 
             var d = new BigInteger(Convert.FromBase64String(split[0]));
-            var privParams = new ECPrivateKeyParameters(d, ecp);
+            var privateKeyParameters = new ECPrivateKeyParameters(d, ecp);
 
-            BcKeyPair = new AsymmetricCipherKeyPair(pubParams, privParams);
+            _bcKeyPair = new AsymmetricCipherKeyPair(pubParams, privateKeyParameters);
         }
 
         /// <summary>
@@ -76,8 +76,8 @@ namespace DSLink.Connection
         /// </summary>
         public string Save()
         {
-            var privateBytes = ((ECPrivateKeyParameters) BcKeyPair.Private).D.ToByteArray();
-            var publicBytes = ((ECPublicKeyParameters)BcKeyPair.Public).Q.GetEncoded();
+            var privateBytes = ((ECPrivateKeyParameters) _bcKeyPair.Private).D.ToByteArray();
+            var publicBytes = ((ECPublicKeyParameters) _bcKeyPair.Public).Q.GetEncoded();
             return Convert.ToBase64String(privateBytes) + " " + Convert.ToBase64String(publicBytes);
         }
 
@@ -89,7 +89,7 @@ namespace DSLink.Connection
         public byte[] GenerateSharedSecret(string tempKey)
         {
             var decoded = UrlBase64.Decode(tempKey);
-            var privateKey = ((ECPrivateKeyParameters) BcKeyPair.Private);
+            var privateKey = ((ECPrivateKeyParameters) _bcKeyPair.Private);
             var param = privateKey.Parameters;
             var point = param.Curve.DecodePoint(decoded);
             var spec = new ECPublicKeyParameters(point, param);
@@ -130,6 +130,7 @@ namespace DSLink.Connection
                 Array.Copy(data, data.Length - 32, normal, 0, normal.Length);
                 data = normal;
             }
+
             return data;
         }
     }

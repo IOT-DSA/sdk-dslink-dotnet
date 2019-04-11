@@ -24,20 +24,21 @@ namespace DSLink.Respond
         {
             var nodesFileName = _responder.Link.Config.NodesFilename;
 
-            var vfs = _responder.Link.Config.VFS;
+            var vfs = _responder.Link.Config.Vfs;
             await vfs.CreateAsync(nodesFileName, true);
-            
+
             using (var stream = await vfs.WriteAsync(nodesFileName))
             {
                 // Finally serialize the object after opening the file.
-                JObject obj = _responder.SuperRoot.Serialize();
+                var obj = _responder.SuperRoot.Serialize();
                 var data = obj.ToString();
 
                 using (var streamWriter = new StreamWriter(stream))
                 {
                     await streamWriter.WriteAsync(data).ConfigureAwait(false);
                 }
-                if (Logger.IsDebugEnabled())  
+
+                if (Logger.IsDebugEnabled())
                 {
                     Logger.Debug($"Wrote {data} to " + nodesFileName);
                 }
@@ -53,8 +54,9 @@ namespace DSLink.Respond
         {
             var nodesFileName = _responder.Link.Config.NodesFilename;
 
-            try {
-                var vfs = _responder.Link.Config.VFS;
+            try
+            {
+                var vfs = _responder.Link.Config.Vfs;
                 using (var stream = await vfs.ReadAsync(nodesFileName))
                 {
                     using (var streamReader = new StreamReader(stream))

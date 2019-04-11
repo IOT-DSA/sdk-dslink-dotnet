@@ -9,6 +9,7 @@ namespace DSLink.Respond
     public class SubscriptionManager
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+
         private readonly Dictionary<int, Node> _subscriptionToNode;
         private readonly DSLinkContainer _link;
 
@@ -34,6 +35,7 @@ namespace DSLink.Respond
                 {
                     _subscriptionToNode[sid]._subscribers.Remove(sid);
                 }
+
                 _subscriptionToNode[sid].OnUnsubscribed?.Invoke(sid);
                 _subscriptionToNode.Remove(sid);
             }
@@ -65,6 +67,7 @@ namespace DSLink.Respond
                         });
                     }
                 }
+
                 await _link.Connector.Write(new JObject
                 {
                     new JProperty("responses", responses)
@@ -90,6 +93,7 @@ namespace DSLink.Respond
                     {
                         value[config.Key] = config.Value.JToken;
                     }
+
                     foreach (var attr in child.Value.Attributes)
                     {
                         value[attr.Key] = attr.Value.JToken;
@@ -119,6 +123,7 @@ namespace DSLink.Respond
                         new JProperty("change", "remove")
                     });
                 }
+
                 node.ClearRemovedChildren();
             }
 

@@ -15,19 +15,15 @@ namespace DSLink.Request
         /// <summary>
         /// Request identifier for the request.
         /// </summary>
-        public int RequestID
-        {
-            get;
-            private set;
-        }
+        public readonly int RequestId;
 
-        protected BaseRequest(int requestID)
+        protected BaseRequest(int requestId)
         {
-            RequestID = requestID;
+            RequestId = requestId;
         }
 
         /// <summary>
-        /// Request method.
+        /// Method of the request.
         /// </summary>
         public virtual string Method => "";
 
@@ -38,7 +34,7 @@ namespace DSLink.Request
         {
             return new JObject
             {
-                new JProperty("rid", RequestID),
+                new JProperty("rid", RequestId),
                 new JProperty("method", Method)
             };
         }
@@ -59,7 +55,7 @@ namespace DSLink.Request
         /// </summary>
         public readonly string Path;
 
-        public ListRequest(int requestID, Action<ListResponse> callback, string path) : base(requestID)
+        public ListRequest(int requestId, Action<ListResponse> callback, string path) : base(requestId)
         {
             Callback = callback;
             Path = path;
@@ -101,16 +97,14 @@ namespace DSLink.Request
         /// </summary>
         public readonly Value Value;
 
-        public SetRequest(int requestID, string path, Permission permission, Value value) : base(requestID)
+        public SetRequest(int requestId, string path, Permission permission, Value value) : base(requestId)
         {
             Path = path;
             Permission = permission;
             Value = value;
         }
 
-        /// <summary>
-        /// Method of this request.
-        /// </summary>
+        /// <inheritdoc />
         public override string Method => "set";
 
         /// <summary>
@@ -134,19 +128,14 @@ namespace DSLink.Request
         /// <summary>
         /// Path of the request.
         /// </summary>
-        public string Path
-        {
-            get;
-        }
+        public readonly string Path;
 
-        public RemoveRequest(int requestID, string path) : base(requestID)
+        public RemoveRequest(int requestId, string path) : base(requestId)
         {
             Path = path;
         }
 
-        /// <summary>
-        /// Method of the request.
-        /// </summary>
+        /// <inheritdoc />
         public override string Method => "remove";
 
         /// <summary>
@@ -205,9 +194,9 @@ namespace DSLink.Request
         /// </summary>
         public Table.Mode Mode;
 
-        public InvokeRequest(int requestID, string path, Permission permission, JObject parameters,
-                             Action<InvokeResponse> callback = null, DSLinkContainer link = null,
-                             JArray columns = null) : base(requestID)
+        public InvokeRequest(int requestId, string path, Permission permission, JObject parameters,
+            Action<InvokeResponse> callback = null, DSLinkContainer link = null,
+            JArray columns = null) : base(requestId)
         {
             Path = path;
             Permission = permission;
@@ -217,9 +206,7 @@ namespace DSLink.Request
             _columns = columns;
         }
 
-        /// <summary>
-        /// Method of the request.
-        /// </summary>
+        /// <inheritdoc />
         public override string Method => "invoke";
 
         /// <summary>
@@ -233,6 +220,7 @@ namespace DSLink.Request
             {
                 baseSerialized["permit"] = Permission.ToString();
             }
+
             baseSerialized["params"] = Parameters;
             return baseSerialized;
         }
@@ -245,15 +233,16 @@ namespace DSLink.Request
         {
             if (_link == null || _columns == null)
             {
-                throw new NotSupportedException("Link and columns are null, cannot send updates");
+                throw new NotSupportedException("Link or columns are null, cannot send updates");
             }
+
             var updateRootObject = new JObject
             {
                 new JProperty("responses", new JArray
                 {
                     new JObject
                     {
-                        new JProperty("rid", RequestID),
+                        new JProperty("rid", RequestId),
                         new JProperty("stream", "open"),
                         new JProperty("updates", new JArray(table))
                     }
@@ -272,6 +261,7 @@ namespace DSLink.Request
 
                 updateRootObject["responses"].First["columns"] = _columns;
             }
+
             await _link.Connector.Write(updateRootObject);
         }
 
@@ -284,13 +274,14 @@ namespace DSLink.Request
             {
                 throw new NotSupportedException("Link is null, cannot send updates");
             }
+
             await _link.Connector.Write(new JObject
             {
                 new JProperty("responses", new JArray
                 {
                     new JObject
                     {
-                        new JProperty("rid", RequestID),
+                        new JProperty("rid", RequestId),
                         new JProperty("stream", "closed")
                     }
                 })
@@ -313,15 +304,13 @@ namespace DSLink.Request
         /// </summary>
         public readonly Action<SubscriptionUpdate> Callback;
 
-        public SubscribeRequest(int requestID, JArray paths, Action<SubscriptionUpdate> callback) : base(requestID)
+        public SubscribeRequest(int requestId, JArray paths, Action<SubscriptionUpdate> callback) : base(requestId)
         {
             Paths = paths;
             Callback = callback;
         }
 
-        /// <summary>
-        /// Method of this request.
-        /// </summary>
+        /// <inheritdoc />
         public override string Method => "subscribe";
 
         /// <summary>
@@ -345,14 +334,12 @@ namespace DSLink.Request
         /// </summary>
         public readonly JArray Sids;
 
-        public UnsubscribeRequest(int requestID, JArray sids) : base(requestID)
+        public UnsubscribeRequest(int requestId, JArray sids) : base(requestId)
         {
             Sids = sids;
         }
 
-        /// <summary>
-        /// Method of this request.
-        /// </summary>
+        /// <inheritdoc />
         public override string Method => "unsubscribe";
 
         /// <summary>

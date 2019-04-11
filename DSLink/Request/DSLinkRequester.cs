@@ -20,17 +20,9 @@ namespace DSLink.Request
         private readonly DSLinkContainer _link;
         internal readonly IncrementingIndex _requestId;
 
-        public RequestManager RequestManager
-        {
-            get;
-            private set;
-        }
+        public RequestManager RequestManager { get; private set; }
 
-        public RemoteSubscriptionManager RemoteSubscriptionManager
-        {
-            get;
-            private set;
-        }
+        public RemoteSubscriptionManager RemoteSubscriptionManager { get; private set; }
 
         public DSLinkRequester(DSLinkContainer link)
         {
@@ -51,7 +43,7 @@ namespace DSLink.Request
         /// <param name="callback">Callback event</param>
         public async Task<ListRequest> List(string path, Action<ListResponse> callback)
         {
-            var request = new ListRequest(_requestId.Next, callback, path);
+            var request = new ListRequest(_requestId.CurrentAndIncrement, callback, path);
             RequestManager.StartRequest(request);
             await _link.Connector.Write(new JObject
             {
@@ -71,7 +63,7 @@ namespace DSLink.Request
         /// <param name="value">Value</param>
         public async Task<SetRequest> Set(string path, Permission permission, Value value)
         {
-            var request = new SetRequest(_requestId.Next, path, permission, value);
+            var request = new SetRequest(_requestId.CurrentAndIncrement, path, permission, value);
             RequestManager.StartRequest(request);
             await _link.Connector.Write(new JObject
             {
@@ -89,7 +81,7 @@ namespace DSLink.Request
         /// <param name="path">Path</param>
         public async Task<RemoveRequest> Remove(string path)
         {
-            var request = new RemoveRequest(_requestId.Next, path);
+            var request = new RemoveRequest(_requestId.CurrentAndIncrement, path);
             RequestManager.StartRequest(request);
             await _link.Connector.Write(new JObject
             {
@@ -108,9 +100,10 @@ namespace DSLink.Request
         /// <param name="permission">Permission</param>
         /// <param name="parameters">Parameters</param>
         /// <param name="callback">Callback</param>
-        public async Task<InvokeRequest> Invoke(string path, Permission permission, JObject parameters, Action<InvokeResponse> callback)
+        public async Task<InvokeRequest> Invoke(string path, Permission permission, JObject parameters,
+            Action<InvokeResponse> callback)
         {
-            var request = new InvokeRequest(_requestId.Next, path, permission, parameters, callback);
+            var request = new InvokeRequest(_requestId.CurrentAndIncrement, path, permission, parameters, callback);
             RequestManager.StartRequest(request);
             await _link.Connector.Write(new JObject
             {
@@ -150,7 +143,7 @@ namespace DSLink.Request
         }
 
         internal async Task ProcessResponses(JArray responses)
-        {            
+        {
             foreach (JObject response in responses)
             {
                 await ProcessResponse(response);
@@ -235,13 +228,14 @@ namespace DSLink.Request
                 sum = maxToken.Value<double>();
             }
 
-            RemoteSubscriptionManager.InvokeSubscriptionUpdate(sid, new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
+            RemoteSubscriptionManager.InvokeSubscriptionUpdate(sid,
+                new SubscriptionUpdate(sid, value, ts, count, sum, min, max));
         }
 
         private async Task ProcessRequestUpdates(JObject response, int rid)
         {
             var request = RequestManager.GetRequest(rid);
-            
+
             switch (request)
             {
                 case ListRequest _:
@@ -260,14 +254,19 @@ namespace DSLink.Request
                 case InvokeRequest _:
                     var invokeRequest = (InvokeRequest) request;
                     var path = invokeRequest.Path;
-                    var columns = response.GetValue("columns") != null ? response["columns"].Value<JArray>() : new JArray();
-                    var updates = response.GetValue("updates") != null ? response["updates"].Value<JArray>() : new JArray();
+                    var columns = response.GetValue("columns") != null
+                        ? response["columns"].Value<JArray>()
+                        : new JArray();
+                    var updates = response.GetValue("updates") != null
+                        ? response["updates"].Value<JArray>()
+                        : new JArray();
                     var meta = response.GetValue("meta") != null ? response["meta"].Value<JObject>() : new JObject();
                     var error = response.GetValue("error") != null ? response["error"].Value<JObject>() : new JObject();
 
                     await Task.Run(() =>
                     {
-                        invokeRequest?.Callback(new InvokeResponse(_link, rid, path, columns, updates, meta, error));
+                        invokeRequest?.Callback(new InvokeResponse(_link, rid, path, columns, updates, meta,
+                            error));
                     });
                     break;
             }

@@ -1,4 +1,4 @@
-﻿namespace DSLink
+﻿namespace DSLink.Connection
 {
     public enum ConnectionState
     {

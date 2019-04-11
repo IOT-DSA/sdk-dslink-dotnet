@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DSLink;
-
-/* 
- * This class represents the full set of DSLink Command Line Options
- */
-
-namespace DSLink
+﻿namespace DSLink
 {
+    /// <summary>
+    /// This class represents the full set of DSLink command line options.
+    /// </summary>
     public class DSLinkOptions
     {
         public DSLinkOptions(string LinkName)
         {
         }
-      
+
         public string BrokerUrl { get; set; }
         public string BrokerToken { get; set; }
         public string LinkName { get; set; }

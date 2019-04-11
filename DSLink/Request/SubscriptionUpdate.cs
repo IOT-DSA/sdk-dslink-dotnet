@@ -6,7 +6,7 @@ namespace DSLink.Request
 {
     public class SubscriptionUpdate
     {
-        public readonly int SubscriptionID;
+        public readonly int SubscriptionId;
         public readonly JToken Value;
         public readonly DateTime Updated;
         public readonly string Status;
@@ -15,23 +15,24 @@ namespace DSLink.Request
         public readonly double? Min;
         public readonly double? Max;
 
-        public SubscriptionUpdate(int subID, JToken value, string updated)
+        public SubscriptionUpdate(int subId, JToken value, string updated)
         {
-            SubscriptionID = subID;
+            SubscriptionId = subId;
             Value = value;
             Updated = DateTime.Parse(updated, null, DateTimeStyles.RoundtripKind);
         }
 
-        public SubscriptionUpdate(int subID, string status, string updated)
+        public SubscriptionUpdate(int subId, string status, string updated)
         {
-            SubscriptionID = subID;
+            SubscriptionId = subId;
             Status = status;
             Updated = DateTime.Parse(updated, null, DateTimeStyles.RoundtripKind);
         }
 
-        public SubscriptionUpdate(int subID, JToken value, string updated, int count, double sum, double min, double max)
+        public SubscriptionUpdate(int subId, JToken value, string updated, int count, double sum, double min,
+            double max)
         {
-            SubscriptionID = subID;
+            SubscriptionId = subId;
             Value = value;
             Updated = DateTime.Parse(updated, null, DateTimeStyles.RoundtripKind);
             Count = count;
@@ -41,4 +42,3 @@ namespace DSLink.Request
         }
     }
 }
-

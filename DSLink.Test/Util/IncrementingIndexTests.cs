@@ -12,11 +12,11 @@ namespace DSLink.Test.Util
             var inc = new IncrementingIndex();
 
             Assert.AreEqual(0, inc.Current);
-            var i = inc.Next;
+            var i = inc.CurrentAndIncrement;
             Assert.AreEqual(1, inc.Current);
-            i = inc.Next;
+            i = inc.CurrentAndIncrement;
             Assert.AreEqual(2, inc.Current);
-            i = inc.Next;
+            i = inc.CurrentAndIncrement;
             Assert.AreEqual(3, inc.Current);
         }
 
@@ -26,11 +26,11 @@ namespace DSLink.Test.Util
             var inc = new IncrementingIndex(1);
 
             Assert.AreEqual(1, inc.Current);
-            var i = inc.Next;
+            var i = inc.CurrentAndIncrement;
             Assert.AreEqual(2, inc.Current);
-            i = inc.Next;
+            i = inc.CurrentAndIncrement;
             Assert.AreEqual(3, inc.Current);
-            i = inc.Next;
+            i = inc.CurrentAndIncrement;
             Assert.AreEqual(4, inc.Current);
         }
     }

@@ -15,7 +15,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Dictionary mapping strings to permissions.
         /// </summary>
-        internal static Dictionary<string, Permission> PermissionMap = new Dictionary<string, Permission>
+        internal static readonly Dictionary<string, Permission> PermissionMap = new Dictionary<string, Permission>
         {
             {"never", Never},
             {"read", Read},
@@ -39,21 +39,6 @@ namespace DSLink.Nodes
         public override string ToString()
         {
             return Permit;
-        }
-
-        /// <summary>
-        /// Convert from string to permission.
-        /// </summary>
-        /// <param name="permit">Permission string</param>
-        /// <returns>Permission from specific string</returns>
-        internal static Permission FromString(string permit)
-        {
-            if (string.IsNullOrEmpty(permit))
-            {
-                return null;
-            }
-            permit = permit.ToLower();
-            return PermissionMap.ContainsKey(permit) ? PermissionMap[permit] : null;
         }
     }
 }

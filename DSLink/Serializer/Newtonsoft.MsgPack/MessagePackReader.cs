@@ -29,6 +29,7 @@
     of the authors and should not be interpreted as representing official policies, 
     either expressed or implied, of the FreeBSD Project.
 */
+
 using System;
 using System.IO;
 using MsgPack;
@@ -50,10 +51,7 @@ namespace Newtonsoft.Msgpack
 
         private Unpacker Unpacker
         {
-            get
-            {
-                return mState.Unpacker;
-            }
+            get { return mState.Unpacker; }
         }
 
         public override bool Read()
@@ -178,17 +176,17 @@ namespace Newtonsoft.Msgpack
                     mReader.SetToken(JsonToken.String, lastReadData.AsString());
                 }
                 else if (lastReadData.UnderlyingType == typeof(double) ||
-                    lastReadData.UnderlyingType == typeof(float))
+                         lastReadData.UnderlyingType == typeof(float))
                 {
                     mReader.SetToken(JsonToken.Float, lastReadData.ToObject());
                 }
                 else if (lastReadData.IsTypeOf<sbyte>() == true ||
-                    lastReadData.IsTypeOf<short>() == true ||
-                    lastReadData.IsTypeOf<ushort>() == true ||
-                    lastReadData.IsTypeOf<int>() == true ||
-                    lastReadData.IsTypeOf<uint>() == true ||
-                    lastReadData.IsTypeOf<long>() == true ||
-                    lastReadData.IsTypeOf<ulong>() == true)
+                         lastReadData.IsTypeOf<short>() == true ||
+                         lastReadData.IsTypeOf<ushort>() == true ||
+                         lastReadData.IsTypeOf<int>() == true ||
+                         lastReadData.IsTypeOf<uint>() == true ||
+                         lastReadData.IsTypeOf<long>() == true ||
+                         lastReadData.IsTypeOf<ulong>() == true)
                 {
                     mReader.SetToken(JsonToken.Integer, lastReadData.ToObject());
                 }
@@ -274,7 +272,7 @@ namespace Newtonsoft.Msgpack
                     {
                         result =
                             SerializationContext.Default.GetSerializer<decimal?>()
-                                                .UnpackFrom(mUnpacker);
+                                .UnpackFrom(mUnpacker);
 
                         hasResult = true;
                     }

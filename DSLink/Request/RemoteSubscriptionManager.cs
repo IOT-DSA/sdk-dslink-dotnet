@@ -15,7 +15,7 @@ namespace DSLink.Request
         private readonly Dictionary<int, string> _subIdToPath;
         private readonly Dictionary<int, string> _realSubIdToPath;
         private readonly IncrementingIndex _subscriptionId;
-        
+
         public RemoteSubscriptionManager(DSLinkContainer link)
         {
             _link = link;
@@ -27,8 +27,8 @@ namespace DSLink.Request
 
         public async Task<int> Subscribe(string path, Action<SubscriptionUpdate> callback, int qos)
         {
-            var sid = _subscriptionId.Next;
-            var request = new SubscribeRequest(_link.Requester._requestId.Next, new JArray
+            var sid = _subscriptionId.CurrentAndIncrement;
+            var request = new SubscribeRequest(_link.Requester._requestId.CurrentAndIncrement, new JArray
             {
                 new JObject
                 {
@@ -49,6 +49,7 @@ namespace DSLink.Request
                 });
                 _realSubIdToPath[sid] = path;
             }
+
             _subscriptions[path].VirtualSubs[sid] = callback;
             _subIdToPath[sid] = path;
 
@@ -68,7 +69,7 @@ namespace DSLink.Request
                     new JProperty("requests", new JArray
                     {
                         new UnsubscribeRequest(
-                            _link.Requester._requestId.Next,
+                            _link.Requester._requestId.CurrentAndIncrement,
                             new JArray
                             {
                                 sub.RealSubID
@@ -104,6 +105,7 @@ namespace DSLink.Request
                 Logger.Debug(string.Format("Remote sid {0} was not found in subscription manager", subId));
                 return;
             }
+
             foreach (var i in _subscriptions[_realSubIdToPath[subId]].VirtualSubs)
             {
                 i.Value(update);
@@ -118,7 +120,9 @@ namespace DSLink.Request
             }
 
             public readonly int RealSubID;
-            public readonly Dictionary<int, Action<SubscriptionUpdate>> VirtualSubs = new Dictionary<int, Action<SubscriptionUpdate>>();
+
+            public readonly Dictionary<int, Action<SubscriptionUpdate>> VirtualSubs =
+                new Dictionary<int, Action<SubscriptionUpdate>>();
         }
     }
 }

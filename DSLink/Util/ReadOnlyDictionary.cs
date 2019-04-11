@@ -7,11 +7,6 @@ namespace DSLink.Util
     {
         private readonly IDictionary<TKey, TValue> _dictionary;
 
-        public ReadOnlyDictionary()
-        {
-            _dictionary = new Dictionary<TKey, TValue>();
-        }
-
         public ReadOnlyDictionary(IDictionary<TKey, TValue> dictionary)
         {
             _dictionary = dictionary;
@@ -27,10 +22,7 @@ namespace DSLink.Util
             return _dictionary.ContainsKey(key);
         }
 
-        public ICollection<TKey> Keys
-        {
-            get { return _dictionary.Keys; }
-        }
+        public ICollection<TKey> Keys => _dictionary.Keys;
 
         bool IDictionary<TKey, TValue>.Remove(TKey key)
         {
@@ -45,14 +37,8 @@ namespace DSLink.Util
 
         TValue IDictionary<TKey, TValue>.this[TKey key]
         {
-            get
-            {
-                return this[key];
-            }
-            set
-            {
-                throw new ReadOnlyException();
-            }
+            get => this[key];
+            set => throw new ReadOnlyException();
         }
 
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)

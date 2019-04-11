@@ -8,7 +8,7 @@ namespace DSLink.Nodes
     /// <summary>
     /// Represents a Value.
     /// </summary>
-    public class Value:ISerializable
+    public class Value : ISerializable
     {
         /// <summary>
         /// Represents the value that this class is containing.
@@ -33,14 +33,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Gets last updated time in the ISO 8601 format that DSA uses.
         /// </summary>
-        public string LastUpdated
-        {
-            get
-            {
-                if (!_lastUpdated.HasValue) return null;
-                return _lastUpdated.Value.ToIso8601();
-            }
-        }
+        public string LastUpdated => _lastUpdated?.ToIso8601();
 
         public Value()
         {
@@ -101,9 +94,11 @@ namespace DSLink.Nodes
                 {
                     return;
                 }
+
                 _val = val;
                 _lastUpdated = ts;
             }
+
             SetValue();
         }
 
@@ -169,7 +164,13 @@ namespace DSLink.Nodes
 
         public void Set(DateTime val, bool force = false, DateTime? ts = null)
         {
-            _val = val.ToIso8601();
+            var newValue = val.ToIso8601();
+            if (!force && _val != null && _val.Value<string>() == newValue)
+            {
+                return;
+            }
+
+            _val = newValue;
             _lastUpdated = ts;
             SetValue();
         }
@@ -210,7 +211,10 @@ namespace DSLink.Nodes
         private void SetValue()
         {
             if (!_lastUpdated.HasValue)
+            {
                 _lastUpdated = DateTime.Now;
+            }
+
             OnSet?.Invoke(this);
         }
 

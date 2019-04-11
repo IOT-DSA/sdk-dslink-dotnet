@@ -28,7 +28,7 @@ namespace DSLink.Nodes.Actions
             public static readonly Mode Stream = new Mode("stream");
 
             public readonly string String;
-            
+
             public Mode(string modeString)
             {
                 String = modeString;

@@ -5,12 +5,13 @@ using JSONSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace DSLink.Serializer
 {
+    /// <inheritdoc />
     /// <summary>
     /// Custom serializer extension for JSON, which serializes binary data to
     /// a standard put forth by DSA.
-    /// <see cref="JsonSerializer"/> 
+    /// <see cref="T:DSLink.Serializer.JsonSerializer" /> 
     /// </summary>
-	public class JsonByteArrayConverter : JsonConverter
+    public class JsonByteArrayConverter : JsonConverter
     {
         public override bool CanRead => true;
 
@@ -24,26 +25,29 @@ namespace DSLink.Serializer
             var type = value.GetType();
             if (type == typeof(byte[]))
             {
-                writer.WriteValue("\x1B" + "bytes:" + UrlBase64.Encode((byte[])value));
+                writer.WriteValue("\x1B" + "bytes:" + UrlBase64.Encode((byte[]) value));
             }
             else if (type == typeof(string))
             {
-                writer.WriteValue((string)value);
+                writer.WriteValue((string) value);
             }
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JSONSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+            JSONSerializer serializer)
         {
-            if (reader.TokenType == JsonToken.String)
+            if (reader.TokenType != JsonToken.String)
             {
-                string val = (string)reader.Value;
-                if (val.StartsWith("\x1B" + "bytes:") || val.StartsWith("\\u001bbytes:"))
-                {
-                    return UrlBase64.Decode(val.Substring(val.IndexOf(":", StringComparison.Ordinal) + 1));
-                }
-                return val;
+                return null;
             }
-            return null;
+
+            var val = (string) reader.Value;
+            if (val.StartsWith("\x1B" + "bytes:") || val.StartsWith("\\u001bbytes:"))
+            {
+                return UrlBase64.Decode(val.Substring(val.IndexOf(":", StringComparison.Ordinal) + 1));
+            }
+
+            return val;
         }
     }
 }

@@ -37,6 +37,7 @@ namespace DSLink
                 _responder = new DSLinkResponder(this);
                 _responder.Init();
             }
+
             if (Config.Requester)
             {
                 _requester = new DSLinkRequester(this);
@@ -54,6 +55,7 @@ namespace DSLink
             {
                 return;
             }
+
             _isLinkInitialized = true;
 
             await _config._initKeyPair();
@@ -68,6 +70,7 @@ namespace DSLink
                 {
                     initDefault = !(await LoadSavedNodes());
                 }
+
                 if (initDefault)
                 {
                     InitializeDefaultNodes();
@@ -80,7 +83,8 @@ namespace DSLink
         /// exist yet or failed to load.
         /// </summary>
         public virtual void InitializeDefaultNodes()
-        {}
+        {
+        }
 
         public async Task<ConnectionState> Connect(uint maxAttempts = 0)
         {
@@ -104,6 +108,7 @@ namespace DSLink
                 {
                     delay = Config.MaxConnectionCooldown;
                 }
+
                 Logger.Warn($"Failed to connect, delaying for {delay} seconds");
                 await Task.Delay(TimeSpan.FromSeconds(delay));
 
@@ -111,15 +116,17 @@ namespace DSLink
                 {
                     attemptsLeft--;
                 }
+
                 attempts++;
             }
+
             Logger.Warn("Failed to connect within the allotted connection attempt limit.");
             OnConnectionFailed();
             return ConnectionState.Disconnected;
         }
 
         public void Disconnect()
-        {            
+        {
             _reconnectOnFailure = false;
             Connector.Disconnect();
         }
@@ -130,7 +137,7 @@ namespace DSLink
             {
                 throw new DSAException(this, "Responder is not enabled.");
             }
-            
+
             return await Responder.DiskSerializer.DeserializeFromDisk();
         }
 
@@ -140,7 +147,7 @@ namespace DSLink
             {
                 throw new DSAException(this, "Responder is not enabled.");
             }
-            
+
             await Responder.DiskSerializer.SerializeToDisk();
         }
 
@@ -158,7 +165,7 @@ namespace DSLink
             }
 
             if (_reconnectOnFailure)
-            {                
+            {
                 InitConnector();
                 await Connect();
                 OnConnectorReconnected();
@@ -169,25 +176,33 @@ namespace DSLink
         /// Called when the connection is opened to the broker.
         /// Override when you need to do something after connection opens.
         /// </summary>
-        protected virtual void OnConnectionOpen() {}
+        protected virtual void OnConnectionOpen()
+        {
+        }
 
         /// <summary>
         /// Called when the connection is closed to the broker.
         /// Override when you need to do something after connection closes.
         /// </summary>
-        protected virtual void OnConnectionClosed() {}
-        
+        protected virtual void OnConnectionClosed()
+        {
+        }
+
         /// <summary>
         /// Called when the connection fails to connect to the broker.
         /// Override when you need to detect a failure to connect.
         /// </summary>
-        protected virtual void OnConnectionFailed() {}
+        protected virtual void OnConnectionFailed()
+        {
+        }
 
         /// <summary>
         /// Called when the connection reconnects to the broker.
         /// Override when you need to resubscribe.
         /// </summary>
-        protected virtual void OnConnectorReconnected() {}
+        protected virtual void OnConnectorReconnected()
+        {
+        }
 
         private async Task OnMessage(JObject message)
         {
@@ -206,6 +221,7 @@ namespace DSLink
                 {
                     response["responses"] = responses;
                 }
+
                 write = true;
             }
 
@@ -285,6 +301,7 @@ namespace DSLink
                 {
                     logString += "(over 5000 bytes)";
                 }
+
                 Logger.Debug(logString);
             }
         }
@@ -298,7 +315,7 @@ namespace DSLink
                     // Write a blank message containing no responses/requests.
                     await Connector.Write(new JObject(), false);
                 }
-                
+
                 // Delay thirty seconds until the next ping.
                 await Task.Delay(30000);
             }

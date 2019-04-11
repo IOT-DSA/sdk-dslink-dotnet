@@ -1,4 +1,4 @@
-# DSLink SDK for .NET [![Build Status](https://ablcode.visualstudio.com/_apis/public/build/definitions/cf61073a-00ed-4166-9f78-170aba3120a5/255/badge)]
+# DSLink SDK for .NET
 ## About
 This DSLink library is targeted towards .NET Standard 2.0.
 For more information on the specifics about .NET Standard, please visit the [.NET Standard repo](https://github.com/dotnet/standard/blob/master/docs/versions.md).
@@ -12,4 +12,3 @@ This library is licensed under Apache v2.0, our license is provided [here](https
 
 ### NuGet Repository
 After the major code overhaul and sufficient testing, we will be pushing our library to the official NuGet repositories as v1.0.0.
-
