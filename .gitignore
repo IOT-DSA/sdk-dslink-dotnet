@@ -243,3 +243,4 @@ _Pvt_Extensions
 # .NET SDK
 .keys
 nodes.json
+DSLink.Example/*.txt

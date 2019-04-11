@@ -17,10 +17,11 @@ namespace DSLink.Example
     {
         private readonly Dictionary<string, Value> _rngValues;
         private readonly Random _random;
+        private readonly Thread _randomNumberThread;
 
         private static void Main(string[] args)
         {
-            var results = Parser.Default.ParseArguments<CommandLineArguments>(args)
+            Parser.Default.ParseArguments<CommandLineArguments>(args)
                 .WithParsed(cmdLineOptions =>
                 {
                     cmdLineOptions = ProcessDSLinkJson(cmdLineOptions);
@@ -98,8 +99,9 @@ namespace DSLink.Example
                     _rngValues.Add(node.Name, node.Value);
                 }
             });
-
-            Task.Run(_updateRandomNumbers);
+            
+            _randomNumberThread = new Thread(_updateRandomNumbers);
+            _randomNumberThread.Start();
         }
 
         public override void InitializeDefaultNodes()
@@ -107,18 +109,20 @@ namespace DSLink.Example
             Responder.SuperRoot.CreateChild("createRNG", "rngAdd").BuildNode();
         }
 
-        private async void _updateRandomNumbers()
+        private void _updateRandomNumbers()
         {
-            lock (_rngValues)
+            while (Thread.CurrentThread.IsAlive)
             {
-                foreach (var kv in _rngValues)
+                lock (_rngValues)
                 {
-                    kv.Value.Set(_random.Next());
+                    foreach (var kv in _rngValues)
+                    {
+                        kv.Value.Set(_random.Next());
+                    }
                 }
+                
+                Thread.Sleep(1);
             }
-
-            await Task.Delay(1);
-            _updateRandomNumbers();
         }
 
         private async void _createRngAction(InvokeRequest request)
