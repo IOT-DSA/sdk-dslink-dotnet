@@ -1,12 +1,4 @@
-﻿/// <summary>
-/// This class represents the complete of set of all possible command line options
-/// used not only by DSLink SDK but the calling program itself
-/// 
-/// It makes use of the CommandLineParser nuget package to supply attributes to the various
-/// class members.  Those attributes are then used by the parser.
-/// </summary>
-
-using CommandLine;
+﻿using CommandLine;
 
 namespace DSLink.Example
 {
@@ -19,6 +11,13 @@ namespace DSLink.Example
         Error
     }
 
+    /// <summary>
+    /// This class represents the complete of set of all possible command line options
+    /// used not only by DSLink SDK but the calling program itself
+    /// 
+    /// It makes use of the CommandLineParser nuget package to supply attributes to the various
+    /// class members.  Those attributes are then used by the parser.
+    /// </summary>
     public class CommandLineArguments
     {
         [Option('b', "broker",
