@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DSLink.Logging;
 
-namespace DSLink.Connection
+namespace DSLink.Protocol
 {
-    public class WebSocketConnector : Connector
+    public class WebSocketConnection : Connection
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
@@ -16,8 +17,10 @@ namespace DSLink.Connection
         private readonly CancellationTokenSource _wsTokenSource;
         private readonly SemaphoreSlim _wsSendSemaphore;
 
-        public WebSocketConnector(Configuration config) : base(config)
+        public WebSocketConnection(Configuration config) : base(config)
         {
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, errors) => true;
+            
             _ws = new ClientWebSocket();
             _wsTokenSource = new CancellationTokenSource();
             _wsSendSemaphore = new SemaphoreSlim(1, 1);

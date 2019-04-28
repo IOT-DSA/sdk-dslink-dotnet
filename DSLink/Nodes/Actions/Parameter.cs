@@ -1,20 +1,37 @@
-using DSLink.Util;
-using Newtonsoft.Json.Linq;
-
 namespace DSLink.Nodes.Actions
 {
     /// <summary>
-    /// Used to pass data to an action while invoking.
+    /// Parameter allows data to be passed into an action during an invoke.
     /// </summary>
-    public class Parameter : JObject
+    public class Parameter
     {
         /// <summary>
         /// Name of the parameter.
         /// </summary>
         public string Name
         {
-            get { return this["name"].Value<string>(); }
-            set { this["name"] = value; }
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Description of the parameter, shown in DGLux as
+        /// a tooltip of the title.
+        /// </summary>
+        public string Description
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Placeholder for editor field, only shown in DGLux
+        /// when editor is equal to "textinput".
+        /// </summary>
+        public string Placeholder
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -22,17 +39,17 @@ namespace DSLink.Nodes.Actions
         /// </summary>
         public ValueType ValueType
         {
-            get { return ValueType.FromString(this["type"].Value<string>()); }
-            set { this["type"] = value.Type; }
+            get;
+            set;
         }
 
         /// <summary>
         /// Default value of the parameter.
         /// </summary>
-        public dynamic DefaultValue
+        public Value DefaultValue
         {
-            get { return this["default"].ToDynamic(); }
-            set { this["default"] = value; }
+            get;
+            set;
         }
 
         /// <summary>
@@ -40,8 +57,8 @@ namespace DSLink.Nodes.Actions
         /// </summary>
         public EditorType Editor
         {
-            get { return EditorType.FromString(this["editor"].Value<string>()); }
-            set { this["editor"] = value.Type; }
+            get;
+            set;
         }
 
         public Parameter()
@@ -52,10 +69,15 @@ namespace DSLink.Nodes.Actions
         {
             Name = name;
             ValueType = type;
+            
             if (defaultValue != null)
+            {
                 DefaultValue = defaultValue;
+            }
             if (editor != null)
+            {
                 Editor = editor;
+            }
         }
     }
 }

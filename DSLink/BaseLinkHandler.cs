@@ -1,14 +1,16 @@
 using System;
 using System.Threading.Tasks;
-using DSLink.Connection;
+using DSLink.Abstractions;
 using Newtonsoft.Json.Linq;
 using DSLink.Request;
 using DSLink.Respond;
 using DSLink.Logging;
+using DSLink.Protocol;
 
 namespace DSLink
 {
-    public class DSLinkContainer
+    // ReSharper disable once InconsistentNaming
+    public abstract class BaseLinkHandler
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
@@ -19,18 +21,18 @@ namespace DSLink
         private readonly Configuration _config;
         private readonly DSLinkResponder _responder;
         private readonly DSLinkRequester _requester;
-        private Connector _connector;
+        private Connection _connection;
 
         public Configuration Config => _config;
         public virtual Responder Responder => _responder;
         public virtual DSLinkRequester Requester => _requester;
-        public virtual Connector Connector => _connector;
+        public virtual Connection Connection => _connection;
 
-        public DSLinkContainer(Configuration config)
+        public BaseLinkHandler(Configuration config)
         {
             _config = config;
 
-            InitConnector();
+            _initConnection();
 
             if (Config.Responder)
             {
@@ -73,17 +75,9 @@ namespace DSLink
 
                 if (initDefault)
                 {
-                    InitializeDefaultNodes();
+                    OnResponderInitialized(_responder);
                 }
             }
-        }
-
-        /// <summary>
-        /// Used to initialize the node structure when nodes.json does not
-        /// exist yet or failed to load.
-        /// </summary>
-        public virtual void InitializeDefaultNodes()
-        {
         }
 
         public async Task<ConnectionState> Connect(uint maxAttempts = 0)
@@ -99,8 +93,8 @@ namespace DSLink
                 _config.RemoteEndpoint = await _handshake.Shake();
                 if (_config.RemoteEndpoint != null)
                 {
-                    await Connector.Connect();
-                    return Connector.ConnectionState;
+                    await Connection.Connect();
+                    return Connection.ConnectionState;
                 }
 
                 var delay = attempts;
@@ -128,7 +122,7 @@ namespace DSLink
         public void Disconnect()
         {
             _reconnectOnFailure = false;
-            Connector.Disconnect();
+            Connection.Disconnect();
         }
 
         public async Task<bool> LoadSavedNodes()
@@ -141,7 +135,7 @@ namespace DSLink
             return await Responder.DiskSerializer.DeserializeFromDisk();
         }
 
-        public async Task SaveNodes()
+        protected async Task SaveNodes()
         {
             if (_responder == null)
             {
@@ -153,7 +147,7 @@ namespace DSLink
 
         private async void OnOpen()
         {
-            await Connector.Flush();
+            await Connection.Flush();
         }
 
         private async void OnClose()
@@ -166,7 +160,7 @@ namespace DSLink
 
             if (_reconnectOnFailure)
             {
-                InitConnector();
+                _initConnection();
                 await Connect();
                 OnConnectorReconnected();
             }
@@ -233,32 +227,32 @@ namespace DSLink
 
             if (write)
             {
-                await Connector.Write(response);
+                await Connection.Write(response);
             }
         }
 
-        private void InitConnector()
+        private void _initConnection()
         {
             _reconnectOnFailure = true;
-            _connector = new WebSocketConnector(_config);
+            _connection = new WebSocketConnection(_config);
 
-            // Connector events
-            _connector.OnMessage += OnStringRead;
-            _connector.OnBinaryMessage += OnBinaryRead;
-            _connector.OnWrite += OnStringWrite;
-            _connector.OnBinaryWrite += OnBinaryWrite;
-            _connector.OnOpen += OnOpen;
-            _connector.OnClose += OnClose;
+            // Connection events
+            _connection.OnMessage += OnStringRead;
+            _connection.OnBinaryMessage += OnBinaryRead;
+            _connection.OnWrite += OnStringWrite;
+            _connection.OnBinaryWrite += OnBinaryWrite;
+            _connection.OnOpen += OnOpen;
+            _connection.OnClose += OnClose;
 
             // Overridable events for DSLink writers
-            _connector.OnOpen += OnConnectionOpen;
-            _connector.OnClose += OnConnectionClosed;
+            _connection.OnOpen += OnConnectionOpen;
+            _connection.OnClose += OnConnectionClosed;
         }
 
         private async void OnStringRead(MessageEvent messageEvent)
         {
             LogMessageString(false, messageEvent);
-            await OnMessage(Connector.DataSerializer.Deserialize(messageEvent.Message));
+            await OnMessage(Connection.DataSerializer.Deserialize(messageEvent.Message));
         }
 
         private void OnStringWrite(MessageEvent messageEvent)
@@ -269,7 +263,7 @@ namespace DSLink
         private async void OnBinaryRead(BinaryMessageEvent messageEvent)
         {
             LogMessageBytes(false, messageEvent);
-            await OnMessage(Connector.DataSerializer.Deserialize(messageEvent.Message));
+            await OnMessage(Connection.DataSerializer.Deserialize(messageEvent.Message));
         }
 
         private void OnBinaryWrite(BinaryMessageEvent messageEvent)
@@ -310,15 +304,23 @@ namespace DSLink
         {
             while (_pingTask.Status != TaskStatus.Canceled)
             {
-                if (Connector.Connected())
+                if (Connection.Connected())
                 {
                     // Write a blank message containing no responses/requests.
-                    await Connector.Write(new JObject(), false);
+                    await Connection.Write(new JObject(), false);
                 }
 
                 // Delay thirty seconds until the next ping.
                 await Task.Delay(30000);
             }
+        }
+
+        public virtual void OnResponderInitialized(Responder responder)
+        {
+        }
+
+        public virtual void OnRequesterInitialized(Requester requester)
+        {
         }
     }
 }

@@ -11,9 +11,9 @@ namespace DSLink.Respond
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
         private readonly Dictionary<int, Node> _subscriptionToNode;
-        private readonly DSLinkContainer _link;
+        private readonly BaseLinkHandler _link;
 
-        public SubscriptionManager(DSLinkContainer link)
+        public SubscriptionManager(BaseLinkHandler link)
         {
             _subscriptionToNode = new Dictionary<int, Node>();
             _link = link;
@@ -68,7 +68,7 @@ namespace DSLink.Respond
                     }
                 }
 
-                await _link.Connector.Write(new JObject
+                await _link.Connection.Write(new JObject
                 {
                     new JProperty("responses", responses)
                 });
@@ -91,18 +91,18 @@ namespace DSLink.Respond
 
                     foreach (var config in child.Value.Configs)
                     {
-                        value[config.Key] = config.Value.JToken;
+                        value[config.Key] = config.Value.As<JToken>();
                     }
 
                     foreach (var attr in child.Value.Attributes)
                     {
-                        value[attr.Key] = attr.Value.JToken;
+                        value[attr.Key] = attr.Value.As<JToken>();
                     }
 
                     if (!child.Value.Value.IsNull)
                     {
-                        value["value"] = child.Value.Value.JToken;
-                        value["ts"] = child.Value.Value.LastUpdated;
+                        value["value"] = child.Value.Value.As<JToken>();
+                        value["ts"] = child.Value.Value.LastUpdatedIso;
                     }
 
                     updates.Add(new JArray

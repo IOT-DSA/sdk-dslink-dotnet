@@ -9,9 +9,9 @@ namespace DSLink.Respond
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
         private readonly Dictionary<int, string> _requestIdToPath = new Dictionary<int, string>();
-        private readonly DSLinkContainer _link;
+        private readonly BaseLinkHandler _link;
 
-        public StreamManager(DSLinkContainer link)
+        public StreamManager(BaseLinkHandler link)
         {
             _link = link;
         }

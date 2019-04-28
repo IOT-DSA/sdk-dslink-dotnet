@@ -10,7 +10,7 @@ using System.IO;
 
 namespace DSLink.Example.Requester
 {
-    public class ExampleRequesterDSLink : DSLinkContainer
+    public class RequesterLinkHandler : BaseLinkHandler
     {
         public static void Main(string[] args)
         {
@@ -26,7 +26,7 @@ namespace DSLink.Example.Requester
                     var config = new Configuration(cmdLineOptions.LinkName, true, true);
 
                     //Construct our custom link
-                    var dslink = new ExampleRequesterDSLink(config, cmdLineOptions);
+                    var dslink = new RequesterLinkHandler(config, cmdLineOptions);
 
                     InitializeLink(dslink).Wait();
                 })
@@ -39,12 +39,12 @@ namespace DSLink.Example.Requester
             }
         }
 
-        public static async Task InitializeLink(ExampleRequesterDSLink dsLink)
+        public static async Task InitializeLink(RequesterLinkHandler linkHandler)
         {
-            await dsLink.Connect();
+            await linkHandler.Connect();
         }
 
-        public ExampleRequesterDSLink(Configuration config, CommandLineArguments cmdLineOptions) : base(config)
+        public RequesterLinkHandler(Configuration config, CommandLineArguments cmdLineOptions) : base(config)
         {
             //Perform any configuration overrides from comman line options
             if (cmdLineOptions.BrokerUrl != null)

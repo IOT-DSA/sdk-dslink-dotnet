@@ -17,14 +17,14 @@ namespace DSLink.Request
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
-        private readonly DSLinkContainer _link;
+        private readonly BaseLinkHandler _link;
         internal readonly IncrementingIndex _requestId;
 
         public RequestManager RequestManager { get; private set; }
 
         public RemoteSubscriptionManager RemoteSubscriptionManager { get; private set; }
 
-        public DSLinkRequester(DSLinkContainer link)
+        public DSLinkRequester(BaseLinkHandler link)
         {
             _link = link;
             _requestId = new IncrementingIndex(1);
@@ -45,7 +45,7 @@ namespace DSLink.Request
         {
             var request = new ListRequest(_requestId.CurrentAndIncrement, callback, path);
             RequestManager.StartRequest(request);
-            await _link.Connector.Write(new JObject
+            await _link.Connection.Write(new JObject
             {
                 new JProperty("requests", new JArray
                 {
@@ -65,7 +65,7 @@ namespace DSLink.Request
         {
             var request = new SetRequest(_requestId.CurrentAndIncrement, path, permission, value);
             RequestManager.StartRequest(request);
-            await _link.Connector.Write(new JObject
+            await _link.Connection.Write(new JObject
             {
                 new JProperty("requests", new JArray
                 {
@@ -83,7 +83,7 @@ namespace DSLink.Request
         {
             var request = new RemoveRequest(_requestId.CurrentAndIncrement, path);
             RequestManager.StartRequest(request);
-            await _link.Connector.Write(new JObject
+            await _link.Connection.Write(new JObject
             {
                 new JProperty("requests", new JArray
                 {
@@ -105,7 +105,7 @@ namespace DSLink.Request
         {
             var request = new InvokeRequest(_requestId.CurrentAndIncrement, path, permission, parameters, callback);
             RequestManager.StartRequest(request);
-            await _link.Connector.Write(new JObject
+            await _link.Connection.Write(new JObject
             {
                 new JProperty("requests", new JArray
                 {
@@ -238,8 +238,7 @@ namespace DSLink.Request
 
             switch (request)
             {
-                case ListRequest _:
-                    var listRequest = (ListRequest) request;
+                case ListRequest listRequest:
                     var name = listRequest.Path.Split('/').Last();
                     var node = new RemoteNode(name, null, listRequest.Path);
                     node.FromSerialized(response["updates"].Value<JArray>());
@@ -251,8 +250,7 @@ namespace DSLink.Request
                 case RemoveRequest _:
                     RequestManager.StopRequest(rid);
                     break;
-                case InvokeRequest _:
-                    var invokeRequest = (InvokeRequest) request;
+                case InvokeRequest invokeRequest:
                     var path = invokeRequest.Path;
                     var columns = response.GetValue("columns") != null
                         ? response["columns"].Value<JArray>()

@@ -13,14 +13,14 @@ namespace DSLink.Respond
         /// <summary>
         /// DSLink container.
         /// </summary>
-        private readonly DSLinkContainer _link;
+        private readonly BaseLinkHandler _link;
 
         /// <summary>
         /// Request identifier for request.
         /// </summary>
         private readonly int _requestId;
 
-        protected Response(DSLinkContainer link, int requestId)
+        protected Response(BaseLinkHandler link, int requestId)
         {
             _link = link;
             _requestId = requestId;
@@ -37,7 +37,7 @@ namespace DSLink.Respond
             }
 
             _link.Requester.RequestManager.StopRequest(_requestId);
-            await _link.Connector.Write(new JObject
+            await _link.Connection.Write(new JObject
             {
                 new JProperty("responses", new JObject
                 {
@@ -63,7 +63,7 @@ namespace DSLink.Respond
         /// </summary>
         public readonly Node Node;
 
-        public ListResponse(DSLinkContainer link, int requestId,
+        public ListResponse(BaseLinkHandler link, int requestId,
             string path, Node node)
             : base(link, requestId)
         {
@@ -109,7 +109,7 @@ namespace DSLink.Respond
         /// </summary>
         public bool HasUpdates => Updates.Count > 0;
 
-        public InvokeResponse(DSLinkContainer link, int requestId,
+        public InvokeResponse(BaseLinkHandler link, int requestId,
             string path, JArray columns,
             JArray updates, JObject meta, JObject error)
             : base(link, requestId)

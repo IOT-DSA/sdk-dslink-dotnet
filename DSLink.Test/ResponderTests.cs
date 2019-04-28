@@ -1,5 +1,4 @@
-﻿using DSLink.Connection;
-using DSLink.Respond;
+﻿using DSLink.Respond;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -8,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using DSLink.Nodes;
 using System.Threading.Tasks;
 using DSLink.Nodes.Actions;
+using DSLink.Protocol;
 
 namespace DSLink.Test
 {
@@ -17,8 +17,8 @@ namespace DSLink.Test
         private Configuration _config;
         private DSLinkResponder _responder;
         private Mock<IFolder> _mockFolder;
-        private Mock<DSLinkContainer> _mockContainer;
-        private Mock<Connector> _mockConnector;
+        private Mock<BaseLinkHandler> _mockContainer;
+        private Mock<Connection> _mockConnector;
 
         [SetUp]
         public void SetUp()
@@ -27,14 +27,14 @@ namespace DSLink.Test
 
             _config = new Configuration("Test", responder: true);
 
-            _mockContainer = new Mock<DSLinkContainer>(new Configuration("Test"));
-            _mockConnector = new Mock<Connector>(
+            _mockContainer = new Mock<BaseLinkHandler>(new Configuration("Test"));
+            _mockConnector = new Mock<Connection>(
                 _mockContainer.Object.Config
                 //,
                 //_mockContainer.Object.Logger
             );
 
-            _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
+            _mockContainer.SetupGet(c => c.Connection).Returns(_mockConnector.Object);
 
             _responder = new DSLinkResponder(_mockContainer.Object);
             _mockContainer.SetupGet(c => c.Responder).Returns(_responder);
@@ -43,12 +43,12 @@ namespace DSLink.Test
             _responder.SuperRoot.CreateChild("testValue")
                 .SetType(DSLink.Nodes.ValueType.Number)
                 .SetValue(123)
-                .BuildNode();
+                .Build();
 
             _responder.SuperRoot.CreateChild("testNodeConfigs")
                 .SetConfig("testString", new Value("string"))
                 .SetConfig("testNumber", new Value(123))
-                .BuildNode();
+                .Build();
         }
 
         private Task<JArray> _listNode()
@@ -119,15 +119,6 @@ namespace DSLink.Test
             });
         }
 
-        private void _setUpNodeClass()
-        {
-            _responder.AddNodeClass("testClass", (Node node) =>
-            {
-                node.Configs.Set(ConfigType.DisplayName, new Value("test"));
-                node.Attributes.Set("attr", new Value("test"));
-            });
-        }
-
         // TODO: Split this into multiple tests
         [Test]
         public async Task List()
@@ -173,12 +164,12 @@ namespace DSLink.Test
             bool actionInvoked = false;
             _responder.SuperRoot.CreateChild("testAction")
                 .SetInvokable(Permission.Write)
-                .SetAction(new ActionHandler(Permission.Write, async (request) =>
+                .SetAction(new Action(Permission.Write, async (request) =>
                 {
                     actionInvoked = true;
                     await request.Close();
                 }))
-                .BuildNode();
+                .Build();
 
             await _invokeNode();
 
@@ -191,13 +182,13 @@ namespace DSLink.Test
         {
             _responder.SuperRoot.CreateChild("testAction")
                 .SetInvokable(Permission.Write)
-                .SetAction(new ActionHandler(Permission.Write, async (request) =>
+                .SetAction(new Action(Permission.Write, async (request) =>
                 {
                     Assert.AreEqual("string", request.Parameters["testString"].Value<string>());
                     Assert.AreEqual(123, request.Parameters["testNumber"].Value<int>());
                     await request.Close();
                 }))
-                .BuildNode();
+                .Build();
 
             await _invokeNode();
         }
@@ -235,17 +226,6 @@ namespace DSLink.Test
             // Test for unsubscribe method stream close.
             Assert.AreEqual(2, requestClose["rid"].Value<int>());
             Assert.AreEqual("closed", requestClose["stream"].Value<string>());
-        }
-
-        [Test]
-        public void NodeClassAdd()
-        {
-            _setUpNodeClass();
-
-            var node = _responder.SuperRoot.CreateChild("testNodeClass", "testClass").BuildNode();
-
-            Assert.AreEqual("test", node.Configs.Get(ConfigType.DisplayName).String);
-            Assert.AreEqual("test", node.Attributes.Get("attr").String);
         }
     }
 }

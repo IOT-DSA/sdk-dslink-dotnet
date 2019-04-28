@@ -1,6 +1,8 @@
 ﻿using DSLink.Nodes;
 using DSLink.Nodes.Actions;
 using NUnit.Framework;
+using FluentAssertions;
+using FluentAssertions.Common;
 
 namespace DSLink.Test.Nodes.Actions
 {
@@ -14,7 +16,7 @@ namespace DSLink.Test.Nodes.Actions
                 Name = "testString"
             };
 
-            Assert.AreEqual("testString", parameter.Name);
+            parameter.Name.Should().Be("testString");
         }
 
         [Test]
@@ -25,18 +27,20 @@ namespace DSLink.Test.Nodes.Actions
                 ValueType = ValueType.Binary
             };
 
-            Assert.AreEqual(ValueType.Binary, parameter.ValueType);
+            parameter.ValueType.Should().Be(ValueType.Binary);
         }
 
         [Test]
         public void DefaultValueSetsProperly()
         {
+            var actualValue = new Value(123);
             var parameter = new Parameter
             {
-                DefaultValue = 123
+                DefaultValue = actualValue
             };
+            var expectedValue = new Value(actualValue.As<int>(), actualValue.LastUpdated);
 
-            Assert.AreEqual(123, parameter.DefaultValue);
+            parameter.DefaultValue.Should().BeEquivalentTo(expectedValue);
         }
 
         [Test]
@@ -47,7 +51,7 @@ namespace DSLink.Test.Nodes.Actions
                 Editor = EditorType.Color
             };
 
-            Assert.AreEqual(EditorType.Color, parameter.Editor);
+            parameter.Editor.Should().Be(EditorType.Color);
         }
     }
 }

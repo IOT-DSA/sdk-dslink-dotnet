@@ -7,12 +7,12 @@ namespace DSLink.Test
     [TestFixture]
     public class ValueTests
     {
-        private static readonly byte[] _testBytes =
+        private static readonly byte[] TestBytes =
         {
             0x01, 0x02, 0x03, 0x04, 0x05
         };
 
-        private static readonly byte[] _testBytesReverse =
+        private static readonly byte[] TestBytesReverse =
         {
             0x05, 0x04, 0x03, 0x02, 0x01
         };
@@ -22,13 +22,6 @@ namespace DSLink.Test
         {
             var value = new Value();
             Assert.IsTrue(value.IsNull);
-        }
-
-        [Test]
-        public void Null_Created_IsJTokenNull()
-        {
-            var value = new Value();
-            Assert.IsNull(value.JToken);
         }
 
         [Test]
@@ -43,14 +36,7 @@ namespace DSLink.Test
         public void Boolean_Created_BooleanPropertyEqualsValue()
         {
             var value = new Value(false);
-            Assert.AreEqual(false, value.Boolean);
-        }
-
-        [Test]
-        public void Boolean_Created_EqualsProperType()
-        {
-            var value = new Value(false);
-            Assert.AreEqual(JTokenType.Boolean, value.JToken.Type);
+            Assert.AreEqual(false, value.As<bool>());
         }
 
         [Test]
@@ -65,15 +51,7 @@ namespace DSLink.Test
         {
             var value = new Value(false);
             value.Set(true);
-            Assert.AreEqual(true, value.Boolean);
-        }
-
-        [Test]
-        public void Boolean_AfterSet_EqualsProperType()
-        {
-            var value = new Value(false);
-            value.Set(true);
-            Assert.AreEqual(JTokenType.Boolean, value.JToken.Type);
+            Assert.AreEqual(true, value.As<bool>());
         }
 
         [Test]
@@ -95,14 +73,7 @@ namespace DSLink.Test
         public void Int_Created_IntPropertyEqualsValue()
         {
             var value = new Value(123);
-            Assert.AreEqual(123, value.Int);
-        }
-
-        [Test]
-        public void Int_Created_EqualsProperType()
-        {
-            var value = new Value(123);
-            Assert.AreEqual(JTokenType.Integer, value.JToken.Type);
+            Assert.AreEqual(123, value.As<int>());
         }
 
         [Test]
@@ -118,15 +89,7 @@ namespace DSLink.Test
         {
             var value = new Value(123);
             value.Set(321);
-            Assert.AreEqual(321, value.Int);
-        }
-
-        [Test]
-        public void Int_AfterSet_EqualsProperType()
-        {
-            var value = new Value(123);
-            value.Set(321);
-            Assert.AreEqual(JTokenType.Integer, value.JToken.Type);
+            Assert.AreEqual(321, value.As<int>());
         }
 
         [Test]
@@ -140,14 +103,7 @@ namespace DSLink.Test
         public void Float_Created_FloatPropertyEqualsValue()
         {
             var value = new Value(123.456f);
-            Assert.AreEqual(123.456f, value.Float);
-        }
-
-        [Test]
-        public void Float_Created_EqualsProperType()
-        {
-            var value = new Value(123.456f);
-            Assert.AreEqual(JTokenType.Float, value.JToken.Type);
+            Assert.AreEqual(123.456f, value.As<float>());
         }
 
         [Test]
@@ -163,15 +119,7 @@ namespace DSLink.Test
         {
             var value = new Value(123.456f);
             value.Set(654.321f);
-            Assert.AreEqual(654.321f, value.Float);
-        }
-
-        [Test]
-        public void Float_AfterSet_EqualsProperType()
-        {
-            var value = new Value(123.456f);
-            value.Set(654.321f);
-            Assert.AreEqual(JTokenType.Float, value.JToken.Type);
+            Assert.AreEqual(654.321f, value.As<float>());
         }
 
         [Test]
@@ -185,14 +133,7 @@ namespace DSLink.Test
         public void Double_Created_DoublePropertyEqualsValue()
         {
             var value = new Value(123.456);
-            Assert.AreEqual(123.456, value.Double);
-        }
-
-        [Test]
-        public void Double_Created_EqualsProperType()
-        {
-            var value = new Value(123.456);
-            Assert.AreEqual(JTokenType.Float, value.JToken.Type);
+            Assert.AreEqual(123.456, value.As<double>());
         }
 
         [Test]
@@ -208,15 +149,7 @@ namespace DSLink.Test
         {
             var value = new Value(123.456);
             value.Set(654.321);
-            Assert.AreEqual(654.321, value.Double);
-        }
-
-        [Test]
-        public void Double_AfterSet_EqualsProperType()
-        {
-            var value = new Value(123.456);
-            value.Set(654.321);
-            Assert.AreEqual(JTokenType.Float, value.JToken.Type);
+            Assert.AreEqual(654.321, value.As<double>());
         }
 
         [Test]
@@ -230,14 +163,7 @@ namespace DSLink.Test
         public void String_Created_StringPropertyEqualsValue()
         {
             var value = new Value("123");
-            Assert.AreEqual("123", value.String);
-        }
-
-        [Test]
-        public void String_Created_EqualsProperType()
-        {
-            var value = new Value("123");
-            Assert.AreEqual(JTokenType.String, value.JToken.Type);
+            Assert.AreEqual("123", value.As<string>());
         }
 
         [Test]
@@ -253,60 +179,37 @@ namespace DSLink.Test
         {
             var value = new Value("123");
             value.Set("321");
-            Assert.AreEqual("321", value.String);
-        }
-
-        [Test]
-        public void String_AfterSet_EqualsProperType()
-        {
-            var value = new Value("123");
-            value.Set("321");
-            Assert.AreEqual(JTokenType.String, value.JToken.Type);
+            Assert.AreEqual("321", value.As<string>());
         }
 
         [Test]
         public void ByteArray_Created_IsNullFalse()
         {
-            var value = new Value(_testBytes);
+            var value = new Value(TestBytes);
             Assert.IsFalse(value.IsNull);
         }
 
         [Test]
         public void ByteArray_Created_ByteArrayPropertyEqualsValue()
         {
-            var value = new Value(_testBytes);
-            Assert.AreEqual(_testBytes, value.ByteArray);
-        }
-
-        [Test]
-        public void ByteArray_Created_EqualsProperType()
-        {
-            var value = new Value(_testBytes);
-            Assert.AreEqual(JTokenType.Bytes, value.JToken.Type);
+            var value = new Value(TestBytes);
+            Assert.AreEqual(TestBytes, value.As<byte[]>());
         }
 
         [Test]
         public void ByteArray_AfterSet_IsNullFalse()
         {
-            var value = new Value(_testBytes);
-            value.Set(_testBytesReverse);
+            var value = new Value(TestBytes);
+            value.Set(TestBytesReverse);
             Assert.IsFalse(value.IsNull);
         }
 
         [Test]
         public void ByteArray_AfterSet_ByteArrayPropertyEqualsValue()
         {
-            var value = new Value(_testBytes);
-            value.Set(_testBytesReverse);
-            Assert.AreEqual(_testBytesReverse, value.ByteArray);
-        }
-
-        [Test]
-        public void ByteArray_AfterSet_EqualsProperType()
-        {
-            var value = new Value(_testBytes);
-            value.Set(_testBytesReverse);
-            Assert.AreEqual(JTokenType.Bytes, value.JToken.Type);
+            var value = new Value(TestBytes);
+            value.Set(TestBytesReverse);
+            Assert.AreEqual(TestBytesReverse, value.As<byte[]>());
         }
     }
 }

@@ -1,19 +1,19 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using DSLink.Logging;
 using DSLink.Serializer;
 using DSLink.Util;
-using DSLink.Logging;
+using Newtonsoft.Json.Linq;
 
-namespace DSLink.Connection
+namespace DSLink.Protocol
 {
-    public abstract class Connector
+    public abstract class Connection
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
         private BaseSerializer _serializer;
-        protected readonly Configuration _config;
+        private readonly Configuration _config;
         private readonly IncrementingIndex _msgId;
 
         public BaseSerializer DataSerializer
@@ -122,7 +122,7 @@ namespace DSLink.Connection
         /// </summary>
         public event Action<BinaryMessageEvent> OnBinaryMessage;
 
-        protected Connector(Configuration config)
+        protected Connection(Configuration config)
         {
             _config = config;
             ConnectionState = ConnectionState.Disconnected;

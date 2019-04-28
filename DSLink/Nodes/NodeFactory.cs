@@ -15,20 +15,13 @@ namespace DSLink.Nodes
         {
             _node = node;
             _node.Building = true;
-            _node.InitializeClass();
         }
 
-        public Node BuildNode()
+        public Node Build()
         {
             _node.Building = false;
             _node.Parent.AddChild(_node);
             return _node;
-        }
-
-        public NodeFactory SetNodeClass(string className)
-        {
-            _node.ClassName = className;
-            return this;
         }
 
         public NodeFactory SetConfig(string name, Value value)
@@ -136,21 +129,9 @@ namespace DSLink.Nodes
             return this;
         }
 
-        public NodeFactory SetAction(ActionHandler actionHandler)
+        public NodeFactory SetAction(Action action)
         {
-            _node.SetAction(actionHandler);
-            return this;
-        }
-
-        public NodeFactory AddParameter(Parameter parameter)
-        {
-            _node.AddParameter(parameter);
-            return this;
-        }
-
-        public NodeFactory AddColumn(Column column)
-        {
-            _node.AddColumn(column);
+            _node.SetAction(action);
             return this;
         }
 

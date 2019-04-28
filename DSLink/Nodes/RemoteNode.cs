@@ -14,33 +14,22 @@ namespace DSLink.Nodes
             Path = path;
         }
 
-        /// <summary>
-        /// <see cref="Node"/>
-        /// </summary>
+        /// <inheritdoc />
         public override NodeFactory CreateChild(string name)
         {
             throw new InvalidOperationException("Cannot create a remote node");
         }
 
-        /// <summary>
-        /// Set the value.
-        /// </summary>
-        /// <param name="value">Value</param>
+        /// <inheritdoc />
         protected override void ValueSet(Value value)
         {
         }
 
-        /// <summary>
-        /// Updates the subscribers.
-        /// </summary>
+        /// <inheritdoc />
         protected override void UpdateSubscribers()
         {
         }
 
-        /// <summary>
-        /// Deserializes.
-        /// </summary>
-        /// <param name="serialized">Serialized</param>
         public void FromSerialized(JArray serialized)
         {
             foreach (var jToken in serialized)

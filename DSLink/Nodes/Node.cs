@@ -5,6 +5,7 @@ using DSLink.Nodes.Actions;
 using DSLink.Util;
 using Newtonsoft.Json.Linq;
 using DSLink.Logging;
+using Action = DSLink.Nodes.Actions.Action;
 
 namespace DSLink.Nodes
 {
@@ -23,7 +24,7 @@ namespace DSLink.Nodes
             '%', '.', '/', '\\', '?', '*', ':', '|', '<', '>', '$', '@', ',', '\'', '"'
         };
 
-        private readonly DSLinkContainer _link;
+        private readonly BaseLinkHandler _link;
         private string _path;
         private readonly IDictionary<string, Node> _children;
         internal readonly List<Node> _removedChildren;
@@ -83,7 +84,7 @@ namespace DSLink.Nodes
         /// <summary>
         /// Node action
         /// </summary>
-        public ActionHandler ActionHandler { get; protected set; }
+        public Action Action { get; protected set; }
 
         /// <summary>
         /// Indicates whether the Node is serialized into the 
@@ -107,17 +108,6 @@ namespace DSLink.Nodes
         /// True if Node is subscribed to.
         /// </summary>
         public bool Subscribed => _subscribers.Count != 0;
-
-        /// <summary>
-        /// Class name of the node.
-        /// </summary>
-        public string ClassName { get; internal set; }
-
-        /// <summary>
-        /// Flag for when the Node Class is initialized.
-        /// Used to prevent duplicate initializations.
-        /// </summary>
-        private bool _initializedClass;
 
         /// <summary>
         /// Public-facing dictionary of children.
@@ -167,15 +157,13 @@ namespace DSLink.Nodes
         /// <param name="name">Name of Node</param>
         /// <param name="parent">Parent of Node</param>
         /// <param name="link">DSLink container of Node</param>
-        /// <param name="className">Node class name</param>
-        public Node(string name, Node parent, DSLinkContainer link, string className = "node")
+        public Node(string name, Node parent, BaseLinkHandler link)
         {
             if (name == null)
             {
                 throw new ArgumentException("Name must not be null.");
             }
 
-            ClassName = className;
             Parent = parent;
             _children = new Dictionary<string, Node>();
 
@@ -217,27 +205,6 @@ namespace DSLink.Nodes
 
         private void _createInitialData()
         {
-            Configs.Set(ConfigType.ClassName, new Value(ClassName));
-        }
-
-        /// <summary>
-        /// Initializes the Node Class.
-        /// </summary>
-        public void InitializeClass()
-        {
-            if (_initializedClass || _link == null)
-            {
-                return;
-            }
-
-            _initializedClass = true;
-            if (_link.Responder.NodeClasses.ContainsKey(ClassName) &&
-                (!PrivateConfigs.Has("nodeClassInit") || PrivateConfigs.Get("nodeClassInit").Boolean == false))
-            {
-                PrivateConfigs.Set("nodeClassInit", new Value(true));
-                ResetNode();
-                _link.Responder.NodeClasses[ClassName](this);
-            }
         }
 
         /// <summary>
@@ -267,28 +234,16 @@ namespace DSLink.Nodes
         /// The node will not be added to the parent until NodeFactory.BuildNode() is called.
         /// </summary>
         /// <param name="name">Node's name</param>
-        /// <param name="className">Node's class</param>
         /// <returns>NodeFactory of new child</returns>
-        public virtual NodeFactory CreateChild(string name, string className)
+        public virtual NodeFactory CreateChild(string name)
         {
             if (name.IndexOfAny(BannedChars) != -1)
             {
                 throw new ArgumentException("Invalid character(s) in Node name.");
             }
 
-            Node child = new Node(name, this, _link, className);
+            Node child = new Node(name, this, _link);
             return new NodeFactory(child);
-        }
-
-        /// <summary>
-        /// Create a child via the NodeFactory.
-        /// The node will not be added to the parent until NodeFactory.BuildNode() is called.
-        /// </summary>
-        /// <param name="name">Node's name</param>
-        /// <returns>NodeFactory of new child</returns>
-        public virtual NodeFactory CreateChild(string name)
-        {
-            return CreateChild(name, "node");
         }
 
         /// <summary>
@@ -309,61 +264,15 @@ namespace DSLink.Nodes
 
             UpdateSubscribers();
         }
-
-        /// <summary>
-        /// Adds a parameter.
-        /// </summary>
-        /// <param name="parameter">Parameter</param>
-        public void AddParameter(Parameter parameter)
-        {
-            if (!Configs.Has(ConfigType.Parameters))
-            {
-                Configs.Set(ConfigType.Parameters, new Value(new JArray()));
-            }
-
-            var parameters = Configs.Get(ConfigType.Parameters).JArray;
-            foreach (JToken token in parameters)
-            {
-                if (token["name"].Value<string>() == parameter.Name)
-                {
-                    throw new Exception($"Parameter {parameter.Name} already exists on {_path}");
-                }
-            }
-
-            parameters.Add(parameter);
-        }
-
-        /// <summary>
-        /// Adds a column.
-        /// </summary>
-        /// <param name="column">Column</param>
-        public void AddColumn(Column column)
-        {
-            if (!Configs.Has(ConfigType.Columns))
-            {
-                Configs.Set(ConfigType.Columns, new Value(new JArray()));
-            }
-
-            var columns = Configs.Get(ConfigType.Columns).JArray;
-            foreach (JToken token in columns)
-            {
-                if (token["name"].Value<string>() == column.Name)
-                {
-                    throw new Exception($"Column {column.Name} already exists on {_path}");
-                }
-            }
-
-            columns.Add(column);
-        }
-
+        
         /// <summary>
         /// Sets the action.
         /// </summary>
-        /// <param name="actionHandler">Action</param>
-        public void SetAction(ActionHandler actionHandler)
+        /// <param name="action">Action</param>
+        public void SetAction(Action action)
         {
-            Configs.Set(ConfigType.Invokable, new Value(actionHandler.Permission.Permit));
-            ActionHandler = actionHandler;
+            Configs.Set(ConfigType.Invokable, new Value(action.Permission.Permit));
+            Action = action;
         }
 
         /// <summary>
@@ -439,17 +348,17 @@ namespace DSLink.Nodes
         /// <param name="value"></param>
         protected virtual async void ValueSet(Value value)
         {
-            List<Task> tasks = new List<Task>();
+            var tasks = new List<Task>();
 
             lock (_subscribers)
             {
-                for (int i = 0; i < _subscribers.Count; i++)
+                foreach (var t in _subscribers)
                 {
-                    tasks.Add(_link.Connector.AddValueUpdateResponse(new JArray
+                    tasks.Add(_link.Connection.AddValueUpdateResponse(new JArray
                     {
-                        _subscribers[i],
-                        value.JToken,
-                        value.LastUpdated
+                        t,
+                        value.As<JToken>(),
+                        value.LastUpdatedIso
                     }));
                 }
             }
@@ -458,9 +367,9 @@ namespace DSLink.Nodes
             {
                 await Task.WhenAll(tasks);
             }
-            catch (OperationCanceledException ocex)
+            catch (OperationCanceledException e)
             {
-                Logger.Warn($"OperationCanceledException raised - moving on. details = {ocex.ToString()}");
+                Logger.Warn(e.ToString());
             }
         }
 
@@ -474,19 +383,19 @@ namespace DSLink.Nodes
 
             foreach (var entry in Configs)
             {
-                serializedObject.Add(new JProperty(entry.Key, entry.Value.JToken));
+                serializedObject.Add(new JProperty(entry.Key, entry.Value.As<JToken>()));
             }
 
             foreach (var entry in Attributes)
             {
-                serializedObject.Add(new JProperty(entry.Key, entry.Value.JToken));
+                serializedObject.Add(new JProperty(entry.Key, entry.Value.As<JToken>()));
             }
 
             var privateConfigs = new JObject();
             serializedObject.Add("privateConfigs", privateConfigs);
             foreach (var entry in PrivateConfigs)
             {
-                privateConfigs.Add(new JProperty(entry.Key, entry.Value.JToken));
+                privateConfigs.Add(new JProperty(entry.Key, entry.Value.As<JToken>()));
             }
 
             foreach (var entry in Children)
@@ -499,12 +408,7 @@ namespace DSLink.Nodes
 
             if (!Value.IsNull)
             {
-                serializedObject.Add(new JProperty("?value", Value.JToken));
-            }
-
-            if (ClassName != "node")
-            {
-                serializedObject.Add(new JProperty("?class", ClassName));
+                serializedObject.Add(new JProperty("?value", Value.As<JToken>()));
             }
 
             return serializedObject;
@@ -542,19 +446,9 @@ namespace DSLink.Nodes
 
                     if (!Children.ContainsKey(name))
                     {
-                        string className;
-                        if (prop.Value["?class"] != null)
-                        {
-                            className = prop.Value["?class"].Value<string>();
-                        }
-                        else
-                        {
-                            className = "node";
-                        }
-
-                        var builder = CreateChild(name, className);
+                        var builder = CreateChild(name);
                         builder.Deserialize((JObject) prop.Value);
-                        builder.BuildNode();
+                        builder.Build();
                     }
                     else
                     {

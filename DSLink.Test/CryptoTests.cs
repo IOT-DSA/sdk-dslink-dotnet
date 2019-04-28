@@ -2,7 +2,7 @@
 using StandardStorage;
 using System;
 using System.Threading.Tasks;
-using DSLink.Connection;
+using DSLink.Protocol;
 
 namespace DSLink.Test
 {

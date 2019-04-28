@@ -7,7 +7,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
 
-namespace DSLink.Connection
+namespace DSLink.Protocol
 {
     /// <summary>
     /// Handles key generation, loading, and saving for handshake.

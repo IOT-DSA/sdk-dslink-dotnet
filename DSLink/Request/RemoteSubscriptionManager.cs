@@ -10,13 +10,13 @@ namespace DSLink.Request
     public class RemoteSubscriptionManager
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
-        private readonly DSLinkContainer _link;
+        private readonly BaseLinkHandler _link;
         private readonly Dictionary<string, Subscription> _subscriptions;
         private readonly Dictionary<int, string> _subIdToPath;
         private readonly Dictionary<int, string> _realSubIdToPath;
         private readonly IncrementingIndex _subscriptionId;
 
-        public RemoteSubscriptionManager(DSLinkContainer link)
+        public RemoteSubscriptionManager(BaseLinkHandler link)
         {
             _link = link;
             _subscriptions = new Dictionary<string, Subscription>();
@@ -40,7 +40,7 @@ namespace DSLink.Request
             if (!_subscriptions.ContainsKey(path))
             {
                 _subscriptions.Add(path, new Subscription(sid));
-                await _link.Connector.Write(new JObject
+                await _link.Connection.Write(new JObject
                 {
                     new JProperty("requests", new JArray
                     {
@@ -64,7 +64,7 @@ namespace DSLink.Request
             _subIdToPath.Remove(subId);
             if (sub.VirtualSubs.Count == 0)
             {
-                await _link.Connector.Write(new JObject
+                await _link.Connection.Write(new JObject
                 {
                     new JProperty("requests", new JArray
                     {

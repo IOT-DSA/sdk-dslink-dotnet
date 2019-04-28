@@ -115,7 +115,7 @@ namespace DSLink.Request
             var baseSerialized = base.Serialize();
             baseSerialized["path"] = Path;
             baseSerialized["permit"] = Permission.ToString();
-            baseSerialized["value"] = Value.JToken;
+            baseSerialized["value"] = Value.As<JToken>();
             return baseSerialized;
         }
     }
@@ -177,7 +177,7 @@ namespace DSLink.Request
         /// <summary>
         /// Link container.
         /// </summary>
-        private readonly DSLinkContainer _link;
+        private readonly BaseLinkHandler _link;
 
         /// <summary>
         /// Columns of the request.
@@ -195,7 +195,7 @@ namespace DSLink.Request
         public Table.Mode Mode;
 
         public InvokeRequest(int requestId, string path, Permission permission, JObject parameters,
-            Action<InvokeResponse> callback = null, DSLinkContainer link = null,
+            Action<InvokeResponse> callback = null, BaseLinkHandler link = null,
             JArray columns = null) : base(requestId)
         {
             Path = path;
@@ -262,7 +262,7 @@ namespace DSLink.Request
                 updateRootObject["responses"].First["columns"] = _columns;
             }
 
-            await _link.Connector.Write(updateRootObject);
+            await _link.Connection.Write(updateRootObject);
         }
 
         /// <summary>
@@ -275,7 +275,7 @@ namespace DSLink.Request
                 throw new NotSupportedException("Link is null, cannot send updates");
             }
 
-            await _link.Connector.Write(new JObject
+            await _link.Connection.Write(new JObject
             {
                 new JProperty("responses", new JArray
                 {

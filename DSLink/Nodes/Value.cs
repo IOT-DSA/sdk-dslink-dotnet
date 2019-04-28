@@ -18,7 +18,11 @@ namespace DSLink.Nodes
         /// <summary>
         /// When the value was last updated.
         /// </summary>
-        private DateTime? _lastUpdated;
+        public DateTime? LastUpdated
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Event occurs when value is set.
@@ -33,12 +37,12 @@ namespace DSLink.Nodes
         /// <summary>
         /// Gets last updated time in the ISO 8601 format that DSA uses.
         /// </summary>
-        public string LastUpdated => _lastUpdated?.ToIso8601();
+        public string LastUpdatedIso => LastUpdated?.ToIso8601();
 
         public Value()
         {
             _val = null;
-            _lastUpdated = null;
+            LastUpdated = null;
         }
 
         public Value(string val, DateTime? ts = null)
@@ -96,7 +100,7 @@ namespace DSLink.Nodes
                 }
 
                 _val = val;
-                _lastUpdated = ts;
+                LastUpdated = ts;
             }
 
             SetValue();
@@ -110,7 +114,7 @@ namespace DSLink.Nodes
             }
 
             _val = val;
-            _lastUpdated = ts;
+            LastUpdated = ts;
             SetValue();
         }
 
@@ -122,7 +126,7 @@ namespace DSLink.Nodes
             }
 
             _val = val;
-            _lastUpdated = ts;
+            LastUpdated = ts;
             SetValue();
         }
 
@@ -134,7 +138,7 @@ namespace DSLink.Nodes
             }
 
             _val = val;
-            _lastUpdated = ts;
+            LastUpdated = ts;
             SetValue();
         }
 
@@ -146,7 +150,7 @@ namespace DSLink.Nodes
             }
 
             _val = val;
-            _lastUpdated = ts;
+            LastUpdated = ts;
             SetValue();
         }
 
@@ -158,7 +162,7 @@ namespace DSLink.Nodes
             }
 
             _val = val;
-            _lastUpdated = ts;
+            LastUpdated = ts;
             SetValue();
         }
 
@@ -171,33 +175,32 @@ namespace DSLink.Nodes
             }
 
             _val = newValue;
-            _lastUpdated = ts;
+            LastUpdated = ts;
             SetValue();
         }
 
         public void Set(JToken jtoken, bool force = false, DateTime? ts = null)
         {
             _val = jtoken;
-            _lastUpdated = ts;
+            LastUpdated = ts;
             SetValue();
         }
 
         public void Clear()
         {
             _val = null;
-            _lastUpdated = null;
+            LastUpdated = null;
         }
 
-        public JToken JToken => _val;
-        public dynamic Dynamic => _val.Value<dynamic>();
-        public bool Boolean => _val.Value<bool>();
-        public string String => _val.Value<string>();
-        public int Int => _val.Value<int>();
-        public float Float => _val.Value<float>();
-        public double Double => _val.Value<double>();
-        public byte[] ByteArray => _val.Value<byte[]>();
-        public JArray JArray => _val.Value<JArray>();
-        public DateTime DateTime => _val.Value<DateTime>();
+        public T As<T>()
+        {
+            return _val.Value<T>();
+        }
+
+        public JToken AsJToken()
+        {
+            return _val;
+        }
 
         /// <summary>
         /// Determines whether the value is null
@@ -210,9 +213,9 @@ namespace DSLink.Nodes
         /// </summary>
         private void SetValue()
         {
-            if (!_lastUpdated.HasValue)
+            if (!LastUpdated.HasValue)
             {
-                _lastUpdated = DateTime.Now;
+                LastUpdated = DateTime.Now;
             }
 
             OnSet?.Invoke(this);
@@ -230,7 +233,20 @@ namespace DSLink.Nodes
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("Value", _val);
-            info.AddValue("LastUpdated", _lastUpdated);
+            info.AddValue("LastUpdated", LastUpdated);
+        }
+
+        public bool Equals(Value other)
+        {
+            return Equals(_val, other._val) && LastUpdated.Equals(other.LastUpdated);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (397 * (_val != null ? _val.GetHashCode() : 0)) ^ LastUpdated.GetHashCode();
+            }
         }
     }
 }

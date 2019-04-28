@@ -9,11 +9,13 @@ using System.Threading.Tasks;
 using Serilog;
 using CommandLine;
 using System.IO;
+using DSLink.Respond;
+using Action = DSLink.Nodes.Actions.Action;
 
 
 namespace DSLink.Example
 {
-    public class ExampleDSLink : DSLinkContainer
+    public class ExampleLinkHandler : BaseLinkHandler
     {
         private readonly Dictionary<string, Value> _rngValues;
         private readonly Random _random;
@@ -33,7 +35,7 @@ namespace DSLink.Example
                     var config = new Configuration(cmdLineOptions.LinkName, true, true);
 
                     //Construct our custom link
-                    var dslink = new ExampleDSLink(config, cmdLineOptions);
+                    var dslink = new ExampleLinkHandler(config, cmdLineOptions);
 
                     InitializeLink(dslink).Wait();
                 })
@@ -45,13 +47,13 @@ namespace DSLink.Example
             }
         }
 
-        public static async Task InitializeLink(ExampleDSLink dsLink)
+        public static async Task InitializeLink(ExampleLinkHandler linkHandler)
         {
-            await dsLink.Connect();
-            await dsLink.SaveNodes();
+            await linkHandler.Connect();
+            await linkHandler.SaveNodes();
         }
 
-        public ExampleDSLink(Configuration config, CommandLineArguments cmdLineOptions) : base(config)
+        public ExampleLinkHandler(Configuration config, CommandLineArguments cmdLineOptions) : base(config)
         {
             //Perform any configuration overrides from command line options
             if (cmdLineOptions.BrokerUrl != null)
@@ -77,7 +79,7 @@ namespace DSLink.Example
             _rngValues = new Dictionary<string, Value>();
             _random = new Random();
 
-            Responder.AddNodeClass("rngAdd", delegate(Node node)
+            /*Responder.AddNodeClass("rngAdd", delegate(Node node)
             {
                 node.Configs.Set(ConfigType.DisplayName, new Value("Create RNG"));
                 node.AddParameter(new Parameter
@@ -85,7 +87,7 @@ namespace DSLink.Example
                     Name = "rngName",
                     ValueType = Nodes.ValueType.String
                 });
-                node.SetAction(new ActionHandler(Permission.Config, _createRngAction));
+                node.SetAction(new Action(Permission.Config, _createRngAction));
             });
 
             Responder.AddNodeClass("rng", delegate(Node node)
@@ -98,15 +100,10 @@ namespace DSLink.Example
                 {
                     _rngValues.Add(node.Name, node.Value);
                 }
-            });
+            });*/
             
             _randomNumberThread = new Thread(_updateRandomNumbers);
             _randomNumberThread.Start();
-        }
-
-        public override void InitializeDefaultNodes()
-        {
-            Responder.SuperRoot.CreateChild("createRNG", "rngAdd").BuildNode();
         }
 
         private void _updateRandomNumbers()
@@ -131,10 +128,20 @@ namespace DSLink.Example
             if (string.IsNullOrEmpty(rngName)) return;
             if (Responder.SuperRoot.Children.ContainsKey(rngName)) return;
 
-            var newRng = Responder.SuperRoot.CreateChild(rngName, "rng").BuildNode();
+            var newRng = Responder.SuperRoot.CreateChild(rngName).Build();
 
             await request.Close();
             await SaveNodes();
+        }
+
+        public override void OnResponderInitialized(Responder responder)
+        {
+            var action = new Action(Permission.Read, _createRngAction);
+
+            responder.SuperRoot.CreateChild("rngAdd")
+                .SetDisplayName("Add RNG")
+                .SetAction(action)
+                .Build();
         }
 
         #region Initialize Logging

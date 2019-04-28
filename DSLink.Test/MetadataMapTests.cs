@@ -32,7 +32,7 @@ namespace DSLink.Test
             _metadataMap = new MetadataMap("");
             _metadataMap.Set("test", new Value("val"));
 
-            Assert.AreEqual("val", _metadataMap.Get("test").String);
+            Assert.AreEqual("val", _metadataMap.Get("test").As<string>());
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace DSLink.Test
             _metadataMap = new MetadataMap("");
             _metadataMap.Set(ConfigType.ClassName, new Value("val"));
 
-            Assert.AreEqual("val", _metadataMap.Get(ConfigType.ClassName).String);
+            Assert.AreEqual("val", _metadataMap.Get(ConfigType.ClassName).As<string>());
         }
 
         [Test]
@@ -50,7 +50,7 @@ namespace DSLink.Test
             _metadataMap = new MetadataMap("");
             _metadataMap.Set("test", new Value("val"));
 
-            Assert.AreEqual("val", _metadataMap["test"].String);
+            Assert.AreEqual("val", _metadataMap["test"].As<string>());
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace DSLink.Test
             _metadataMap = new MetadataMap("");
             _metadataMap.Set(ConfigType.ClassName, new Value("val"));
 
-            Assert.AreEqual("val", _metadataMap[ConfigType.ClassName].String);
+            Assert.AreEqual("val", _metadataMap[ConfigType.ClassName].As<string>());
         }
 
         [Test]
@@ -175,11 +175,13 @@ namespace DSLink.Test
             _metadataMap.Set(ConfigType.ClassName, new Value("light"));
             _metadataMap.Set(ConfigType.DisplayName, new Value("bulb_abc"));
 
-            var enumerator = _metadataMap.GetEnumerator();
-            enumerator.MoveNext();
-            Assert.AreEqual(ConfigType.ClassName.String, enumerator.Current.Key);
-            enumerator.MoveNext();
-            Assert.AreEqual(ConfigType.DisplayName.String, enumerator.Current.Key);
+            using (var enumerator = _metadataMap.GetEnumerator())
+            {
+                enumerator.MoveNext();
+                Assert.AreEqual(ConfigType.ClassName.String, enumerator.Current.Key);
+                enumerator.MoveNext();
+                Assert.AreEqual(ConfigType.DisplayName.String, enumerator.Current.Key);
+            }
         }
     }
 }

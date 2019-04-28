@@ -2,7 +2,7 @@
 using System.Text;
 using DSLink.Util;
 
-namespace DSLink.Connection
+namespace DSLink.Protocol
 {
     public static class Token
     {

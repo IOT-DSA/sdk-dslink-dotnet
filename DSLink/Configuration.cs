@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DSLink.Connection;
+using DSLink.Protocol;
 using DSLink.Util;
 using DSLink.VFS;
 
@@ -56,7 +56,7 @@ namespace DSLink
 
         public string DsId => Name + "-" + UrlBase64.Encode(Sha256.ComputeHash(KeyPair.EncodedPublicKey));
         public bool HasToken => !string.IsNullOrEmpty(Token);
-        public string TokenParameter => Connection.Token.CreateToken(Token, DsId);
+        public string TokenParameter => Protocol.Token.CreateToken(Token, DsId);
 
         public IVFS Vfs
         {

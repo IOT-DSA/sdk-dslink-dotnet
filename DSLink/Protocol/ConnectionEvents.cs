@@ -1,4 +1,4 @@
-namespace DSLink.Connection
+namespace DSLink.Protocol
 {
     /// <summary>
     /// Connection message event for String data.

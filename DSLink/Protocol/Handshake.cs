@@ -1,38 +1,39 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DSLink.Logging;
 using DSLink.Serializer;
 using DSLink.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using DSLink.Logging;
 
-namespace DSLink.Connection
+namespace DSLink.Protocol
 {
     public class Handshake
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
-
-        /// <summary>
-        /// DSA Version.
-        /// </summary>
         private const string DsaVersion = "1.1.2";
-
-        /// <summary>
-        /// Instance of link container.
-        /// </summary>
-        private readonly DSLinkContainer _link;
-
-        /// <summary>
-        /// HttpClient for handshaking.
-        /// </summary>
+        
+        private readonly BaseLinkHandler _link;
+        private readonly HttpClientHandler _httpClientHandler;
         private readonly HttpClient _httpClient;
 
-        public Handshake(DSLinkContainer link)
+        public Handshake(BaseLinkHandler link)
         {
             _link = link;
-            _httpClient = new HttpClient();
+            _httpClientHandler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            };
+            _httpClient = new HttpClient(_httpClientHandler);
+        }
+
+        ~Handshake()
+        {
+            _httpClient.Dispose();
+            _httpClientHandler.Dispose();
         }
 
         private string _buildUrl()
@@ -52,7 +53,7 @@ namespace DSLink.Connection
         /// </summary>
         public async Task<RemoteEndpoint> Shake()
         {
-            Logger.Info("Handshaking with " + _buildUrl());
+            Logger.Info($"Handshaking with ${_buildUrl()}");
             HttpResponseMessage resp = null;
             try
             {
@@ -60,10 +61,12 @@ namespace DSLink.Connection
             }
             catch (Exception e)
             {
-                Logger.Warn(e.Message);
+                Logger.Error(e, "Failed to handshake with broker.");
             }
 
             if (resp == null || !resp.IsSuccessStatusCode) return null;
+            
+            resp.
 
             Logger.Info("Handshake successful");
             return JsonConvert.DeserializeObject<RemoteEndpoint>(
@@ -99,7 +102,7 @@ namespace DSLink.Connection
                         ? Serializers.Json.Keys.ToArray()
                         : Serializers.Types.Keys.ToArray())
                 },
-                {"enableWebSocketCompression", _link.Connector.SupportsCompression}
+                {"enableWebSocketCompression", _link.Connection.SupportsCompression}
             };
         }
     }

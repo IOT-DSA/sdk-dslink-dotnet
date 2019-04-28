@@ -1,5 +1,4 @@
-﻿using DSLink.Connection;
-using DSLink.Nodes;
+﻿using DSLink.Nodes;
 using DSLink.Respond;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -7,14 +6,15 @@ using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using DSLink.Protocol;
 
 namespace DSLink.Test
 {
     [TestFixture]
     public class NodeTests
     {
-        private Mock<DSLinkContainer> _mockContainer;
-        private Mock<Connector> _mockConnector;
+        private Mock<BaseLinkHandler> _mockContainer;
+        private Mock<Connection> _mockConnector;
         private Mock<Responder> _mockResponder;
         private Mock<SubscriptionManager> _mockSubManager;
         private Node _superRootNode;
@@ -22,8 +22,8 @@ namespace DSLink.Test
         [SetUp]
         public void SetUp()
         {
-            _mockContainer = new Mock<DSLinkContainer>(new Configuration("Test"));
-            _mockConnector = new Mock<Connector>(
+            _mockContainer = new Mock<BaseLinkHandler>(new Configuration("Test"));
+            _mockConnector = new Mock<Connection>(
                 _mockContainer.Object.Config
                 //,
                 //_mockContainer.Object.Logger
@@ -31,7 +31,7 @@ namespace DSLink.Test
             _mockResponder = new Mock<Responder>();
             _mockSubManager = new Mock<SubscriptionManager>(_mockContainer.Object);
 
-            _mockContainer.SetupGet(c => c.Connector).Returns(_mockConnector.Object);
+            _mockContainer.SetupGet(c => c.Connection).Returns(_mockConnector.Object);
             _mockContainer.SetupGet(c => c.Responder).Returns(_mockResponder.Object);
             _mockResponder.SetupGet(r => r.SuperRoot).Returns(_superRootNode);
             _mockResponder.SetupGet(r => r.SubscriptionManager).Returns(_mockSubManager.Object);
@@ -45,14 +45,14 @@ namespace DSLink.Test
         [Test]
         public void RemoveAllChildren()
         {
-            var nodeA = _superRootNode.CreateChild("A").BuildNode();
-            nodeA.CreateChild("1").BuildNode();
-            nodeA.CreateChild("2").BuildNode();
-            nodeA.CreateChild("3").BuildNode();
-            var node4 = nodeA.CreateChild("4").BuildNode();
-            node4.CreateChild("4a").BuildNode();
-            node4.CreateChild("4b").BuildNode();
-            node4.CreateChild("4c").BuildNode();
+            var nodeA = _superRootNode.CreateChild("A").Build();
+            nodeA.CreateChild("1").Build();
+            nodeA.CreateChild("2").Build();
+            nodeA.CreateChild("3").Build();
+            var node4 = nodeA.CreateChild("4").Build();
+            node4.CreateChild("4a").Build();
+            node4.CreateChild("4b").Build();
+            node4.CreateChild("4c").Build();
 
             nodeA.RemoveAllChildren();
 
@@ -64,7 +64,7 @@ namespace DSLink.Test
         {
             foreach (char c in Node.BannedChars)
             {
-                Assert.Throws<ArgumentException>(() => { _superRootNode.CreateChild($"Test{c}").BuildNode(); });
+                Assert.Throws<ArgumentException>(() => { _superRootNode.CreateChild($"Test{c}").Build(); });
             }
         }
 
@@ -72,14 +72,14 @@ namespace DSLink.Test
         public void MultipleBannedCharactersInName()
         {
             var multiCharTest = new string(Node.BannedChars);
-            Assert.Throws<ArgumentException>(() => { _superRootNode.CreateChild(multiCharTest).BuildNode(); });
+            Assert.Throws<ArgumentException>(() => { _superRootNode.CreateChild(multiCharTest).Build(); });
         }
 
         [Test]
         public void NoBannedCharactersInName()
         {
             var noCharTest = "TestNoBannedChars";
-            Assert.DoesNotThrow(() => { _superRootNode.CreateChild(noCharTest).BuildNode(); });
+            Assert.DoesNotThrow(() => { _superRootNode.CreateChild(noCharTest).Build(); });
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace DSLink.Test
             var testValue = _superRootNode.CreateChild("TestValue")
                 .SetType(DSLink.Nodes.ValueType.Number)
                 .SetValue(0)
-                .BuildNode();
+                .Build();
 
             _mockResponder.Object.SubscriptionManager.Subscribe(1, testValue);
             testValue.Value.Set(123);
@@ -98,8 +98,8 @@ namespace DSLink.Test
                     token => JToken.DeepEquals(token, new JArray
                     {
                         1,
-                        testValue.Value.JToken,
-                        testValue.Value.LastUpdated
+                        testValue.Value.AsJToken(),
+                        testValue.Value.LastUpdatedIso
                     })
                 )
             ));
@@ -108,8 +108,8 @@ namespace DSLink.Test
         [Test]
         public void NodeTraversal()
         {
-            var testParent = _superRootNode.CreateChild("testParent").BuildNode();
-            var testChild = testParent.CreateChild("testChild").BuildNode();
+            var testParent = _superRootNode.CreateChild("testParent").Build();
+            var testChild = testParent.CreateChild("testChild").Build();
 
             Assert.AreEqual(testParent, _superRootNode.Get(testParent.Path));
             Assert.AreEqual(testChild, _superRootNode.Get(testChild.Path));
@@ -124,8 +124,8 @@ namespace DSLink.Test
         [Test]
         public void GetMethodWithVariousPaths()
         {
-            var testParent = _superRootNode.CreateChild("testParent").BuildNode();
-            var testChild = testParent.CreateChild("testChild").BuildNode();
+            var testParent = _superRootNode.CreateChild("testParent").Build();
+            var testChild = testParent.CreateChild("testChild").Build();
 
             Assert.AreEqual(testParent, _superRootNode.Get("/testParent/"));
             Assert.AreEqual(testParent, _superRootNode.Get("/testParent"));
@@ -146,7 +146,7 @@ namespace DSLink.Test
                 .SetConfig("string", new Value("123"))
                 .SetAttribute("number", new Value(123))
                 .SetAttribute("string", new Value("123"))
-                .BuildNode();
+                .Build();
 
             Assert.IsTrue(
                 JToken.DeepEquals(_mockSubManager.Object.SerializeUpdates(_superRootNode), new JArray
@@ -181,7 +181,7 @@ namespace DSLink.Test
                 .SetConfig("string", new Value("123"))
                 .SetAttribute("number", new Value(123))
                 .SetAttribute("string", new Value("123"))
-                .BuildNode();
+                .Build();
 
             Assert.IsTrue(
                 JToken.DeepEquals(_superRootNode.Serialize(), new JObject
@@ -223,10 +223,10 @@ namespace DSLink.Test
 
             Assert.IsNotNull(_superRootNode["testNode"]);
             var testNode = _superRootNode["testNode"];
-            Assert.AreEqual(123, testNode.Configs.Get("number").Int);
-            Assert.AreEqual("123", testNode.Configs.Get("string").String);
-            Assert.AreEqual(123, testNode.Attributes.Get("number").Int);
-            Assert.AreEqual("123", testNode.Attributes.Get("string").String);
+            Assert.AreEqual(123, testNode.Configs.Get("number").As<int>());
+            Assert.AreEqual("123", testNode.Configs.Get("string").As<string>());
+            Assert.AreEqual(123, testNode.Attributes.Get("number").As<int>());
+            Assert.AreEqual("123", testNode.Attributes.Get("string").As<string>());
         }
     }
 }

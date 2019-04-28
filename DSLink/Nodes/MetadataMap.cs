@@ -57,15 +57,14 @@ namespace DSLink.Nodes
                 return null;
             }
 
-            var encBytes = _metadataDictionary[_prefix + key].ByteArray;
+            var encBytes = _metadataDictionary[_prefix + key].As<byte[]>();
             var decBytes = Util.Encryption.AESDecryptBytes(encBytes,
                 Util.Encryption.GetByteArrayFromSecureString(password), salt);
             var decValueString = Encoding.Default.GetString(decBytes);
             var jo = JsonConvert.DeserializeObject<JObject>(decValueString);
 
             var value = jo["Value"].ToString();
-            DateTime ts;
-            DateTime.TryParse(jo["LastUpdated"].ToString(), out ts);
+            DateTime.TryParse(jo["LastUpdated"].ToString(), out var ts);
 
             var val = new Value(value, ts);
             return val;
@@ -120,7 +119,7 @@ namespace DSLink.Nodes
                 array.Add(new JArray
                 {
                     kp.Key,
-                    kp.Value.JToken
+                    kp.Value.AsJToken()
                 });
             }
 

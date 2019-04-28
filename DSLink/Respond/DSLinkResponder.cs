@@ -8,7 +8,7 @@ namespace DSLink.Respond
 {
     public sealed class DSLinkResponder : Responder
     {
-        public DSLinkResponder(DSLinkContainer link)
+        public DSLinkResponder(BaseLinkHandler link)
         {
             Link = link;
         }
@@ -19,14 +19,6 @@ namespace DSLink.Respond
             SubscriptionManager = new SubscriptionManager(Link);
             StreamManager = new StreamManager(Link);
             SuperRoot = new Node("", null, Link);
-        }
-
-        public override void AddNodeClass(string name, Action<Node> factory)
-        {
-            lock (NodeClasses)
-            {
-                NodeClasses[name] = factory;
-            }
         }
 
         public override async Task<JArray> ProcessRequests(JArray requests)
@@ -109,7 +101,7 @@ namespace DSLink.Respond
             if (node != null)
             {
                 if (request["permit"] == null ||
-                    request["permit"].Value<string>().Equals(node.Configs.Get(ConfigType.Writable).String))
+                    request["permit"].Value<string>().Equals(node.Configs.Get(ConfigType.Writable).As<string>()))
                 {
                     node.Value.Set(request["value"]);
                     node.Value.InvokeRemoteSet();
@@ -135,15 +127,15 @@ namespace DSLink.Respond
         private async Task InvokeMethod(JObject request)
         {
             var node = SuperRoot.Get(request["path"].Value<string>());
-            if (node?.ActionHandler != null)
+            if (node?.Action != null)
             {
                 if (request["permit"] == null ||
-                    request["permit"].Value<string>().Equals(node.ActionHandler.Permission.ToString()))
+                    request["permit"].Value<string>().Equals(node.Action.Permission.ToString()))
                 {
                     JArray columns;
                     if (node.Configs.Has(ConfigType.Columns))
                     {
-                        columns = node.Configs.Get(ConfigType.Columns).JArray;
+                        columns = node.Configs.Get(ConfigType.Columns).As<JArray>();
                     }
                     else
                     {
@@ -156,7 +148,7 @@ namespace DSLink.Respond
                     var invokeRequest = new InvokeRequest(request["rid"].Value<int>(), request["path"].Value<string>(),
                         permit, request["params"].Value<JObject>(), link: Link,
                         columns: columns);
-                    await Task.Run(() => node.ActionHandler.Function.Invoke(invokeRequest));
+                    await Task.Run(() => node.Action.Function.Invoke(invokeRequest));
                 }
             }
         }
@@ -181,8 +173,8 @@ namespace DSLink.Respond
                         new JArray
                         {
                             sid,
-                            node.Value.JToken,
-                            node.Value.LastUpdated
+                            node.Value.As<JToken>(),
+                            node.Value.LastUpdatedIso
                         }
                     })
                 });
