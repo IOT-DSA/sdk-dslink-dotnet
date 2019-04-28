@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -19,8 +18,6 @@ namespace DSLink.Protocol
 
         public WebSocketConnection(Configuration config) : base(config)
         {
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, errors) => true;
-            
             _ws = new ClientWebSocket();
             _wsTokenSource = new CancellationTokenSource();
             _wsSendSemaphore = new SemaphoreSlim(1, 1);
@@ -34,15 +31,19 @@ namespace DSLink.Protocol
                 {
                     await base.Connect();
 
-                    Logger.Info("WebSocket connecting to " + WsUrl);
+                    Logger.Info("Connecting to " + WsUrl);
 
                     await _ws.ConnectAsync(new Uri(WsUrl), CancellationToken.None);
                     _startReceiveTask();
                     EmitOpen();
                 }
-                catch (Exception ex)
+                catch (WebSocketException e)
                 {
-                    Logger.Error(ex, "Error connecting to websocket");
+                    Logger.Error(e, "WebSocket exception occurred during connect");
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "General exception occurred during connect");
                 }
             }
             else
@@ -149,8 +150,8 @@ namespace DSLink.Protocol
                         var str = "";
 
                         // First read all the message bytes
-                        WebSocketMessageType messageType = WebSocketMessageType.Close;
-                        bool endOfMessage = false;
+                        var messageType = WebSocketMessageType.Close;
+                        var endOfMessage = false;
                         do
                         {
                             try

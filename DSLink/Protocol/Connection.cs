@@ -131,7 +131,7 @@ namespace DSLink.Protocol
             OnOpen += () =>
             {
                 ConnectionState = ConnectionState.Connected;
-                Logger.Info($"Connected to {WsUrl}");
+                Logger.Info($"Connected");
             };
 
             OnClose += () =>
@@ -172,7 +172,6 @@ namespace DSLink.Protocol
         public virtual Task Connect()
         {
             ConnectionState = ConnectionState.Connecting;
-            Logger.Info("Connecting");
 
             return Task.CompletedTask;
         }

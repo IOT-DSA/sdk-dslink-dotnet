@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using DSLink.Abstractions;
 using Newtonsoft.Json.Linq;
@@ -30,6 +31,7 @@ namespace DSLink
 
         public BaseLinkHandler(Configuration config)
         {
+            ServicePointManager.ServerCertificateValidationCallback = (sender, cert, chain, errors) => true;
             _config = config;
 
             _initConnection();

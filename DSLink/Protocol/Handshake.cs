@@ -53,7 +53,7 @@ namespace DSLink.Protocol
         /// </summary>
         public async Task<RemoteEndpoint> Shake()
         {
-            Logger.Info($"Handshaking with ${_buildUrl()}");
+            Logger.Info($"Handshaking with {_buildUrl()}");
             HttpResponseMessage resp = null;
             try
             {
@@ -64,11 +64,13 @@ namespace DSLink.Protocol
                 Logger.Error(e, "Failed to handshake with broker.");
             }
 
-            if (resp == null || !resp.IsSuccessStatusCode) return null;
-            
-            resp.
+            if (resp == null || !resp.IsSuccessStatusCode)
+            {
+                Logger.Error("Failed to handshake with broker.");
+                return null;
+            }
 
-            Logger.Info("Handshake successful");
+            Logger.Debug("Handshake successful");
             return JsonConvert.DeserializeObject<RemoteEndpoint>(
                 await resp.Content.ReadAsStringAsync()
             );
