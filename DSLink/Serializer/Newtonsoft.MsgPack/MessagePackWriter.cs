@@ -428,7 +428,10 @@ namespace Newtonsoft.Msgpack
 
             public MsgpackToken Parent
             {
-                get { return mParent; }
+                get
+                {
+                    return mParent;
+                }
             }
 
             public abstract void AddChild(string propertyName, MsgpackToken child);
@@ -449,7 +452,10 @@ namespace Newtonsoft.Msgpack
 
             public ICollection<MsgpackProperty> Children
             {
-                get { return mChildren; }
+                get
+                {
+                    return mChildren;
+                }
             }
 
             public override void AddChild(string propertyName, MsgpackToken child)
@@ -476,8 +482,17 @@ namespace Newtonsoft.Msgpack
 
         private class MsgpackProperty
         {
-            public string Name { get; set; }
-            public MsgpackToken Value { get; set; }
+            public string Name
+            {
+                get;
+                set;
+            }
+
+            public MsgpackToken Value
+            {
+                get;
+                set;
+            }
         }
 
         private class MsgpackArray : MsgpackToken
@@ -494,7 +509,10 @@ namespace Newtonsoft.Msgpack
 
             public ICollection<MsgpackToken> Children
             {
-                get { return mChildren; }
+                get
+                {
+                    return mChildren;
+                }
             }
 
             public override void AddChild(string propertyName, MsgpackToken child)
@@ -525,7 +543,10 @@ namespace Newtonsoft.Msgpack
 
             public T Value
             {
-                get { return mValue; }
+                get
+                {
+                    return mValue;
+                }
             }
 
             public override void AddChild(string propertyName, MsgpackToken child)

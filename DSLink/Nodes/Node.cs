@@ -51,8 +51,14 @@ namespace DSLink.Nodes
         /// </summary>
         public string Path
         {
-            get { return _path; }
-            protected set { _path = value.TrimEnd('/'); }
+            get
+            {
+                return _path;
+            }
+            protected set
+            {
+                _path = value.TrimEnd('/');
+            }
         }
 
         /// <summary>
@@ -84,7 +90,11 @@ namespace DSLink.Nodes
         /// <summary>
         /// Node action
         /// </summary>
-        public Action Action { get; protected set; }
+        public Action Action
+        {
+            get;
+            protected set;
+        }
 
         /// <summary>
         /// Indicates whether the Node is serialized into the 
@@ -264,7 +274,7 @@ namespace DSLink.Nodes
 
             UpdateSubscribers();
         }
-        
+
         /// <summary>
         /// Sets the action.
         /// </summary>

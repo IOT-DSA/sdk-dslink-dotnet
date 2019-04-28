@@ -51,7 +51,10 @@ namespace Newtonsoft.Msgpack
 
         private Unpacker Unpacker
         {
-            get { return mState.Unpacker; }
+            get
+            {
+                return mState.Unpacker;
+            }
         }
 
         public override bool Read()
@@ -129,7 +132,10 @@ namespace Newtonsoft.Msgpack
 
             public Unpacker Unpacker
             {
-                get { return mUnpacker; }
+                get
+                {
+                    return mUnpacker;
+                }
             }
 
             public virtual bool Read()

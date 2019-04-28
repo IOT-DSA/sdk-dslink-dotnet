@@ -15,7 +15,7 @@ namespace DSLink.Protocol
     {
         private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
         private const string DsaVersion = "1.1.2";
-        
+
         private readonly BaseLinkHandler _link;
         private readonly HttpClientHandler _httpClientHandler;
         private readonly HttpClient _httpClient;

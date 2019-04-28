@@ -20,9 +20,17 @@ namespace DSLink.Request
         private readonly BaseLinkHandler _link;
         internal readonly IncrementingIndex _requestId;
 
-        public RequestManager RequestManager { get; private set; }
+        public RequestManager RequestManager
+        {
+            get;
+            private set;
+        }
 
-        public RemoteSubscriptionManager RemoteSubscriptionManager { get; private set; }
+        public RemoteSubscriptionManager RemoteSubscriptionManager
+        {
+            get;
+            private set;
+        }
 
         public DSLinkRequester(BaseLinkHandler link)
         {

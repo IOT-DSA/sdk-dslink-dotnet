@@ -8,7 +8,11 @@
         /// <summary>
         /// Fetch the current value without modifying the value.
         /// </summary>
-        public int Current { get; private set; }
+        public int Current
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Fetch the current value, and post-increment it.

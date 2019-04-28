@@ -8,15 +8,35 @@ namespace DSLink.Respond
 {
     public abstract class Responder
     {
-        internal virtual BaseLinkHandler Link { get; set; }
+        internal virtual BaseLinkHandler Link
+        {
+            get;
+            set;
+        }
 
-        public virtual Node SuperRoot { get; protected set; }
+        public virtual Node SuperRoot
+        {
+            get;
+            protected set;
+        }
 
-        public virtual SubscriptionManager SubscriptionManager { get; protected set; }
+        public virtual SubscriptionManager SubscriptionManager
+        {
+            get;
+            protected set;
+        }
 
-        public virtual StreamManager StreamManager { get; protected set; }
+        public virtual StreamManager StreamManager
+        {
+            get;
+            protected set;
+        }
 
-        public virtual DiskSerializer DiskSerializer { get; protected set; }
+        public virtual DiskSerializer DiskSerializer
+        {
+            get;
+            protected set;
+        }
 
         /// <summary>
         /// Initialize the responder.

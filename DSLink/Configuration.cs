@@ -71,9 +71,17 @@ namespace DSLink
             }
         }
 
-        public RemoteEndpoint RemoteEndpoint { internal set; get; }
+        public RemoteEndpoint RemoteEndpoint
+        {
+            internal set;
+            get;
+        }
 
-        public KeyPair KeyPair { get; private set; }
+        public KeyPair KeyPair
+        {
+            get;
+            private set;
+        }
 
         public Configuration(string linkName, bool requester = false, bool responder = false)
         {

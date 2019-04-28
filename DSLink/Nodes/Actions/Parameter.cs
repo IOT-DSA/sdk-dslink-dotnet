@@ -69,11 +69,12 @@ namespace DSLink.Nodes.Actions
         {
             Name = name;
             ValueType = type;
-            
+
             if (defaultValue != null)
             {
                 DefaultValue = defaultValue;
             }
+
             if (editor != null)
             {
                 Editor = editor;

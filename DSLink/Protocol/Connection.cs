@@ -31,7 +31,11 @@ namespace DSLink.Protocol
             }
         }
 
-        public ConnectionState ConnectionState { private set; get; }
+        public ConnectionState ConnectionState
+        {
+            private set;
+            get;
+        }
 
         /// <summary>
         /// Queue object for queueing up data when the WebSocket is either closed

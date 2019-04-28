@@ -101,7 +101,7 @@ namespace DSLink.Example
                     _rngValues.Add(node.Name, node.Value);
                 }
             });*/
-            
+
             _randomNumberThread = new Thread(_updateRandomNumbers);
             _randomNumberThread.Start();
         }
@@ -117,7 +117,7 @@ namespace DSLink.Example
                         kv.Value.Set(_random.Next());
                     }
                 }
-                
+
                 Thread.Sleep(1);
             }
         }
